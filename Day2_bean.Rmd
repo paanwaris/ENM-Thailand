@@ -1,0 +1,238 @@
+---
+title: "Day 2 — Environmental thinning with **bean**"
+subtitle: "ENM-Thailand workshop · Sambar deer (*Rusa unicolor*)"
+author: "Workshop materials"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    theme: cosmo
+    df_print: paged
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  message   = FALSE,
+  warning   = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 5,
+  dpi       = 100
+)
+```
+
+# Overview
+
+`bean` reduces sampling bias by thinning occurrence points that are **clustered in environmental space (E-space)** instead of in geographic space. The intuition: most field campaigns oversample easily reachable environments. Thinning per environmental "pod" produces a more even coverage of the species' niche, and therefore a less biased fundamental-niche estimate.
+
+Today we will:
+
+1. Load the cleaned GBIF occurrences for *Rusa unicolor* in Thailand.
+2. Prepare them for `bean` and visualise the bias in E-space.
+3. Find an **objective** environmental grid resolution.
+4. Thin the points with both methods (`thin_env_nd` stochastic, `thin_env_center` deterministic).
+5. Fit an ellipsoid niche on the thinned points and map suitability back to G-space.
+
+> Prerequisite: you have run the install + download scripts. The Day-0 script wrote the GBIF + bioclim files we use below.
+
+# Packages and data
+
+```{r packages}
+library(bean)
+library(terra)
+library(sf)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(viridis)
+
+set.seed(2026)
+```
+
+```{r load-data}
+bioclim  <- terra::rast("data/processed/bioclim_thailand.tif")
+thailand <- sf::st_read("data/processed/thailand_boundary.gpkg", quiet = TRUE)
+
+sambar <- readr::read_csv("data/processed/sambar_clean_thailand.csv",
+                          show_col_types = FALSE)
+
+cat("Cleaned occurrence records in Thailand: ", nrow(sambar), "\n")
+head(sambar)
+```
+
+For a clean ellipsoid we again use two informative bioclim variables. These also map well onto Sambar deer habitat (warm, wet evergreen and mixed forests).
+
+```{r pick-vars}
+env <- bioclim[[c("bio1", "bio12")]]
+names(env) <- c("bio1", "bio12")
+```
+
+# Step 1 — Prepare occurrences
+
+`prepare_bean()` drops rows with missing coordinates, extracts environmental values at each occurrence, and returns a tidy data frame ready for thinning.
+
+```{r prepare}
+sambar_xy <- sambar %>%
+  dplyr::select(longitude = decimalLongitude,
+                latitude  = decimalLatitude)
+
+prepped <- bean::prepare_bean(
+  occurrences = sambar_xy,
+  env         = env,
+  lon         = "longitude",
+  lat         = "latitude"
+)
+
+head(prepped)
+cat("Records retained after env extraction: ", nrow(prepped), "\n")
+```
+
+Look at the raw points in G-space and in E-space side by side. Notice the clustering in E-space — that's the bias `bean` will reduce.
+
+```{r raw-bias, fig.width = 9, fig.height = 4.5}
+par(mfrow = c(1, 2))
+
+plot(env[[1]], col = viridis::viridis(100, alpha = 0.7),
+     main = "G-space: Sambar deer (raw)")
+plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
+points(prepped[, c("longitude", "latitude")], pch = 21, bg = "tomato",
+       col = "white", cex = 0.7)
+
+plot(prepped$bio1, prepped$bio12,
+     xlab = "BIO1 — annual mean T (°C)", ylab = "BIO12 — annual precip. (mm)",
+     pch = 19, col = adjustcolor("tomato", alpha.f = 0.5),
+     main = "E-space: Sambar deer (raw)")
+
+par(mfrow = c(1, 1))
+```
+
+# Step 2 — Choose an objective environmental resolution
+
+`find_env_resolution()` walks a grid of candidate resolutions, looks at the average nearest-neighbour distance among points after thinning, and identifies the "elbow" where dense artificial clustering ends.
+
+```{r find-res}
+res_search <- bean::find_env_resolution(
+  data       = prepped,
+  vars       = c("bio1", "bio12"),
+  resolutions = seq(0.05, 1.0, by = 0.05)  # standardised E-space units
+)
+
+res_search$plot
+chosen_res <- res_search$resolution
+cat("Chosen environmental resolution: ", chosen_res, "\n")
+```
+
+# Step 3 — Apply thinning
+
+`bean` ships two thinning strategies; we run both for comparison.
+
+```{r thin}
+# Stochastic: randomly retain one occurrence per "pod"
+thin_nd <- bean::thin_env_nd(
+  data       = prepped,
+  vars       = c("bio1", "bio12"),
+  resolution = chosen_res
+)
+
+# Deterministic: replace each occupied pod with its centre
+thin_center <- bean::thin_env_center(
+  data       = prepped,
+  vars       = c("bio1", "bio12"),
+  resolution = chosen_res
+)
+
+cat("Raw n               : ", nrow(prepped),    "\n")
+cat("Thinned (stochastic): ", nrow(thin_nd),    "\n")
+cat("Thinned (centroid)  : ", nrow(thin_center),"\n")
+```
+
+```{r thin-vs-raw, fig.width = 9, fig.height = 4.5}
+par(mfrow = c(1, 2))
+plot(prepped$bio1, prepped$bio12, pch = 19, cex = 0.5,
+     col = adjustcolor("grey60", alpha.f = 0.6),
+     xlab = "BIO1 (°C)", ylab = "BIO12 (mm)",
+     main = "Before thinning")
+
+plot(prepped$bio1, prepped$bio12, pch = 19, cex = 0.5,
+     col = adjustcolor("grey60", alpha.f = 0.25),
+     xlab = "BIO1 (°C)", ylab = "BIO12 (mm)",
+     main = "After thinning (stochastic)")
+points(thin_nd[, c("bio1", "bio12")], pch = 21, bg = "tomato",
+       col = "white", cex = 1)
+par(mfrow = c(1, 1))
+```
+
+# Step 4 — Fit the ellipsoid niche
+
+`fit_ellipsoid()` formalises the niche by fitting a bivariate (or multivariate) ellipsoid around the thinned points. We compare the ellipsoid fit on raw vs. thinned data.
+
+```{r fit-ellipsoid}
+ell_raw      <- bean::fit_ellipsoid(thin_center, vars = c("bio1", "bio12"))
+ell_thinned  <- bean::fit_ellipsoid(thin_nd,     vars = c("bio1", "bio12"))
+
+ell_thinned
+```
+
+```{r ellipsoid-overlay, fig.height = 5.5}
+plot(prepped$bio1, prepped$bio12, pch = 19, cex = 0.4,
+     col = adjustcolor("grey70", alpha.f = 0.4),
+     xlab = "BIO1 (°C)", ylab = "BIO12 (mm)",
+     main = "Raw vs. thinned ellipsoid (Sambar deer)")
+# Overlay both ellipsoids using bean's plot method
+lines(ellipse::ellipse(ell_raw$cov,     centre = ell_raw$center),
+      col = "grey30", lwd = 2, lty = 2)
+lines(ellipse::ellipse(ell_thinned$cov, centre = ell_thinned$center),
+      col = "tomato", lwd = 2)
+legend("topright",
+       legend = c("Raw", "Thinned"),
+       col    = c("grey30", "tomato"),
+       lty    = c(2, 1), lwd = 2, bty = "n")
+```
+
+> If `ellipse` is not installed, run `install.packages("ellipse")`. We use it here only for an overlay comparison; `bean` ships its own plotting helpers as well.
+
+# Step 5 — Project the niche back to G-space
+
+```{r predict}
+pred_raw     <- predict(ell_raw,     env)
+pred_thinned <- predict(ell_thinned, env)
+
+par(mfrow = c(1, 2))
+plot(pred_raw,     main = "Suitability — raw niche",
+     col = viridis::viridis(100))
+plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
+plot(pred_thinned, main = "Suitability — thinned niche",
+     col = viridis::viridis(100))
+plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
+par(mfrow = c(1, 1))
+```
+
+```{r save}
+dir.create("outputs", showWarnings = FALSE)
+terra::writeRaster(pred_thinned,
+                   "outputs/Day2_suitability_sambar_thinned.tif",
+                   overwrite = TRUE)
+saveRDS(ell_thinned, "outputs/Day2_ellipsoid_thinned.rds")
+```
+
+# Wrap-up & exercises
+
+Take-homes:
+
+- Spatial bias in occurrence data **propagates into E-space** as dense clusters.
+- `bean` thins in E-space so that the fitted niche is not pulled toward the densest sampled environments.
+- The two thinning methods (`thin_env_nd` vs. `thin_env_center`) trade randomness for reproducibility — pick one and stick with it for a given analysis.
+
+Try on your own:
+
+1. Add **bio7** (temperature annual range) as a third variable to the niche.
+2. Vary the `resolution` argument by ±50 % around the elbow value — how stable is the resulting ellipsoid?
+3. Compute the Schoener's-D overlap between the raw and thinned predictions (e.g. with `ENMTools`) to quantify the bias correction.
+
+```{r session-info}
+sessionInfo()
+```
