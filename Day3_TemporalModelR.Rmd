@@ -1,0 +1,319 @@
+---
+title: "Day 3 — Temporally-explicit SDMs with **TemporalModelR**"
+subtitle: "ENM-Thailand workshop · Sambar deer (*Rusa unicolor*)"
+author: "Workshop materials"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    theme: cosmo
+    df_print: paged
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  message   = FALSE,
+  warning   = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 5,
+  dpi       = 100
+)
+```
+
+# Overview
+
+`TemporalModelR` builds **temporally-explicit** species distribution models. The key idea: each occurrence is paired with the environmental conditions *at the time it was recorded*, rather than against a long-term average. Models can then project predictions as time-series surfaces and detect pixel-level temporal trajectories (always-suitable, increasing, decreasing, fluctuating, etc.).
+
+> **Important note on data.** Truly temporally-resolved bioclimatic layers (one raster per year) are large and slow to download. To keep the workshop reproducible we work with the **static** WorldClim bioclim that we cropped on Day 0. We give every raster the *same* values across years, which means the **temporal signal in our toy example comes entirely from the year associated with each observation, not from the environment itself**. The pipeline you learn here is identical to the one you would use with truly time-varying layers (e.g. CHELSA-TS, ERA5, MODIS); you would just point `pattern` at one raster per year.
+
+Today we will:
+
+1. Build a stack of "annual" bioclim layers (10-min resolution, Thailand) — one copy per year.
+2. Align them, rarefy Sambar deer occurrences in space *and* time, and extract environment.
+3. Build spatiotemporal cross-validation folds and fold-stratified pseudoabsences.
+4. Fit a `build_temporal_glm()` model and a `build_temporal_rf()` model.
+5. Project predictions across multiple years and run the postprocessing pipeline (consensus, changepoints, regional summaries).
+
+# Packages and data
+
+```{r packages}
+library(TemporalModelR)
+library(terra)
+library(sf)
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(viridis)
+
+set.seed(2026)
+```
+
+```{r load-data}
+bioclim  <- terra::rast("data/processed/bioclim_thailand.tif")
+thailand <- sf::st_read("data/processed/thailand_boundary.gpkg", quiet = TRUE)
+
+sambar <- readr::read_csv("data/processed/sambar_clean_thailand.csv",
+                          show_col_types = FALSE) %>%
+  dplyr::filter(year >= 2000, year <= 2020) %>%
+  dplyr::rename(longitude = decimalLongitude,
+                latitude  = decimalLatitude)
+
+cat("Occurrences after year filter:", nrow(sambar), "\n")
+table(sambar$year)
+```
+
+# Step 1 — Build the temporally-explicit raster stack
+
+`TemporalModelR` matches occurrence records to rasters via **time placeholders in filenames**. We pick three predictors (BIO1, BIO12, BIO15) and write one copy per year. In a real study these copies would actually differ year-by-year — here they are duplicates of the static WorldClim values purely to demonstrate the workflow.
+
+```{r write-temporal-rasters}
+dir.create("data/processed/temporal_rasters", showWarnings = FALSE)
+
+years     <- 2000:2020
+variables <- c("bio1", "bio12", "bio15")
+
+for (v in variables) {
+  layer <- bioclim[[v]]
+  for (y in years) {
+    out <- file.path("data/processed/temporal_rasters",
+                     sprintf("%s_%d.tif", v, y))
+    if (!file.exists(out)) {
+      terra::writeRaster(layer, filename = out, overwrite = TRUE)
+    }
+  }
+}
+
+list.files("data/processed/temporal_rasters") |> head()
+```
+
+`patterns` tells `TemporalModelR` how to expand a placeholder. Below, the placeholder `<year>` is replaced with each year.
+
+```{r patterns}
+patterns <- list(
+  bio1_year  = "data/processed/temporal_rasters/bio1_<year>.tif",
+  bio12_year = "data/processed/temporal_rasters/bio12_<year>.tif",
+  bio15_year = "data/processed/temporal_rasters/bio15_<year>.tif"
+)
+
+# time_cols maps placeholders to occurrence-table columns
+time_cols <- list("<year>" = "year")
+```
+
+# Step 2 — Preprocessing
+
+## Align rasters
+
+`raster_align()` reprojects and resamples every raster to a common grid. Our copies are already aligned (they came from the same source), but we run the function to demonstrate the pattern.
+
+```{r raster-align}
+aligned <- TemporalModelR::raster_align(
+  patterns     = patterns,
+  time_values  = list("<year>" = years),
+  reference    = bioclim[[1]]
+)
+```
+
+## Spatio-temporal rarefaction
+
+Keep at most one record per pixel **per year** (so a repeated visit to the same place in a later year is preserved as a temporally-independent observation).
+
+```{r rarefy}
+rarefied <- TemporalModelR::spatiotemporal_rarefaction(
+  occurrences = sambar,
+  raster_ref  = bioclim[[1]],
+  time_cols   = list(year = "year"),
+  lon = "longitude", lat = "latitude"
+)
+
+cat("Rarefied n: ", nrow(rarefied), "\n")
+```
+
+## Match each observation to the environment it experienced
+
+```{r extract}
+extracted <- TemporalModelR::temporally_explicit_extraction(
+  occurrences = rarefied,
+  patterns    = patterns,
+  time_cols   = time_cols,
+  lon = "longitude", lat = "latitude"
+)
+
+extracted$data |> head()
+```
+
+## Scale rasters (z-score)
+
+```{r scale}
+scaled_rasters <- TemporalModelR::scale_rasters(
+  patterns     = patterns,
+  time_values  = list("<year>" = years),
+  scaling_pars = extracted$scaling
+)
+```
+
+## Cross-validation folds & pseudoabsences
+
+We use **spatiotemporal** folds (blocks split in both space and time) — the most defensible choice for temporal SDMs.
+
+```{r folds}
+partitioned <- TemporalModelR::spatiotemporal_partition(
+  data    = extracted$data,
+  method  = "spatiotemporal",
+  k       = 4,
+  lon     = "longitude", lat = "latitude",
+  time_cols = "year"
+)
+
+absences <- TemporalModelR::generate_absences(
+  partition_result = partitioned,
+  raster_ref       = bioclim[[1]],
+  n_per_presence   = 1,
+  patterns         = patterns,
+  time_cols        = time_cols
+)
+```
+
+# Step 3 — Modeling
+
+We compare two algorithms; both share the same input objects.
+
+## GLM (with a quadratic term on temperature)
+
+```{r glm}
+glm_res <- TemporalModelR::build_temporal_glm(
+  partition_result    = partitioned,
+  pseudoabsence_result = absences,
+  model_formula = presence ~ bio1_year + I(bio1_year^2) + bio12_year + bio15_year
+)
+
+glm_res$evaluation
+```
+
+## Random forest
+
+```{r rf}
+rf_res <- TemporalModelR::build_temporal_rf(
+  partition_result    = partitioned,
+  pseudoabsence_result = absences,
+  model_vars = c("bio1_year", "bio12_year", "bio15_year"),
+  ntree      = 500
+)
+
+rf_res$evaluation
+```
+
+# Step 4 — Project predictions through time
+
+Generate one map per year for both models.
+
+```{r predict}
+time_steps <- data.frame(year = years)
+
+glm_preds <- TemporalModelR::generate_spatiotemporal_predictions(
+  model_result = glm_res,
+  rasters      = scaled_rasters,
+  time_steps   = time_steps,
+  patterns     = patterns,
+  time_cols    = time_cols,
+  output_dir   = "outputs/glm_predictions"
+)
+
+rf_preds <- TemporalModelR::generate_spatiotemporal_predictions(
+  model_result = rf_res,
+  rasters      = scaled_rasters,
+  time_steps   = time_steps,
+  patterns     = patterns,
+  time_cols    = time_cols,
+  output_dir   = "outputs/rf_predictions"
+)
+```
+
+Quick look at three years for the RF model:
+
+```{r plot-years, fig.width = 9, fig.height = 4}
+sample_years <- c(2000, 2010, 2020)
+rf_stack <- terra::rast(file.path("outputs/rf_predictions",
+                                  sprintf("fold1_year_%d.tif", sample_years)))
+
+par(mfrow = c(1, 3))
+for (i in seq_along(sample_years)) {
+  plot(rf_stack[[i]],
+       main = paste("RF — predicted suitability,", sample_years[i]),
+       col  = viridis::viridis(100), range = c(0, 1))
+  plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
+}
+par(mfrow = c(1, 1))
+```
+
+# Step 5 — Postprocessing
+
+## Consensus surfaces across folds
+
+```{r consensus}
+consensus <- TemporalModelR::summarize_raster_outputs(
+  prediction_result  = rf_preds,
+  consensus_threshold = 3   # at least 3 of 4 folds must agree
+)
+
+plot(consensus$frequency,
+     main = "Proportion of time steps each pixel was suitable (RF)",
+     col  = viridis::magma(100))
+plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
+```
+
+## Pixel-level temporal trajectories (changepoint analysis)
+
+`analyze_temporal_patterns()` runs `fastcpd` per pixel and classifies trajectories as never-suitable, always-suitable, no pattern, increasing, decreasing, or fluctuating.
+
+```{r changepoints}
+patterns_out <- TemporalModelR::analyze_temporal_patterns(
+  prediction_result  = rf_preds,
+  consensus_result   = consensus,
+  spatial_autocorr   = FALSE
+)
+
+plot(patterns_out$classification,
+     main = "Temporal trajectory class per pixel",
+     type = "classes")
+```
+
+## Aggregate by spatial unit (Thailand provinces)
+
+```{r provinces, eval = FALSE}
+provinces <- geodata::gadm(country = "THA", level = 1, path = "data/raw") |>
+  sf::st_as_sf()
+
+regional <- TemporalModelR::analyze_trends_by_spatial_unit(
+  pattern_result = patterns_out,
+  polygons       = provinces,
+  id_field       = "NAME_1"
+)
+
+head(regional)
+```
+
+> The province step is set to `eval = FALSE` so the document still knits if you haven't fetched GADM level-1 yet. Set it to `TRUE` after running the line manually.
+
+# Wrap-up & exercises
+
+What we covered:
+
+- Built a fully temporally-explicit pipeline: time-stamped occurrences ↔ time-stamped rasters.
+- Used spatio-temporal cross-validation folds and fold-stratified pseudoabsences.
+- Fit GLM and RF temporal models and projected through time.
+- Classified pixel-level temporal trajectories and aggregated by region.
+
+Try on your own:
+
+1. Swap the static-clone rasters for **real** annual layers (e.g. CHELSA-TS bio1 1981–2020). The only thing that changes is the file path in `patterns`.
+2. Fit a `build_temporal_gam()` and compare its E-space evaluation metrics to the GLM and RF.
+3. Repeat the analysis with **monthly** time steps using `expand.grid(year = years, month = sprintf("%02d", 1:12))`.
+
+```{r session-info}
+sessionInfo()
+```
