@@ -22,8 +22,9 @@ outputs/*.RData
 figures/*.png
 figures/*.pdf
 
-# pkgdown build output (built and pushed via GitHub Action / build script)
-docs/
+# pkgdown build output — uncomment if you publish via the gh-pages branch
+# (with usethis::use_pkgdown_github_pages()) and don't want docs/ on main.
+# docs/
 
 # OS junk
 .DS_Store

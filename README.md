@@ -37,7 +37,7 @@ Each day is delivered as a self-contained R Markdown notebook at the top of the 
 | | Role | ORCID |
 |---|---|---|
 | **Paanwaris Paansri** | Main author / Maintainer · `paanwaris@vt.edu` | <https://orcid.org/0000-0001-9992-098X> |
-| **Luis E. Escobar** | Co-author | <https://orcid.org/0000-0001-5735-2750> |
+| **Luis E. Escobar** | Co-author · `escobar1@vt.edu`| <https://orcid.org/0000-0001-5735-2750> |
 
 ---
 
