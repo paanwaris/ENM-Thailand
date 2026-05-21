@@ -1,0 +1,8 @@
+# Copy this file to `.Renviron` (same directory) and fill in your own values.
+# `.Renviron` is in .gitignore — it will NOT be committed.
+#
+# After editing, restart R so the values are loaded (or call `readRenviron(".Renviron")`).
+
+GBIF_USER  = "your_gbif_username"
+GBIF_EMAIL = "your_email@example.com"
+GBIF_PWD   = "your_gbif_password"

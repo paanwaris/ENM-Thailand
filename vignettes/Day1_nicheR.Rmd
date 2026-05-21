@@ -1,0 +1,11 @@
+---
+title: "Day 1 — Virtual species with nicheR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Day 1 — Virtual species with nicheR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r child = "../Day1_nicheR.Rmd"}
+```

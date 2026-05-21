@@ -34,213 +34,260 @@ This is the ideal way to learn ENM mechanics, because we can compare every outpu
 Today we will:
 
 1. Build an ellipsoid from a user-defined range of bioclimatic tolerances.
-2. Project the ellipsoid onto Thailand bioclim rasters to get suitability and Mahalanobis distance.
-3. Add a sampling-bias layer and sample virtual occurrence points.
-4. Simulate a virtual community and map richness.
+2. Explore the environmental space of Thailand in **3D** using BIO1, BIO12, and BIO15.
+3. Project the ellipsoid onto Thailand bioclim rasters to get suitability and Mahalanobis distance.
+4. Add a sampling-bias layer and sample virtual occurrence points using three sampling strategies (`centroid`, `random`, `edge`).
 
-> Prerequisite: you have run `source("scripts/00_install_packages.R")` and `source("scripts/00_download_data.R")` at least once.
+# Install and load packages
 
-# Packages and data
+The chunk below installs everything Day 1 needs the first time you run it. Re-running is safe — already-installed packages are skipped.
+
+```{r install, eval = FALSE}
+# ---- CRAN dependencies -----------------------------------------------------
+cran_pkgs <- c(
+  "terra",
+  "sf",
+  "plotly",
+  "viridis",
+  "rmarkdown",
+  "knitr",
+  "remotes"
+)
+to_install <- cran_pkgs[!cran_pkgs %in% rownames(installed.packages())]
+if (length(to_install)) install.packages(to_install, dependencies = TRUE)
+
+# ---- nicheR from GitHub ----------------------------------------------------
+if (!requireNamespace("nicheR", quietly = TRUE)) {
+  remotes::install_github("castanedaM/nicheR", upgrade = "never")
+}
+```
 
 ```{r packages}
 library(nicheR)
 library(terra)
 library(sf)
-library(dplyr)
-library(ggplot2)
-library(viridis)
+library(plotly)
 
 # Reproducible random draws throughout the lesson
 set.seed(2026)
 ```
 
-We load the cropped WorldClim layers and Thailand polygon written by `00_download_data.R`.
+# Data
+
+For Day 1 we work with the WorldClim bioclim rasters and the Thailand polygon. These files are produced by Day 2a (`Day2a_Data_Download.Rmd`) — please knit Day 2a once before Day 1 so the files exist in `data/processed/`.
 
 ```{r load-data}
 bio_path <- "data/processed/bioclim_thailand.tif"
 tha_path <- "data/processed/thailand_boundary.gpkg"
 
-bioclim <- terra::rast(bio_path)
-thailand <- sf::st_read(tha_path, quiet = TRUE)
+bioclim <- rast(bio_path)
+thailand <- st_read(tha_path, quiet = TRUE)
+
+plot(thailand[2])
 
 # Show layer names — bio1 … bio19
 names(bioclim)
+
+summary(bioclim)
 ```
 
-For a clean teaching example we work with just two bioclimatic variables:
+For a clean teaching example we work with three bioclimatic variables. These also drive the 3-D environmental exploration in the next step:
 
-- **bio1** — annual mean temperature (°C × 10 in WorldClim units, but °C in v2.1)
+- **bio1** — annual mean temperature (°C, WorldClim v2.1)
 - **bio12** — annual precipitation (mm)
+- **bio15** — precipitation seasonality (CV)
 
 ```{r pick-vars}
-env <- bioclim[[c("bio1", "bio12")]]
-plot(env, main = c("BIO1 — annual mean T (°C)", "BIO12 — annual precip. (mm)"))
+env3    <- bioclim[[c("bio1", "bio12", "bio15")]]
+env3_df <- as.data.frame(env3, na.rm = TRUE)
+plot(env3)
 ```
 
-# Step 1 — Define a virtual species' niche
+# Step 1 — Explore E-space in 3D (BIO1 × BIO12 × BIO15)
+
+Before defining a niche, look at the *available* environmental conditions of Thailand in three dimensions. `BIO15` (precipitation seasonality, CV) captures within-year rainfall variability and adds an important third axis on top of mean temperature (`BIO1`) and total annual precipitation (`BIO12`).
+
+```{r env-3d}
+plotly::plot_ly(
+  data   = env3_df,
+  x      = ~bio1, y = ~bio12, z = ~bio15,
+  type   = "scatter3d", mode = "markers",
+  marker = list(size = 2, opacity = 0.5)
+) |>
+  plotly::layout(scene = list(
+    xaxis = list(title = "BIO1 (°C)"),
+    yaxis = list(title = "BIO12 (mm)"),
+    zaxis = list(title = "BIO15 (CV)")
+  ))
+```
+
+# Step 2 — Define a virtual species' niche
 
 A `nicheR` ellipsoid is built from a **range data frame** that lists the minimum and maximum each environmental variable can take inside the species' niche. The package converts this into a centroid, a covariance matrix, semi-axes, and a niche volume.
 
-Imagine a hypothetical tropical mammal that tolerates mean annual temperatures between **22 and 28 °C** and annual precipitation between **1500 and 2500 mm**.
+Imagine a hypothetical tropical mammal that tolerates mean annual temperatures between **25 and 28 °C** and annual precipitation between **1200 and 2500 mm**.
 
 ```{r build-ellipsoid}
 range_df <- data.frame(
-  variable = c("bio1", "bio12"),
-  min      = c(22,   1500),
-  max      = c(28,   2500)
+  bio1  = c(25, 28),
+  bio12 = c(1200, 2500),
+  bio15 = c(70, 90)
 )
 
-ell <- nicheR::ellipsoid(range_data = range_df)
+ell <- build_ellipsoid(range = range_df)
 ell
 ```
 
 `ell` carries the centroid, covariance matrix, and dimensions of the niche. We can visualise it directly in E-space, with the available environmental conditions of Thailand as background.
 
 ```{r plot-ellipsoid}
-# Pull every pixel's (bio1, bio12) values as the environmental background
-env_df <- as.data.frame(env, na.rm = TRUE)
-
-# Open an E-space canvas, add background points, then overlay the ellipsoid
-nicheR::plot_ellipsoid(ell,
-                       xlim = range(env_df$bio1),
-                       ylim = range(env_df$bio12),
-                       xlab = "BIO1 — annual mean T (°C)",
-                       ylab = "BIO12 — annual precip. (mm)")
-nicheR::add_data(env_df, vars = c("bio1", "bio12"),
-                 col = adjustcolor("grey60", alpha.f = 0.3), pch = 16, cex = 0.4)
-nicheR::add_ellipsoid(ell, col = "tomato", lwd = 2)
-title(main = "Virtual niche relative to Thailand's environment")
+# `env3_df` from Step 1 carries every pixel's (bio1, bio12, bio15) values —
+# we use it as the background point cloud here too.
+plot_ellipsoid(ell, background = env3_df)
 ```
 
-# Step 2 — Predict suitability and Mahalanobis distance in G-space
+# Step 3 — Predict suitability and Mahalanobis distance in G-space
 
 `predict()` projects the ellipsoid onto a `SpatRaster` and returns both a suitability surface (1 at the centroid, 0 at the boundary, with `truncated = TRUE` clamping outside-niche pixels to zero) and a Mahalanobis distance surface.
 
 ```{r predict}
-pred <- nicheR::predict(ell, data = env, truncated = TRUE)
+pred <- predict(ell,
+                newdata = env3,
+                include_suitability = TRUE,
+                suitability_truncated = TRUE,
+                include_mahalanobis = TRUE,
+                mahalanobis_truncated = TRUE,
+                keep_data = TRUE)
 
-# pred is a 2-layer SpatRaster: "suitability" and "mahalanobis"
-print(pred)
+# pred is a multi-layer SpatRaster carrying "suitability" and "mahalanobis"
+pred
 
-plot(pred[["suitability"]],
-     main = "Virtual species — predicted suitability across Thailand",
+plot(pred,
      col  = viridis::viridis(100))
-plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
+
+# Binary potential distribution map
+binary_rast <- (pred$suitability_trunc > 0) * 1
+
+plot(binary_rast,
+     axes = FALSE, box = TRUE,
+     col  = c("#d4d4d4", "#0004d5"),
+     main = "Potential Distribution (Binary)")
 ```
 
-```{r predict-maha, fig.height = 4.5}
-plot(pred[["mahalanobis"]],
-     main = "Mahalanobis distance (NA outside the truncated niche)",
-     col  = rev(viridis::magma(100)))
-plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
-```
-
-# Step 3 — Add a sampling-bias layer
+# Step 4 — Add a sampling-bias layer
 
 Real-world surveys are biased toward accessible places. We can simulate that bias and apply it on top of suitability.
 
-For this lesson we use longitude as a proxy for accessibility — many roads in Thailand follow north–south corridors, so western pixels are slightly under-sampled.
+For this lesson we use species-richness and nighttime-lights rasters (written by `Day2a_Data_Download.Rmd`) as proxies for survey effort.
 
 ```{r bias-layer}
-# A toy bias raster: higher values mean higher *detection* probability
-bias_layer <- env[[1]]
-bias_layer[] <- terra::xFromCell(env, seq_len(terra::ncell(env)))
-bias_layer <- terra::mask(bias_layer, env[[1]])
-names(bias_layer) <- "longitude_bias"
+sp_rich_layer  <- rast("data/processed/sp_richness_TH.tif")
+nighttime_layer <- rast("data/processed/nighttime_TH.tif")
+bias_layer <- c(sp_rich_layer, nighttime_layer)
+plot(bias_layer)
 
-# Combine bias layers (here, only one) into a 0-1 composite surface
-bias_prep <- nicheR::prepare_bias(layers = list(longitude_bias = bias_layer),
-                                  directions = c(longitude_bias = "direct"))
+# Combine bias layers into a 0-1 composite surface
+bias_prep <- prepare_bias(bias_surface = bias_layer,
+                          effect_direction = c("direct", "inverse"))
 
-plot(bias_prep,
-     main = "Composite sampling bias (0 = avoid, 1 = preferred)",
-     col  = viridis::cividis(100))
+plot(bias_prep$composite_surface)
 ```
 
 ```{r apply-bias, fig.height = 4.5}
-biased_pred <- nicheR::apply_bias(prediction = pred[["suitability"]],
-                                  bias       = bias_prep)
+biased_pred <- apply_bias(prepared_bias = bias_prep,
+                          prediction = pred,
+                          prediction_layer = "suitability",
+                          effect_direction = "direct")
 
-plot(biased_pred,
-     main = "Suitability × bias  =  realised sampling surface",
-     col  = viridis::viridis(100))
-plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
+plot(biased_pred$suitability_biased,
+     main = "Suitability × bias  =  realised sampling surface")
+plot(pred$suitability)
 ```
 
-# Step 4 — Generate virtual occurrence points
+# Step 5 — Generate virtual occurrence points with three sampling strategies
 
-With the bias-weighted prediction in hand, draw a sample of virtual records. We compare an unbiased draw with a bias-weighted one to see the effect.
+`nicheR::sample_data()` accepts three `sampling` strategies:
 
-```{r sampling}
-n <- 150
+- `"centroid"` — points weighted toward the niche centroid (preferred conditions).
+- `"random"` — points drawn uniformly from inside the niche.
+- `"edge"` — points biased toward the niche periphery (marginal conditions).
 
-# Unbiased: pure niche sampling, random across the ellipsoid
-unbiased_pts <- nicheR::sample_data(prediction = pred[["suitability"]],
-                                    n          = n,
-                                    strategy   = "random",
-                                    method     = "suitability")
+We draw 50 virtual records under each strategy and compare them.
 
-# Biased: weight by the realised sampling surface
-biased_pts   <- nicheR::sample_biased_data(prediction = pred[["suitability"]],
-                                           bias       = bias_prep,
-                                           n          = n,
-                                           strategy   = "random",
-                                           method     = "suitability")
+```{r sampling-three}
+pts_centroid <- sample_data(n_occ = 50,
+                            prediction = pred,
+                            sampling = "centroid",
+                            prediction_layer = "suitability",
+                            seed = 123)
 
-head(unbiased_pts)
+pts_random   <- sample_data(n_occ = 50,
+                            prediction = pred,
+                            sampling = "random",
+                            prediction_layer = "suitability",
+                            seed = 123)
+
+pts_edge     <- sample_data(n_occ = 50,
+                            prediction = pred,
+                            sampling = "edge",
+                            prediction_layer = "suitability",
+                            seed = 123)
+
+head(pts_centroid)
+head(pts_random)
+head(pts_edge)
 ```
 
-```{r plot-samples, fig.height = 5.5}
-par(mfrow = c(1, 2))
-plot(pred[["suitability"]], col = viridis::viridis(100, alpha = 0.7),
-     main = "Unbiased virtual sample (n=150)")
-points(unbiased_pts[, c("x", "y")], pch = 19, cex = 0.7, col = "white")
+A bias-weighted draw uses `sample_biased_data()` together with the realised sampling surface.
 
-plot(biased_pred, col = viridis::viridis(100, alpha = 0.7),
-     main = "Bias-weighted virtual sample (n=150)")
-points(biased_pts[, c("x", "y")], pch = 19, cex = 0.7, col = "white")
+```{r biased-sample}
+biased_pts <- sample_biased_data(
+  n_occ            = 50,
+  prediction       = biased_pred,
+  prediction_layer = "suitability_biased_direct",
+  seed             = 123
+)
+
+head(biased_pts)
+
+occ_bias_env <- terra::extract(env3, biased_pts[, c("x", "y")])
+```
+
+```{r plot-samples, fig.height = 6, fig.width = 9}
+par(mfrow = c(2, 2))
+
+plot(pred[["suitability"]],
+     main = "Centroid sample (n = 50)")
+points(pts_centroid[, c("x", "y")], pch = 19, cex = 0.6, col = "red")
+
+plot(pred[["suitability"]],
+     main = "Random sample (n = 50)")
+points(pts_random[, c("x", "y")], pch = 19, cex = 0.6, col = "red")
+
+plot(pred[["suitability"]],
+     main = "Edge sample (n = 50)")
+points(pts_edge[, c("x", "y")], pch = 19, cex = 0.6, col = "red")
+
+plot(biased_pred$suitability_biased,
+     main = "Bias-weighted sample (n = 50)")
+points(biased_pts[, c("x", "y")], pch = 19, cex = 0.6, col = "red")
+
 par(mfrow = c(1, 1))
 ```
 
-We can also visualise both samples on top of the niche in E-space.
+The three strategies populate the niche differently in E-space:
 
 ```{r samples-in-espace}
-nicheR::plot_ellipsoid(ell,
-                       xlim = range(env_df$bio1),
-                       ylim = range(env_df$bio12),
-                       xlab = "BIO1 (°C)", ylab = "BIO12 (mm)")
-nicheR::add_data(env_df, vars = c("bio1", "bio12"),
-                 col = adjustcolor("grey80", alpha.f = 0.3), pch = 16, cex = 0.4)
-nicheR::add_ellipsoid(ell, col = "tomato", lwd = 2)
-points(unbiased_pts[, c("bio1", "bio12")], col = "royalblue", pch = 19, cex = 0.6)
-points(biased_pts  [, c("bio1", "bio12")], col = "darkorange", pch = 17, cex = 0.6)
-legend("topright", legend = c("Unbiased", "Biased"),
-       col = c("royalblue", "darkorange"), pch = c(19, 17), bty = "n")
-```
-
-# Step 5 — Simulate a virtual community
-
-`nicheR` can generate a community of virtual species whose niches relate to each other in known ways. We build three nested ellipsoids — useful for teaching beta-diversity ideas — and map the resulting richness.
-
-```{r community}
-community <- nicheR::nested_ellipses(
-  reference  = ell,
-  n_species  = 3,
-  shrinkage  = 0.6
-)
-
-# Project each species' niche to G-space and stack
-comm_pred <- nicheR::predict(community, data = env, truncated = TRUE)
-
-# Build a presence/absence stack at suitability >= 0.05
-pa <- terra::app(comm_pred, function(x) as.integer(x >= 0.05))
-names(pa) <- paste0("species_", seq_len(terra::nlyr(pa)))
-
-richness <- sum(pa, na.rm = TRUE)
-plot(richness,
-     main = "Virtual community richness (3 nested species)",
-     col  = viridis::turbo(4))
-plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
+plot_ellipsoid(ell, background = env3_df)
+points(pts_centroid[, c("bio1", "bio12")], col = "blue",      pch = 19, cex = 0.6)
+points(pts_random[,   c("bio1", "bio12")], col = "darkgreen", pch = 17, cex = 0.6)
+points(pts_edge[,     c("bio1", "bio12")], col = "purple",    pch = 15, cex = 0.6)
+points(occ_bias_env[, c("bio1", "bio12")], col = "red",       pch = 4,  cex = 0.6)
+legend("topright",
+       legend = c("Centroid", "Random", "Edge", "Bias-weighted"),
+       col    = c("blue", "darkgreen", "purple", "red"),
+       pch    = c(19, 17, 15, 4),
+       bty    = "n")
 ```
 
 # Wrap-up & exercises
@@ -248,15 +295,9 @@ plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
 What we just did:
 
 - Defined a niche **a priori** as a 2-D ellipsoid in bioclim space.
-- Projected it to Thailand and inspected suitability + Mahalanobis distance.
-- Added a sampling-bias surface and contrasted biased vs. unbiased virtual samples.
-- Built a nested virtual community and mapped richness.
-
-Try on your own:
-
-1. Add **bio7** (temperature annual range) as a third dimension and rebuild the ellipsoid.
-2. Replace `nested_ellipses()` with `random_ellipses()` and compare richness patterns.
-3. Increase `n` to 1000 and re-fit the ellipsoid on the *virtual* samples — does it recover the true niche?
+- Explored the available environmental space of Thailand in 3D using BIO1, BIO12, BIO15.
+- Projected the ellipsoid to Thailand and inspected suitability + Mahalanobis distance.
+- Added a sampling-bias surface and contrasted three sampling strategies (`centroid`, `random`, `edge`) plus a bias-weighted draw.
 
 ```{r session-info}
 sessionInfo()

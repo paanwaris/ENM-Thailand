@@ -1,0 +1,55 @@
+Package: ENMThailand
+Type: Package
+Title: ENM-Thailand Workshop 2026
+Version: 0.1.0
+Authors@R: c(
+    person(given   = "Paanwaris",
+           family  = "Paansri",
+           role    = c("aut", "cre"),
+           email   = "paanwaris@vt.edu",
+           comment = c(ORCID = "0000-0001-9992-098X")),
+    person(given   = "Luis E.",
+           family  = "Escobar",
+           role    = "aut",
+           comment = c(ORCID = "0000-0001-5735-2750"))
+    )
+Description: Materials for a three-day workshop on ecological niche modelling
+    (ENM) and species distribution modelling (SDM), using Sambar deer
+    (Rusa unicolor) in Thailand as the case study. The workshop covers
+    virtual species with 'nicheR', environmental sampling-bias thinning with
+    'bean', and temporally-explicit SDMs with 'TemporalModelR'.
+License: MIT + file LICENSE
+Encoding: UTF-8
+URL: https://github.com/paanwaris/ENM-Thailand,
+    https://paanwaris.github.io/ENM-Thailand/
+BugReports: https://github.com/paanwaris/ENM-Thailand/issues
+LazyData: true
+Depends:
+    R (>= 4.1)
+Imports:
+    terra,
+    sf,
+    dplyr,
+    readr,
+    plotly,
+    viridis,
+    rgbif,
+    randomForest,
+    fastcpd
+Suggests:
+    nicheR,
+    bean,
+    TemporalModelR,
+    geodata,
+    rmarkdown,
+    knitr,
+    pkgdown,
+    hexSticker,
+    showtext,
+    remotes
+Remotes:
+    castanedaM/nicheR,
+    paanwaris/bean,
+    CJHughes926/TemporalModelR
+VignetteBuilder: knitr
+RoxygenNote: 7.3.2
