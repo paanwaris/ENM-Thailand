@@ -13,16 +13,22 @@
   </a>
 </p>
 
-A three-day hands-on workshop on ecological niche modelling (ENM) and species distribution modelling (SDM), using Sambar deer (*Rusa unicolor*) in Thailand as the case study.
-
-| Day | Package | Repository | Focus |
-|-----|---------|-----------|-------|
-| 1 | **nicheR** | <https://github.com/castanedaM/nicheR> | Ellipsoid-based virtual niches (virtual species — no occurrence data needed) |
-| 2a | — (data prep) | — | Download GBIF + WorldClim + GADM into `data/processed/` |
-| 2b | **bean**   | <https://github.com/paanwaris/bean> | Reducing environmental sampling bias by thinning in E-space |
-| 3 | **TemporalModelR** | <https://github.com/CJHughes926/TemporalModelR> | Temporally explicit SDMs using local annual rasters (2010–2025) |
+A three-day hands-on workshop on **ecological niche modelling (ENM)** and **species distribution modelling (SDM)** in R, using Sambar deer (*Rusa unicolor*) in Thailand as the case study. The workshop walks participants through three modern R packages developed for the field, building each day on the outputs of the previous one.
 
 The full rendered website lives at **<https://paanwaris.github.io/ENM-Thailand/>**.
+
+---
+
+## Workshop overview
+
+| Day | Package | Focus |
+|-----|---------|-------|
+| 1 | [**nicheR**](https://github.com/castanedaM/nicheR) | Build an ellipsoid-based **virtual species** in environmental space, project it to Thailand, explore E-space in 3D (BIO1 × BIO12 × BIO15), and sample virtual occurrences under three strategies (`centroid`, `random`, `edge`). |
+| 2a | — | Download and prepare the shared workshop inputs: Thailand boundary from GADM, WorldClim v2.1 bioclim layers, and GBIF occurrence records for *Rusa unicolor*, strictly filtered to field-observation `basisOfRecord`. |
+| 2b | [**bean**](https://github.com/paanwaris/bean) | Reduce **environmental sampling bias** in real Sambar occurrence data by thinning points that cluster in E-space, fit an ellipsoid niche, and project suitability back to G-space. |
+| 3 | [**TemporalModelR**](https://github.com/CJHughes926/TemporalModelR) | Build a **temporally explicit SDM** by pairing each occurrence with the environment it experienced at the time of observation. Uses local annual LST and precipitation rasters (2010–2025) provided in `temporal_rasters/`. |
+
+Each day is delivered as a self-contained R Markdown notebook at the top of the repository.
 
 ---
 
@@ -35,162 +41,18 @@ The full rendered website lives at **<https://paanwaris.github.io/ENM-Thailand/>
 
 ---
 
-## Repository structure
-
-```
-ENM-Thailand/
-├── README.md
-├── DESCRIPTION                         ← package metadata + authorship
-├── LICENSE / LICENSE.md                ← MIT
-├── _pkgdown.yml                        ← pkgdown site config
-├── .gitignore
-├── .Renviron.example                   ← template for GBIF credentials
-├── ENM-Thailand.Rproj                  ← create on first open in RStudio
-├── Day1_nicheR.Rmd                     ← canonical Day 1 lesson
-├── Day2a_Data_Download.Rmd             ← canonical Day 2a — downloads
-├── Day2b_Bean_Processing.Rmd           ← canonical Day 2b lesson
-├── Day3_TemporalModelR.Rmd             ← canonical Day 3 lesson
-├── vignettes/                          ← thin wrappers consumed by pkgdown
-│   ├── Day1_nicheR.Rmd
-│   ├── Day2a_Data_Download.Rmd
-│   ├── Day2b_Bean_Processing.Rmd
-│   └── Day3_TemporalModelR.Rmd
-├── scripts/
-│   ├── build_pkgdown_site.R            ← builds the public website
-│   └── make_hex_logo.R                 ← regenerates man/figures/logo.png
-├── man/figures/
-│   └── logo.png                        ← workshop hex logo (referenced in README)
-├── data/
-│   ├── raw/                            ← raw downloads (gitignored)
-│   └── processed/                      ← cleaned outputs (gitignored)
-├── temporal_rasters/                   ← annual LST + Precip rasters 2010–2025 (provided)
-├── outputs/                            ← model objects, prediction rasters
-└── figures/                            ← rendered plots
-```
-
-Package installation is embedded in each Rmd — there is no central install script. The first chunk of every Rmd installs whichever workshop package that day needs.
-
-The `vignettes/` folder contains thin wrappers (`child = "../DayX_*.Rmd"`) so pkgdown renders the **same source** as the canonical top-level files — no duplication.
-
----
-
-## Quick start
-
-### 1. Clone the repo
-
-```bash
-git clone https://github.com/paanwaris/ENM-Thailand.git
-cd ENM-Thailand
-```
-
-### 2. Set your GBIF credentials (one time)
-
-Day 2a reads GBIF credentials from environment variables so nothing confidential ever lands in git. Copy the template and fill in your details:
-
-```bash
-cp .Renviron.example .Renviron
-```
-
-```r
-usethis::edit_r_environ()   # opens .Renviron in RStudio
-```
-
-```
-GBIF_USER  = "paanwaris"
-GBIF_EMAIL = "paanwaris@vt.edu"
-GBIF_PWD   = "********"
-```
-
-Restart R after editing so the variables are loaded. `.Renviron` is in `.gitignore`.
-
-### 3. Knit Day 2a first (≈15 min)
-
-Day 2a populates `data/processed/` with everything the other days read. Run it once:
-
-```r
-rmarkdown::render("Day2a_Data_Download.Rmd")
-```
-
-### 4. Knit each lesson day
-
-Each Rmd is self-contained and can be knit independently after Day 2a has been run once:
-
-```r
-rmarkdown::render("Day1_nicheR.Rmd")
-rmarkdown::render("Day2b_Bean_Processing.Rmd")
-rmarkdown::render("Day3_TemporalModelR.Rmd")
-```
-
-Equivalent from the shell:
-
-```bash
-Rscript -e 'rmarkdown::render("Day1_nicheR.Rmd")'
-Rscript -e 'rmarkdown::render("Day2b_Bean_Processing.Rmd")'
-Rscript -e 'rmarkdown::render("Day3_TemporalModelR.Rmd")'
-```
-
----
-
-## Building the pkgdown website
-
-The public site lives at `https://paanwaris.github.io/ENM-Thailand/` and is regenerated from the same Rmds via the wrappers in `vignettes/`.
-
-### One-time setup
-
-```r
-install.packages(c("pkgdown", "rmarkdown", "knitr"))
-usethis::use_pkgdown_github_pages()   # optional: wires up the gh-pages workflow
-```
-
-### Build the site locally
-
-```r
-source("scripts/build_pkgdown_site.R")
-```
-
-This calls `pkgdown::build_site()` and writes the rendered HTML into `docs/` (gitignored). The four workshop Rmds appear under the **Workshop days** menu in the navbar via the `articles:` section of `_pkgdown.yml`.
-
-### Re-render a single article
-
-```r
-pkgdown::build_article("Day1_nicheR")
-pkgdown::build_article("Day2a_Data_Download")
-pkgdown::build_article("Day2b_Bean_Processing")
-pkgdown::build_article("Day3_TemporalModelR")
-```
-
----
-
-## Regenerating the hex logo
-
-The current `man/figures/logo.png` ships with the repo. If you want to
-re-render it (e.g. swap the year on the next workshop), run:
-
-```r
-source("scripts/make_hex_logo.R")
-```
-
-This uses the [`hexSticker`](https://github.com/GuangchuangYu/hexSticker)
-package to render a fresh `man/figures/logo.png`.
-
----
-
 ## Data sources & citations
 
-- **GBIF**: GBIF.org occurrence download for *Rusa unicolor* (downloaded fresh each run via the `rgbif` package). Please cite the DOI returned by your download.
+- **GBIF**: GBIF.org occurrence download for *Rusa unicolor* via the `rgbif` package. Please cite the DOI returned by your own download.
 - **WorldClim v2.1**: Fick, S.E. and R.J. Hijmans, 2017. WorldClim 2: new 1-km spatial resolution climate surfaces for global land areas. *International Journal of Climatology* 37 (12): 4302–4315. <https://www.worldclim.org/>
 - **Thailand boundary**: GADM v4.1 (free for academic and non-commercial use).
 - **Workshop packages**:
-  - `nicheR` — Castaneda-Guzman, Hughes, Paansri, Cobos
-  - `bean` — Paansri & Escobar
-  - `TemporalModelR` — Hughes, Castaneda-Guzman, Escobar (2026)
+  - `nicheR`
+  - `bean`
+  - `TemporalModelR`
 
 ---
 
 ## License
 
 MIT — see [`LICENSE.md`](LICENSE.md). Each underlying R package retains its own license.
-
-## Contributing
-
-Issues and pull requests welcome. If a code chunk does not run on your system, please open an Issue including your `sessionInfo()` output.
