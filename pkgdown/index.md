@@ -1,13 +1,9 @@
 <p align="center">
-  <img src="man/figures/logo.png" width="240"/>
-</p>
-
-<p align="center">
-  <img src="man/figures/logo_vt_deby.png" height="60" style="margin: 0 10px;"/>
-  <img src="man/figures/logo_ku_forestry.jpg" height="60" style="margin: 0 10px;"/>
-  <img src="man/figures/logo_kuias.jpg" height="60" style="margin: 0 10px;"/>
-  <img src="man/figures/logo_wcs.png" height="60" style="margin: 0 10px;"/>
-  <img src="man/figures/logo_nsf.png" height="60" style="margin: 0 10px;"/>
+  <img src="man/figures/logo_vt_deby.png" height="10" style="margin: 0 10px;"/>
+  <img src="man/figures/logo_ku_forestry.jpg" height="10" style="margin: 0 10px;"/>
+  <img src="man/figures/logo_kuias.jpg" height="10" style="margin: 0 10px;"/>
+  <img src="man/figures/logo_wcs.png" height="10" style="margin: 0 10px;"/>
+  <img src="man/figures/logo_nsf.png" height="10" style="margin: 0 10px;"/>
 </p>
 
 <h1 align="center">ENM-Thailand workshop 2026</h1>
