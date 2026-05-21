@@ -196,7 +196,3 @@ points(sambar$decimalLongitude, sambar$decimalLatitude,
 ```
 
 Everything Day 1, Day 2b, and Day 3 need now lives in `data/processed/`. Day 3 additionally relies on the local `temporal_rasters/` folder, which holds pre-prepared annual precipitation and temperature rasters for 2000–2025 (this folder is provided with the workshop materials).
-
-```{r session-info}
-sessionInfo()
-```

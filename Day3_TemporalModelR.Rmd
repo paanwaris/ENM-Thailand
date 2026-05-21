@@ -410,16 +410,12 @@ regional$plots$annual_change
 regional$plots$total_change_by_unit
 ```
 
-# Wrap-up & exercises
+# Wrap-up
 
 What we covered:
 
-- Read pre-prepared annual precipitation and temperature rasters (2000–2025) directly from `temporal_rasters/` and stacked them — **no new downloads**.
+- Read pre-prepared annual precipitation, temperature rasters, and NDVI (2000–2025) directly from `temporal_rasters/` and stacked them — **no new downloads**.
 - Built a fully temporally-explicit pipeline: time-stamped occurrences ↔ time-stamped rasters.
 - Used spatio-temporal cross-validation folds and fold-stratified pseudoabsences.
 - Fit GLM and RF temporal models and projected through time.
 - Classified pixel-level temporal trajectories and aggregated by region.
-
-```{r session-info}
-sessionInfo()
-```

@@ -213,14 +213,10 @@ terra::writeRaster(pred_thinned,
 saveRDS(ell_thinned, "outputs/Day2_ellipsoid_thinned.rds")
 ```
 
-# Wrap-up & exercises
+# Wrap-up
 
 Take-homes:
 
 - Spatial bias in occurrence data **propagates into E-space** as dense clusters.
 - `bean` thins in E-space so that the fitted niche is not pulled toward the densest sampled environments.
 - The two thinning methods (`thin_env_nd` vs. `thin_env_center`) trade randomness for reproducibility — pick one and stick with it for a given analysis.
-
-```{r session-info}
-sessionInfo()
-```

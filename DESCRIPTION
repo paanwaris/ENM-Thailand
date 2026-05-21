@@ -26,7 +26,10 @@ BugReports: https://github.com/paanwaris/ENM-Thailand/issues
 LazyData: true
 Depends:
     R (>= 4.1)
-Imports:
+Suggests:
+    nicheR,
+    bean,
+    TemporalModelR,
     terra,
     sf,
     dplyr,
@@ -35,17 +38,11 @@ Imports:
     viridis,
     rgbif,
     randomForest,
-    fastcpd
-Suggests:
-    nicheR,
-    bean,
-    TemporalModelR,
+    fastcpd,
     geodata,
     rmarkdown,
     knitr,
     pkgdown,
-    hexSticker,
-    showtext,
     remotes
 Remotes:
     castanedaM/nicheR,

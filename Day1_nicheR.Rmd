@@ -290,7 +290,7 @@ legend("topright",
        bty    = "n")
 ```
 
-# Wrap-up & exercises
+# Wrap-up
 
 What we just did:
 
@@ -298,7 +298,3 @@ What we just did:
 - Explored the available environmental space of Thailand in 3D using BIO1, BIO12, BIO15.
 - Projected the ellipsoid to Thailand and inspected suitability + Mahalanobis distance.
 - Added a sampling-bias surface and contrasted three sampling strategies (`centroid`, `random`, `edge`) plus a bias-weighted draw.
-
-```{r session-info}
-sessionInfo()
-```
