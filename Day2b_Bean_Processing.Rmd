@@ -151,7 +151,7 @@ thin_nd <- thin_env_nd(data            = prepped,
 # Deterministic: replace each occupied pod with its centre
 thin_center <- thin_env_center(data            = prepped,
                                env_vars        = c("bio1", "bio12", "bio15"),
-                               grid_resolution = c(0.5, 50))
+                               grid_resolution = c(0.5, 50, 20))
 
 thin_nd
 thin_center

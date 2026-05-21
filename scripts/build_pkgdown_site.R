@@ -3,47 +3,47 @@
 # -----------------------------------------------------------------------------
 # Build the public pkgdown website for the ENM-Thailand workshop.
 #
+# The repository is "package-shaped" (it has a DESCRIPTION so pkgdown gets
+# clean metadata + ORCID rendering), but there is no `R/` folder with code.
+# So we call the individual pkgdown build steps explicitly and skip
+# `build_reference()` (which would try to `library(ENMThailand)`).
+#
 # Prerequisites:
 #   * The shared inputs (data/processed/, temporal_rasters/) already exist —
 #     knit Day2a_Data_Download.Rmd first so every vignette can run end-to-end.
-#   * `pkgdown` and the three workshop packages are installed.
-#
-# What this script does:
-#   1. Installs missing build-time dependencies (pkgdown, knitr, rmarkdown).
-#   2. Calls `pkgdown::build_site()` against the wrappers in `vignettes/`,
-#      which use `child = "../DayX_*.Rmd"` chunks to render the canonical
-#      top-level Rmds — there is no duplicated source.
-#   3. Writes the rendered HTML into `docs/`.
-#
-# Deploy via GitHub Pages: push the contents of `docs/` to the `gh-pages`
-# branch with `pkgdown::deploy_to_branch()`, or wire up the canonical
-# `usethis::use_pkgdown_github_pages()` workflow once.
+#   * `pkgdown` is installed.
 # =============================================================================
 
 needed  <- c("pkgdown", "knitr", "rmarkdown")
 missing <- needed[!needed %in% rownames(installed.packages())]
 if (length(missing)) install.packages(missing, dependencies = TRUE)
 
-# Sanity-check that the canonical Rmds exist at the repo root
 root_rmds <- c(
   "Day1_nicheR.Rmd",
   "Day2a_Data_Download.Rmd",
   "Day2b_Bean_Processing.Rmd",
   "Day3_TemporalModelR.Rmd"
 )
-
 missing_rmds <- root_rmds[!file.exists(root_rmds)]
 if (length(missing_rmds)) {
   stop("Missing canonical Rmds at the repository root: ",
        paste(missing_rmds, collapse = ", "))
 }
 
-# Build the site. `new_process = FALSE` keeps the inherited environment so
-# packages like geodata don't have to be re-resolved per vignette.
-pkgdown::build_site(
-  override    = list(destination = "docs"),
-  new_process = FALSE,
-  install     = FALSE
-)
+# ---- Build the site, step by step -------------------------------------------
+# init_site()  copies assets (CSS, JS, favicons) into docs/.
+# build_home() renders README.md + LICENSE.md as index.html / LICENSE.html.
+# build_articles() renders every vignette under vignettes/ (the four workshop
+#                  days, via the `child = "../DayX_*.Rmd"` wrappers).
+# NOTE: We deliberately skip build_reference() because the repository has no
+#       R/ functions to document.
+# build_news()   is a no-op unless NEWS.md exists.
+# build_search() builds the in-site search index.
+
+pkgdown::init_site()
+pkgdown::build_home(preview = FALSE)
+pkgdown::build_articles(preview = FALSE)
+pkgdown::build_news(preview = FALSE)
+pkgdown::build_search()
 
 message("\npkgdown site built at: ", normalizePath("docs"))

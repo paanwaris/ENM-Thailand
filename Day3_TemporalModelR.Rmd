@@ -57,7 +57,8 @@ cran_pkgs <- c(
   "fastcpd",
   "rmarkdown",
   "knitr",
-  "remotes"
+  "remotes",
+  "geodata"
   # "geodata"   # uncomment only if you enable the optional `provinces` chunk
 )
 to_install <- cran_pkgs[!cran_pkgs %in% rownames(installed.packages())]
@@ -110,10 +111,11 @@ plot(prec_ex, main = "Precipitaion 2025")
 plot(temp_ex, main = "Temperature 2025")
 plot(NDVI_ex, main = "NDVI 2025")
 
+split_dir <- "data/processed/temporal_split"
 aligned_dir <- "data/processed/rasters_aligned"
 dir.create(aligned_dir, showWarnings = FALSE, recursive = TRUE)
 
-ref_raster <- temp_files[1]  # any one of the per-variable split rasters
+ref_raster <- NDVI_ex  # any one of the per-variable split rasters
 
 raster_align(
   input_dir = split_dir,
@@ -294,7 +296,7 @@ rf_res$fold_test_metrics
 # Step 3 — Project predictions through time
 
 ```{r predict}
-time_steps <- data.frame(year = years)
+time_steps <- data.frame(year = c(2010:2025))
 
 glm_preds <- generate_spatiotemporal_predictions(
   partition_result = partition,
@@ -371,7 +373,7 @@ plot(consensus$frequency_raster,
 patterns_out <- analyze_temporal_patterns(
   binary_stack = consensus$consensus_stack,
   summary_raster = consensus$frequency_raster,
-  time_steps = years,
+  time_steps = time_steps,
   output_dir = "outputs/rf_patterns",
   spatial_autocorrelation = FALSE,
   estimate_time = FALSE,
@@ -386,7 +388,7 @@ plot(patterns_out$pattern,
 ## Aggregate by spatial unit (Thailand provinces)
 
 ```{r provinces}
-provinces <- gadm(country = "THA", level = 1, path = "data/raw") |>
+provinces <- geodata::gadm(country = "THA", level = 1, path = "data/raw") |>
   st_as_sf()
 
 regional <- analyze_trends_by_spatial_unit(
@@ -396,7 +398,7 @@ regional <- analyze_trends_by_spatial_unit(
   pattern_raster = patterns_out$pattern,
   time_decrease_raster = patterns_out$time_decrease,
   time_increase_raster = patterns_out$time_increase,
-  time_steps = years,
+  time_steps = time_steps,
   output_dir = "outputs/rf_regional",
   overwrite = TRUE,
   create_plot = TRUE
