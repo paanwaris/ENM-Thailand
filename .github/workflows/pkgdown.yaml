@@ -1,16 +1,11 @@
-# Manual-only pkgdown build.
-#
-# Why: the workshop vignettes load gigabytes of WorldClim/LST rasters from
-# `data/processed/` and `temporal_rasters/`, plus they call GBIF. None of
-# that exists on a fresh CI runner, so an automatic CI build can't render
-# the articles. The canonical workflow is to build locally
-# (`source("scripts/build_pkgdown_site.R")`) and deploy with
-# `pkgdown::deploy_to_branch()`.
-#
-# This workflow is kept around — but gated behind workflow_dispatch only —
-# so you can still kick off a CI build manually from the Actions tab if you
-# ever ship the data in some other way (release artifact, LFS, etc.).
+# Workflow derived from https://github.com/r-lib/actions/tree/v2/examples
+# Need help debugging build failures? Start at https://github.com/r-lib/actions#where-to-find-help
 on:
+  push:
+    branches: [main, master]
+  pull_request:
+  release:
+    types: [published]
   workflow_dispatch:
 
 name: pkgdown.yaml
