@@ -11,8 +11,6 @@ output:
     code_folding: show
     theme: cosmo
     df_print: paged
-editor_options: 
-  chunk_output_type: console
 ---
 
 ```{r setup, include = FALSE}
@@ -65,7 +63,7 @@ knitr::opts_chunk$set(eval = .workshop_data_ok)
 
 Today we will:
 
-1. Read the annual precipitation and temperature rasters (2000–2025) from `temporal_rasters/` and stack them.
+1. Read the annual precipitation, temperature, and NDVI rasters (2000–2025) from `temporal_rasters/` and stack them.
 2. Align them to a common grid with `raster_align()`, rarefy occurrences with `spatiotemporal_rarefaction()`, and extract time-matched environment with `temporally_explicit_extraction()`.
 3. Scale rasters, build spatiotemporal CV folds, and create fold-stratified pseudoabsences.
 4. Fit `build_temporal_glm()` and `build_temporal_rf()` models and project predictions across years with `generate_spatiotemporal_predictions()`.
