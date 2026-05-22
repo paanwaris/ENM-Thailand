@@ -8,6 +8,7 @@
   <img src="man/figures/logo_kuias.jpg" height="60" style="margin: 0 10px;"/>
   <img src="man/figures/logo_wcs.png" height="60" style="margin: 0 10px;"/>
   <img src="man/figures/logo_nsf.png" height="60" style="margin: 0 10px;"/>
+  <img src="man/figures/logo_nih.png" height="60" style="margin: 0 10px;"/>
 </p>
 
 <h1 align="center">ENM-Thailand workshop 2026</h1>
