@@ -49,6 +49,13 @@ if (!.workshop_data_ok) {
 
 # Overview
 
+> **Workshop navigation —** part 3 of 4 in the [ENM-Thailand 2026 workshop](https://paanwaris.github.io/ENM-Thailand/).
+>
+> - [Day 1 — Virtual species with nicheR.](https://paanwaris.github.io/ENM-Thailand/articles/Day1_nicheR.html) Build an ellipsoid niche by hand and project it.
+> - [Day 2a — Downloading the workshop data.](https://paanwaris.github.io/ENM-Thailand/articles/Day2a_Data_Download.html) Fetch Thailand, WorldClim and GBIF Sambar records.
+> - **Day 2b (this page) — Environmental thinning with bean.** Reduce E-space sampling bias before fitting a real niche.
+> - [Day 3 — Temporally-explicit SDMs with TemporalModelR.](https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html) Pair each occurrence with the environment it experienced.
+
 `bean` reduces sampling bias by thinning occurrence points that are **clustered in environmental space (E-space)** instead of in geographic space. The intuition: most field campaigns oversample easily reachable environments. Thinning per environmental "pod" produces a more even coverage of the species' niche, and therefore a less biased fundamental-niche estimate.
 
 Today we will:
