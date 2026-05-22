@@ -18,16 +18,18 @@ needed  <- c("pkgdown", "knitr", "rmarkdown")
 missing <- needed[!needed %in% rownames(installed.packages())]
 if (length(missing)) install.packages(missing, dependencies = TRUE)
 
-rmds <- file.path(
-  c("Day1_nicheR.Rmd",
-    "Day2a_Data_Download.Rmd",
-    "Day2b_Bean_Processing.Rmd",
-    "Day3_TemporalModelR.Rmd")
+rmds <- c(
+  "Day1_nicheR.Rmd",
+  "Day2a_Data_Download.Rmd",
+  "Day2b_Bean_Processing.Rmd",
+  "Day3_TemporalModelR.Rmd"
 )
 missing_rmds <- rmds[!file.exists(rmds)]
 if (length(missing_rmds)) {
-  stop("Missing canonical Rmds /: ",
-       paste(missing_rmds, collapse = ", "))
+  stop(
+    "Missing canonical Rmds at the repository root: ",
+    paste(missing_rmds, collapse = ", ")
+  )
 }
 
 # Tell Day 2a to render its code without hitting GADM / WorldClim / GBIF.
