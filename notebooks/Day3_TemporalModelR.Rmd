@@ -23,29 +23,6 @@ knitr::opts_chunk$set(
   fig.height = 5,
   dpi       = 100
 )
-
-# This Rmd lives in notebooks/, but every path inside it is written relative
-# to the repository root. Set the knit working directory to the project root
-# so the file knits cleanly whether you click "Knit" in RStudio, render it
-# from R, or build the pkgdown site.
-if (requireNamespace("rprojroot", quietly = TRUE)) {
-  knitr::opts_knit$set(
-    root.dir = rprojroot::find_root(rprojroot::has_file("DESCRIPTION"))
-  )
-} else {
-  knitr::opts_knit$set(root.dir = normalizePath(".."))
-}
-
-# --- Data-presence guard ----------------------------------------------------
-# Day 3 needs both data/processed/ (from Day 2a) AND temporal_rasters/
-# (annual LST/Precip/NDVI files, hosted externally). If either is missing
-# we render the code without running it.
-.has_processed <- file.exists("data/processed/gbif/sambar_thailand.csv") &&
-  file.exists("data/processed/boundary/thailand_boundary.gpkg")
-.has_temporal  <- dir.exists("temporal_rasters") &&
-  length(list.files("temporal_rasters", pattern = "\\.tif$")) > 0
-.workshop_data_ok <- .has_processed && .has_temporal
-knitr::opts_chunk$set(eval = .workshop_data_ok)
 ```
 
 # Overview

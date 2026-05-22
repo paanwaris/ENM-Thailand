@@ -7,5 +7,5 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r child = "../notebooks/Day3_TemporalModelR.Rmd"}
+```{r child = "../Day3_TemporalModelR.Rmd"}
 ```

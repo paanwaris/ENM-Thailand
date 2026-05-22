@@ -71,13 +71,6 @@
 
     
     
-<div class="alert alert-warning" style="padding:1em;border-left:4px solid #F2B705;background:#FFF8E1;">
-<strong>Heads up:</strong> the workshop data is not on this build
-machine, so the chunks below are shown as <em>code only</em> (no
-outputs). To see live results, knit <code>Day2a_Data_Download.Rmd</code>
-locally and fetch the annual rasters via
-<code>scripts/download_temporal_rasters.R</code> first.
-</div>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
@@ -121,8 +114,8 @@ Thailand polygon we use alongside them.</p>
 </blockquote>
 <p>Today we will:</p>
 <ol style="list-style-type: decimal">
-<li>Read the annual precipitation and temperature rasters (2000–2025)
-from <code>temporal_rasters/</code> and stack them.</li>
+<li>Read the annual precipitation, temperature, and NDVI rasters
+(2000–2025) from <code>temporal_rasters/</code> and stack them.</li>
 <li>Align them to a common grid with <code><a href="https://cjhughes926.github.io/TemporalModelR/reference/raster_align.html" class="external-link">raster_align()</a></code>, rarefy
 occurrences with <code><a href="https://cjhughes926.github.io/TemporalModelR/reference/spatiotemporal_rarefaction.html" class="external-link">spatiotemporal_rarefaction()</a></code>, and extract
 time-matched environment with
@@ -187,6 +180,9 @@ docs: <a href="https://cjhughes926.github.io/TemporalModelR/articles/Preprocessi
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>presence <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sambar</span><span class="op">$</span><span class="va">year</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">## </span></span>
+<span><span class="co">## 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025 </span></span>
+<span><span class="co">##    7   23   22   27   29   31   30   31   40   55   19   17   68  106  143  226</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="step-1-preprocessing">Step 1 — Preprocessing<a class="anchor" aria-label="anchor" href="#step-1-preprocessing"></a>
@@ -197,7 +193,7 @@ docs: <a href="https://cjhughes926.github.io/TemporalModelR/articles/Preprocessi
 <p><code><a href="https://cjhughes926.github.io/TemporalModelR/reference/raster_align.html" class="external-link">raster_align()</a></code> reprojects/resamples every raster in
 <code>input_dir</code> against a reference and writes the aligned copies
 to <code>output_dir</code>.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">prec_ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="st">"data/processed/temporal_split/prec_2025.tif"</span><span class="op">)</span></span>
 <span><span class="va">temp_ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="st">"data/processed/temporal_split/temp_2025.tif"</span><span class="op">)</span></span>
 <span><span class="va">NDVI_ex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="st">"data/processed/temporal_split/NDVI_2025.tif"</span><span class="op">)</span></span>
@@ -205,9 +201,10 @@ to <code>output_dir</code>.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">prec_ex</span>, main <span class="op">=</span> <span class="st">"Precipitaion 2025"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">temp_ex</span>, main <span class="op">=</span> <span class="st">"Temperature 2025"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">NDVI_ex</span>, main <span class="op">=</span> <span class="st">"NDVI 2025"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">split_dir</span> <span class="op">&lt;-</span> <span class="st">"data/processed/temporal_split"</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">NDVI_ex</span>, main <span class="op">=</span> <span class="st">"NDVI 2025"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Day3_TemporalModelR_files/figure-html/raster-align-1.png" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">split_dir</span> <span class="op">&lt;-</span> <span class="st">"data/processed/temporal_split"</span></span>
 <span><span class="va">aligned_dir</span> <span class="op">&lt;-</span> <span class="st">"data/processed/rasters_aligned"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">aligned_dir</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -228,7 +225,7 @@ to <code>output_dir</code>.</p>
 <p>Keep at most one record per pixel <strong>per year</strong>, so a
 repeated visit to the same place in a later year is preserved as a
 temporally-independent observation.</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">points_dir</span> <span class="op">&lt;-</span> <span class="st">"data/processed/points"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">points_dir</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -248,9 +245,14 @@ temporally-independent observation.</p>
 <span>  output_prefix <span class="op">=</span> <span class="st">"Sambar_annual"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">rare_out</span><span class="op">$</span><span class="va">input_points</span></span>
-<span><span class="va">rare_out</span><span class="op">$</span><span class="va">spatial_points</span></span>
-<span><span class="va">rare_out</span><span class="op">$</span><span class="va">spatiotemporal_points</span></span></code></pre></div>
+<span><span class="va">rare_out</span><span class="op">$</span><span class="va">input_points</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 874</span></span></code></pre>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rare_out</span><span class="op">$</span><span class="va">spatial_points</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 119</span></span></code></pre>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">rare_out</span><span class="op">$</span><span class="va">spatiotemporal_points</span></span></code></pre></div>
+<pre><code><span><span class="co">## [1] 310</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="match-each-observation-to-the-environment-it-experienced">Match each observation to the environment it experienced<a class="anchor" aria-label="anchor" href="#match-each-observation-to-the-environment-it-experienced"></a>
@@ -259,7 +261,7 @@ temporally-independent observation.</p>
 raster directory using <code>variable_patterns</code>: clean names on
 the left, filename patterns with time placeholders (<code>YEAR</code>)
 on the right.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ext_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">points_dir</span>, <span class="st">"extracted"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ext_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/temporally_explicit_extraction.html" class="external-link">temporally_explicit_extraction</a></span><span class="op">(</span></span>
@@ -281,8 +283,20 @@ on the right.</p>
 <span>  save_scaling_params <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ext_out</span><span class="op">$</span><span class="va">raw_values</span><span class="op">)</span></span>
-<span><span class="va">ext_out</span><span class="op">$</span><span class="va">scaling_params</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">ext_out</span><span class="op">$</span><span class="va">raw_values</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   year pixel_id     prec     temp      NDVI         x        y</span></span>
+<span><span class="co">## 1 2025     1698 1636.465 22.73027 0.7164522  99.38985 18.82608</span></span>
+<span><span class="co">## 2 2022     1785 1563.137 28.29210 0.7183695  98.82302 18.68756</span></span>
+<span><span class="co">## 3 2021     3210 1561.478 25.62316 0.7308000 101.57942 17.36530</span></span>
+<span><span class="co">## 4 2025     3574 1649.073 27.18566 0.6480218 100.87285 16.99498</span></span>
+<span><span class="co">## 5 2025     3676 1558.965 25.64610 0.5752261 101.62258 16.97002</span></span>
+<span><span class="co">## 6 2023     3676 1159.333 28.01327 0.6358696 101.63737 16.96117</span></span></code></pre>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">ext_out</span><span class="op">$</span><span class="va">scaling_params</span></span></code></pre></div>
+<pre><code><span><span class="co">##   variable         mean           sd</span></span>
+<span><span class="co">## 1     prec 1529.4162712 357.64084700</span></span>
+<span><span class="co">## 2     temp   27.4036934   2.44654787</span></span>
+<span><span class="co">## 3     NDVI    0.7127118   0.08300761</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="scale-rasters">Scale rasters<a class="anchor" aria-label="anchor" href="#scale-rasters"></a>
@@ -291,7 +305,7 @@ on the right.</p>
 <code>input_dir</code> using the per-variable means and SDs from
 extraction, so the rasters and the points share the same
 transformation.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">scaled_dir</span> <span class="op">&lt;-</span> <span class="st">"data/processed/rasters_scaled"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">scaled_dir</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -311,7 +325,7 @@ transformation.</p>
 <div class="section level3">
 <h3 id="spatiotemporal-partitioning">Spatiotemporal partitioning<a class="anchor" aria-label="anchor" href="#spatiotemporal-partitioning"></a>
 </h3>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">partition</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/spatiotemporal_partition.html" class="external-link">spatiotemporal_partition</a></span><span class="op">(</span></span>
 <span>  reference_shapefile_path <span class="op">=</span> <span class="va">thailand</span>,</span>
@@ -324,15 +338,29 @@ transformation.</p>
 <span>  n_temporal_folds <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  max_imbalance <span class="op">=</span> <span class="fl">0.15</span>,</span>
 <span>  create_plot <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">partition</span><span class="op">$</span><span class="va">summary</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="Day3_TemporalModelR_files/figure-html/partition-1.png" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">partition</span><span class="op">$</span><span class="va">summary</span></span></code></pre></div>
+<pre><code><span><span class="co">##                        parameter          value</span></span>
+<span><span class="co">## 1                    total_folds              4</span></span>
+<span><span class="co">## 2                n_spatial_folds              2</span></span>
+<span><span class="co">## 3               n_temporal_folds              2</span></span>
+<span><span class="co">## 4               n_balanced_folds              0</span></span>
+<span><span class="co">## 5                 n_random_folds              0</span></span>
+<span><span class="co">## 6                 partition_mode spatiotemporal</span></span>
+<span><span class="co">## 7                   total_points            310</span></span>
+<span><span class="co">## 8                 points_removed              0</span></span>
+<span><span class="co">## 9               pct_rows_removed              0</span></span>
+<span><span class="co">## 10           final_imbalance_pct           0.65</span></span>
+<span><span class="co">## 11 temporal_partitioning_enabled           TRUE</span></span></code></pre>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="generate-pseudoabsences">Generate pseudoabsences<a class="anchor" aria-label="anchor" href="#generate-pseudoabsences"></a>
 </h3>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">absences</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/generate_absences.html" class="external-link">generate_absences</a></span><span class="op">(</span></span>
 <span>  partition_result <span class="op">=</span> <span class="va">partition</span>,</span>
 <span>  reference_shapefile_path <span class="op">=</span> <span class="va">thailand</span>,</span>
@@ -350,9 +378,15 @@ transformation.</p>
 <span>  create_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  plot_by_fold <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">absences</span><span class="op">$</span><span class="va">summary</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
+<p><img src="Day3_TemporalModelR_files/figure-html/absences-1.png" width="700" style="display: block; margin: auto;"><img src="Day3_TemporalModelR_files/figure-html/absences-2.png" width="700" style="display: block; margin: auto;"><img src="Day3_TemporalModelR_files/figure-html/absences-3.png" width="700" style="display: block; margin: auto;"><img src="Day3_TemporalModelR_files/figure-html/absences-4.png" width="700" style="display: block; margin: auto;"><img src="Day3_TemporalModelR_files/figure-html/absences-5.png" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">absences</span><span class="op">$</span><span class="va">summary</span></span></code></pre></div>
+<pre><code><span><span class="co">##   fold n_presences n_pseudoabsences ratio_achieved</span></span>
+<span><span class="co">## 1    1          78              156              2</span></span>
+<span><span class="co">## 2    2          78              156              2</span></span>
+<span><span class="co">## 3    3          77              154              2</span></span>
+<span><span class="co">## 4    4          77              154              2</span></span></code></pre>
 </div>
 </div>
 <div class="section level2">
@@ -361,7 +395,7 @@ transformation.</p>
 <div class="section level3">
 <h3 id="glm-with-a-quadratic-term-on-temperature">GLM (with a quadratic term on temperature)<a class="anchor" aria-label="anchor" href="#glm-with-a-quadratic-term-on-temperature"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glm_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_glm.html" class="external-link">build_temporal_glm</a></span><span class="op">(</span></span>
 <span>  partition_result <span class="op">=</span> <span class="va">partition</span>,</span>
 <span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>,</span>
@@ -376,11 +410,21 @@ transformation.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">glm_res</span><span class="op">$</span><span class="va">fold_test_metrics</span></span></code></pre></div>
+<pre><code><span><span class="co">##   Fold Threshold Testing_TP Testing_FN Testing_TN Testing_FP Sensitivity</span></span>
+<span><span class="co">## 1    1      0.44         46         32         95         60      0.5897</span></span>
+<span><span class="co">## 2    2      0.44         67         11        127         29      0.8590</span></span>
+<span><span class="co">## 3    3      0.42         44         33        121         33      0.5714</span></span>
+<span><span class="co">## 4    4      0.35         60         17         87         67      0.7792</span></span>
+<span><span class="co">##   Specificity    TSS  Kappa    AUC</span></span>
+<span><span class="co">## 1      0.6129 0.2026 0.1861 0.6087</span></span>
+<span><span class="co">## 2      0.8141 0.6731 0.6364 0.9087</span></span>
+<span><span class="co">## 3      0.7857 0.3571 0.3571 0.7940</span></span>
+<span><span class="co">## 4      0.5649 0.3442 0.2961 0.7400</span></span></code></pre>
 </div>
 <div class="section level3">
 <h3 id="random-forest">Random forest<a class="anchor" aria-label="anchor" href="#random-forest"></a>
 </h3>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rf_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_rf.html" class="external-link">build_temporal_rf</a></span><span class="op">(</span></span>
 <span>  partition_result <span class="op">=</span> <span class="va">partition</span>,</span>
 <span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>,</span>
@@ -394,12 +438,22 @@ transformation.</p>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rf_res</span><span class="op">$</span><span class="va">fold_test_metrics</span></span></code></pre></div>
+<pre><code><span><span class="co">##   Fold Threshold Testing_TP Testing_FN Testing_TN Testing_FP Sensitivity</span></span>
+<span><span class="co">## 1    1      0.37         44         34         90         65      0.5641</span></span>
+<span><span class="co">## 2    2      0.36         74          4        118         38      0.9487</span></span>
+<span><span class="co">## 3    3      0.40         45         32        123         31      0.5844</span></span>
+<span><span class="co">## 4    4      0.41         46         31        116         38      0.5974</span></span>
+<span><span class="co">##   Specificity    TSS  Kappa    AUC</span></span>
+<span><span class="co">## 1      0.5806 0.1447 0.1317 0.6410</span></span>
+<span><span class="co">## 2      0.7564 0.7051 0.6358 0.9163</span></span>
+<span><span class="co">## 3      0.7987 0.3831 0.3844 0.7822</span></span>
+<span><span class="co">## 4      0.7532 0.3506 0.3429 0.7422</span></span></code></pre>
 </div>
 </div>
 <div class="section level2">
 <h2 id="step-3-project-predictions-through-time">Step 3 — Project predictions through time<a class="anchor" aria-label="anchor" href="#step-3-project-predictions-through-time"></a>
 </h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">time_steps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2010</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">glm_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html" class="external-link">generate_spatiotemporal_predictions</a></span><span class="op">(</span></span>
@@ -430,7 +484,7 @@ transformation.</p>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p>Quick look at three years for the RF model:</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sample_years</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2000</span>, <span class="fl">2010</span>, <span class="fl">2015</span>, <span class="fl">2020</span>, <span class="fl">2025</span><span class="op">)</span></span>
 <span><span class="va">rf_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.files.html" class="external-link">list.files</a></span><span class="op">(</span><span class="st">"outputs/rf_predictions"</span>,</span>
 <span>                       pattern <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="st">"Prediction_.*("</span>,</span>
@@ -445,8 +499,10 @@ transformation.</p>
 <span>  <span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rf_stack</span><span class="op">[[</span><span class="va">i</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>       main <span class="op">=</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">rf_stack</span><span class="op">)</span><span class="op">[</span><span class="va">i</span><span class="op">]</span><span class="op">)</span></span>
 <span>  <span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">thailand</span><span class="op">)</span>, add <span class="op">=</span> <span class="cn">TRUE</span>, border <span class="op">=</span> <span class="st">"grey20"</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">}</span></span></code></pre></div>
+<p><img src="Day3_TemporalModelR_files/figure-html/plot-years-1.png" width="900" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="step-4-postprocessing">Step 4 — Postprocessing<a class="anchor" aria-label="anchor" href="#step-4-postprocessing"></a>
@@ -457,7 +513,7 @@ transformation.</p>
 <p><code><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs()</a></code> reads the per-time-step
 vote-count rasters from the prediction directory and applies a consensus
 threshold.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
 <span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/rf_predictions"</span>,</span>
 <span>  output_dir <span class="op">=</span> <span class="st">"outputs/rf_consensus"</span>,</span>
@@ -466,6 +522,7 @@ threshold.</p>
 <span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Proportion of time steps each pixel was suitable (RF)"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Day3_TemporalModelR_files/figure-html/consensus-1.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="pixel-level-temporal-trajectories-changepoint-analysis">Pixel-level temporal trajectories (changepoint analysis)<a class="anchor" aria-label="anchor" href="#pixel-level-temporal-trajectories-changepoint-analysis"></a>
@@ -473,7 +530,7 @@ threshold.</p>
 <p><code><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns()</a></code> runs <code>fastcpd</code>
 per pixel and classifies trajectories as never-suitable,
 always-suitable, no-pattern, increasing, decreasing, or fluctuating.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">patterns_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
 <span>  binary_stack <span class="op">=</span> <span class="va">consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
 <span>  summary_raster <span class="op">=</span> <span class="va">consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
@@ -482,16 +539,19 @@ always-suitable, no-pattern, increasing, decreasing, or fluctuating.</p>
 <span>  spatial_autocorrelation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  estimate_time <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">patterns_out</span><span class="op">$</span><span class="va">pattern</span>,</span>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   |                                                          |                                                  |   0%  |                                                          |                                                  |   1%  |                                                          |=                                                 |   1%  |                                                          |=                                                 |   2%  |                                                          |=                                                 |   3%  |                                                          |==                                                |   3%  |                                                          |==                                                |   4%  |                                                          |==                                                |   5%  |                                                          |===                                               |   5%  |                                                          |===                                               |   6%  |                                                          |===                                               |   7%  |                                                          |====                                              |   7%  |                                                          |====                                              |   8%  |                                                          |====                                              |   9%  |                                                          |=====                                             |   9%  |                                                          |=====                                             |  10%  |                                                          |=====                                             |  11%  |                                                          |======                                            |  11%  |                                                          |======                                            |  12%  |                                                          |======                                            |  13%  |                                                          |=======                                           |  13%  |                                                          |=======                                           |  14%  |                                                          |=======                                           |  15%  |                                                          |========                                          |  15%  |                                                          |========                                          |  16%  |                                                          |========                                          |  17%  |                                                          |=========                                         |  17%  |                                                          |=========                                         |  18%  |                                                          |=========                                         |  19%  |                                                          |==========                                        |  19%  |                                                          |==========                                        |  20%  |                                                          |==========                                        |  21%  |                                                          |===========                                       |  21%  |                                                          |===========                                       |  22%  |                                                          |===========                                       |  23%  |                                                          |============                                      |  23%  |                                                          |============                                      |  24%  |                                                          |============                                      |  25%  |                                                          |=============                                     |  25%  |                                                          |=============                                     |  26%  |                                                          |=============                                     |  27%  |                                                          |==============                                    |  27%  |                                                          |==============                                    |  28%  |                                                          |==============                                    |  29%  |                                                          |===============                                   |  29%  |                                                          |===============                                   |  30%  |                                                          |===============                                   |  31%  |                                                          |================                                  |  31%  |                                                          |================                                  |  32%  |                                                          |================                                  |  33%  |                                                          |=================                                 |  33%  |                                                          |=================                                 |  34%  |                                                          |=================                                 |  35%  |                                                          |==================                                |  35%  |                                                          |==================                                |  36%  |                                                          |==================                                |  37%  |                                                          |===================                               |  37%  |                                                          |===================                               |  38%  |                                                          |===================                               |  39%  |                                                          |====================                              |  39%  |                                                          |====================                              |  40%  |                                                          |====================                              |  41%  |                                                          |=====================                             |  41%  |                                                          |=====================                             |  42%  |                                                          |=====================                             |  43%  |                                                          |======================                            |  43%  |                                                          |======================                            |  44%  |                                                          |======================                            |  45%  |                                                          |=======================                           |  45%  |                                                          |=======================                           |  46%  |                                                          |=======================                           |  47%  |                                                          |========================                          |  47%  |                                                          |========================                          |  48%  |                                                          |========================                          |  49%  |                                                          |=========================                         |  49%  |                                                          |=========================                         |  50%  |                                                          |=========================                         |  51%  |                                                          |==========================                        |  51%  |                                                          |==========================                        |  52%  |                                                          |==========================                        |  53%  |                                                          |===========================                       |  53%  |                                                          |===========================                       |  54%  |                                                          |===========================                       |  55%  |                                                          |============================                      |  55%  |                                                          |============================                      |  56%  |                                                          |============================                      |  57%  |                                                          |=============================                     |  57%  |                                                          |=============================                     |  58%  |                                                          |=============================                     |  59%  |                                                          |==============================                    |  59%  |                                                          |==============================                    |  60%  |                                                          |==============================                    |  61%  |                                                          |===============================                   |  61%  |                                                          |===============================                   |  62%  |                                                          |===============================                   |  63%  |                                                          |================================                  |  63%  |                                                          |================================                  |  64%  |                                                          |================================                  |  65%  |                                                          |=================================                 |  65%  |                                                          |=================================                 |  66%  |                                                          |=================================                 |  67%  |                                                          |==================================                |  67%  |                                                          |==================================                |  68%  |                                                          |==================================                |  69%  |                                                          |===================================               |  69%  |                                                          |===================================               |  70%  |                                                          |===================================               |  71%  |                                                          |====================================              |  71%  |                                                          |====================================              |  72%  |                                                          |====================================              |  73%  |                                                          |=====================================             |  73%  |                                                          |=====================================             |  74%  |                                                          |=====================================             |  75%  |                                                          |======================================            |  75%  |                                                          |======================================            |  76%  |                                                          |======================================            |  77%  |                                                          |=======================================           |  77%  |                                                          |=======================================           |  78%  |                                                          |=======================================           |  79%  |                                                          |========================================          |  79%  |                                                          |========================================          |  80%  |                                                          |========================================          |  81%  |                                                          |=========================================         |  81%  |                                                          |=========================================         |  82%  |                                                          |=========================================         |  83%  |                                                          |==========================================        |  83%  |                                                          |==========================================        |  84%  |                                                          |==========================================        |  85%  |                                                          |===========================================       |  85%  |                                                          |===========================================       |  86%  |                                                          |===========================================       |  87%  |                                                          |============================================      |  87%  |                                                          |============================================      |  88%  |                                                          |============================================      |  89%  |                                                          |=============================================     |  89%  |                                                          |=============================================     |  90%  |                                                          |=============================================     |  91%  |                                                          |==============================================    |  91%  |                                                          |==============================================    |  92%  |                                                          |==============================================    |  93%  |                                                          |===============================================   |  93%  |                                                          |===============================================   |  94%  |                                                          |===============================================   |  95%  |                                                          |================================================  |  95%  |                                                          |================================================  |  96%  |                                                          |================================================  |  97%  |                                                          |================================================= |  97%  |                                                          |================================================= |  98%  |                                                          |================================================= |  99%  |                                                          |==================================================|  99%  |                                                          |==================================================| 100%</span></span></code></pre>
+<p><img src="Day3_TemporalModelR_files/figure-html/changepoints-1.png" width="700" style="display: block; margin: auto;"><img src="Day3_TemporalModelR_files/figure-html/changepoints-2.png" width="700" style="display: block; margin: auto;"><img src="Day3_TemporalModelR_files/figure-html/changepoints-3.png" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">patterns_out</span><span class="op">$</span><span class="va">pattern</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Temporal trajectory class per pixel"</span>,</span>
 <span>     type <span class="op">=</span> <span class="st">"classes"</span><span class="op">)</span></span></code></pre></div>
+<p><img src="Day3_TemporalModelR_files/figure-html/changepoints-4.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level3">
 <h3 id="aggregate-by-spatial-unit-thailand-provinces">Aggregate by spatial unit (Thailand provinces)<a class="anchor" aria-label="anchor" href="#aggregate-by-spatial-unit-thailand-provinces"></a>
 </h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">provinces</span> <span class="op">&lt;-</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/geodata/reference/gadm.html" class="external-link">gadm</a></span><span class="op">(</span>country <span class="op">=</span> <span class="st">"THA"</span>, level <span class="op">=</span> <span class="fl">1</span>, path <span class="op">=</span> <span class="st">"data/raw"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></span>
 <span></span>
@@ -506,12 +566,56 @@ always-suitable, no-pattern, increasing, decreasing, or fluctuating.</p>
 <span>  output_dir <span class="op">=</span> <span class="st">"outputs/rf_regional"</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  create_plot <span class="op">=</span> <span class="cn">TRUE</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">regional</span><span class="op">$</span><span class="va">overall_summary</span><span class="op">)</span></span>
-<span><span class="va">regional</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="va">time_series</span></span>
-<span><span class="va">regional</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="va">annual_change</span></span>
-<span><span class="va">regional</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="va">total_change_by_unit</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##   |                                                          |                                                  |   0%  |                                                          |===                                               |   6%  |                                                          |======                                            |  12%  |                                                          |=========                                         |  19%  |                                                          |============                                      |  25%  |                                                          |================                                  |  31%  |                                                          |===================                               |  38%  |                                                          |======================                            |  44%  |                                                          |=========================                         |  50%  |                                                          |============================                      |  56%  |                                                          |===============================                   |  62%  |                                                          |==================================                |  69%  |                                                          |======================================            |  75%  |                                                          |=========================================         |  81%  |                                                          |============================================      |  88%  |                                                          |===============================================   |  94%  |                                                          |==================================================| 100%</span></span></code></pre>
+<pre><code><span><span class="co">##   |                                                          |                                                  |   0%  |                                                          |===                                               |   6%  |                                                          |======                                            |  12%  |                                                          |=========                                         |  19%  |                                                          |============                                      |  25%  |                                                          |================                                  |  31%  |                                                          |===================                               |  38%  |                                                          |======================                            |  44%  |                                                          |=========================                         |  50%  |                                                          |============================                      |  56%  |                                                          |===============================                   |  62%  |                                                          |==================================                |  69%  |                                                          |======================================            |  75%  |                                                          |=========================================         |  81%  |                                                          |============================================      |  88%  |                                                          |===============================================   |  94%  |                                                          |==================================================| 100%</span></span></code></pre>
+<p><img src="Day3_TemporalModelR_files/figure-html/provinces-1.png" width="700" style="display: block; margin: auto;"><img src="Day3_TemporalModelR_files/figure-html/provinces-2.png" width="700" style="display: block; margin: auto;"><img src="Day3_TemporalModelR_files/figure-html/provinces-3.png" width="700" style="display: block; margin: auto;"><img src="Day3_TemporalModelR_files/figure-html/provinces-4.png" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">regional</span><span class="op">$</span><span class="va">overall_summary</span><span class="op">)</span></span></code></pre></div>
+<pre><code><span><span class="co">##         Spatial_Unit Always_Absent Always_Present No_Pattern Increasing</span></span>
+<span><span class="co">## 1      Amnat Charoen            37              0         15          0</span></span>
+<span><span class="co">## 2          Ang Thong            11              0          6          0</span></span>
+<span><span class="co">## 3 Bangkok Metropolis            12              0         20          0</span></span>
+<span><span class="co">## 4          Bueng Kan             1              0         54          0</span></span>
+<span><span class="co">## 5           Buri Ram            96              8         37          0</span></span>
+<span><span class="co">## 6       Chachoengsao            24             10         43          2</span></span>
+<span><span class="co">##   Decreasing Fluctuating Failed Total_Pixels Pct_Always_Absent</span></span>
+<span><span class="co">## 1          0           0      0           52             71.15</span></span>
+<span><span class="co">## 2          0           0      0           17             64.71</span></span>
+<span><span class="co">## 3          0           0      0           32             37.50</span></span>
+<span><span class="co">## 4          1           0      0           56              1.79</span></span>
+<span><span class="co">## 5          0           0      0          141             68.09</span></span>
+<span><span class="co">## 6          0           0      0           79             30.38</span></span>
+<span><span class="co">##   Pct_Always_Present Pct_No_Pattern Pct_Increasing Pct_Decreasing</span></span>
+<span><span class="co">## 1               0.00          28.85           0.00           0.00</span></span>
+<span><span class="co">## 2               0.00          35.29           0.00           0.00</span></span>
+<span><span class="co">## 3               0.00          62.50           0.00           0.00</span></span>
+<span><span class="co">## 4               0.00          96.43           0.00           1.79</span></span>
+<span><span class="co">## 5               5.67          26.24           0.00           0.00</span></span>
+<span><span class="co">## 6              12.66          54.43           2.53           0.00</span></span>
+<span><span class="co">##   Pct_Fluctuating Prop_Increasing Prop_Stable_Suitable Prop_Decreasing</span></span>
+<span><span class="co">## 1               0            0.00                 0.00            0.00</span></span>
+<span><span class="co">## 2               0            0.00                 0.00            0.00</span></span>
+<span><span class="co">## 3               0            0.00                 0.00            0.00</span></span>
+<span><span class="co">## 4               0            0.00                 0.00            1.79</span></span>
+<span><span class="co">## 5               0            0.00                17.78            0.00</span></span>
+<span><span class="co">## 6               0            3.64                18.18            0.00</span></span>
+<span><span class="co">##   Prop_Stable_Unsuitable</span></span>
+<span><span class="co">## 1                  71.15</span></span>
+<span><span class="co">## 2                  64.71</span></span>
+<span><span class="co">## 3                  37.50</span></span>
+<span><span class="co">## 4                   1.79</span></span>
+<span><span class="co">## 5                  72.18</span></span>
+<span><span class="co">## 6                  34.78</span></span></code></pre>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">regional</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="va">time_series</span></span></code></pre></div>
+<p><img src="Day3_TemporalModelR_files/figure-html/provinces-5.png" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">regional</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="va">annual_change</span></span></code></pre></div>
+<p><img src="Day3_TemporalModelR_files/figure-html/provinces-6.png" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">regional</span><span class="op">$</span><span class="va">plots</span><span class="op">$</span><span class="va">total_change_by_unit</span></span></code></pre></div>
+<p><img src="Day3_TemporalModelR_files/figure-html/provinces-7.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 </div>
 <div class="section level2">

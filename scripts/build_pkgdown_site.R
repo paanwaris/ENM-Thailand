@@ -18,16 +18,15 @@ needed  <- c("pkgdown", "knitr", "rmarkdown")
 missing <- needed[!needed %in% rownames(installed.packages())]
 if (length(missing)) install.packages(missing, dependencies = TRUE)
 
-notebook_rmds <- file.path(
-  "notebooks",
+rmds <- file.path(
   c("Day1_nicheR.Rmd",
     "Day2a_Data_Download.Rmd",
     "Day2b_Bean_Processing.Rmd",
     "Day3_TemporalModelR.Rmd")
 )
-missing_rmds <- notebook_rmds[!file.exists(notebook_rmds)]
+missing_rmds <- rmds[!file.exists(rmds)]
 if (length(missing_rmds)) {
-  stop("Missing canonical Rmds in notebooks/: ",
+  stop("Missing canonical Rmds /: ",
        paste(missing_rmds, collapse = ", "))
 }
 

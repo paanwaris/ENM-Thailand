@@ -23,24 +23,6 @@ knitr::opts_chunk$set(
   fig.height = 5,
   dpi       = 100
 )
-
-# This Rmd lives in notebooks/, but every path inside it is written relative
-# to the repository root. Set the knit working directory to the project root
-# so the file knits cleanly whether you click "Knit" in RStudio, render it
-# from R, or build the pkgdown site.
-if (requireNamespace("rprojroot", quietly = TRUE)) {
-  knitr::opts_knit$set(
-    root.dir = rprojroot::find_root(rprojroot::has_file("DESCRIPTION"))
-  )
-} else {
-  knitr::opts_knit$set(root.dir = normalizePath(".."))
-}
-
-# Day 2a is the data-fetching notebook itself. When you build the public
-# pkgdown site we don't actually want to re-hit GADM / WorldClim / GBIF; we
-# just want the code visible. Detect that mode and skip evaluation.
-.fetch_live <- !nzchar(Sys.getenv("PKGDOWN_BUILD"))
-knitr::opts_chunk$set(eval = .fetch_live)
 ```
 
 ```{r data-status, echo = FALSE, results = "asis", eval = TRUE}
@@ -222,6 +204,8 @@ nrow(raw)
 ## Clean and write the analysis-ready table
 
 ```{r gbif-clean, eval = .have_gbif_creds}
+sambar <- read_csv(file.path(gbif_dir, "sambar_gbif.csv"))
+
 sambar <- raw %>%
   select(species,
          decimalLongitude, decimalLatitude,

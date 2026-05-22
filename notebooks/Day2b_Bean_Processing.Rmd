@@ -23,25 +23,6 @@ knitr::opts_chunk$set(
   fig.height = 5,
   dpi       = 100
 )
-
-# This Rmd lives in notebooks/, but every path inside it is written relative
-# to the repository root. Set the knit working directory to the project root
-# so the file knits cleanly whether you click "Knit" in RStudio, render it
-# from R, or build the pkgdown site.
-if (requireNamespace("rprojroot", quietly = TRUE)) {
-  knitr::opts_knit$set(
-    root.dir = rprojroot::find_root(rprojroot::has_file("DESCRIPTION"))
-  )
-} else {
-  knitr::opts_knit$set(root.dir = normalizePath(".."))
-}
-
-# --- Data-presence guard ----------------------------------------------------
-# See Day1_nicheR.Rmd for context. If the cleaned Sambar CSV isn't on disk,
-# we skip evaluation so the site still builds.
-.workshop_data_ok <- file.exists("data/processed/gbif/sambar_thailand.csv") &&
-  file.exists("data/processed/bioclim/bioclim_thailand.tif")
-knitr::opts_chunk$set(eval = .workshop_data_ok)
 ```
 
 # Overview
