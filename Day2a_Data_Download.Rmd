@@ -25,6 +25,25 @@ knitr::opts_chunk$set(
   fig.height = 5,
   dpi       = 100
 )
+
+# Day 2a is the data-fetching notebook itself. When you build the public
+# pkgdown site we don't actually want to re-hit GADM / WorldClim / GBIF; we
+# just want the code visible. Detect that mode and skip evaluation.
+.fetch_live <- !nzchar(Sys.getenv("PKGDOWN_BUILD"))
+knitr::opts_chunk$set(eval = .fetch_live)
+```
+
+```{r data-status, echo = FALSE, results = "asis", eval = TRUE}
+if (!.fetch_live) {
+  cat(
+    '<div class="alert alert-info" style="padding:1em;border-left:4px solid #1B6E3F;background:#E8F5E9;">',
+    '<strong>Build mode:</strong> the live download chunks are <em>shown but ',
+    'not executed</em> on the published website. Knit this file locally with ',
+    'your GBIF credentials in <code>.Renviron</code> to actually populate ',
+    '<code>data/processed/</code>.',
+    '</div>\n\n'
+  )
+}
 ```
 
 # Overview
@@ -139,9 +158,16 @@ options(
   gbif_email = Sys.getenv("GBIF_EMAIL", unset = "[YOUR_EMAIL]"),
   gbif_pwd   = Sys.getenv("GBIF_PWD",   unset = "[YOUR_GBIF_PASSWORD]")
 )
+
+# If no real credentials are present (e.g. fresh clone, GitHub Actions),
+# skip the GBIF download chunks so the document still builds. The code is
+# still displayed.
+.have_gbif_creds <- nzchar(Sys.getenv("GBIF_USER")) &&
+                    nzchar(Sys.getenv("GBIF_EMAIL")) &&
+                    nzchar(Sys.getenv("GBIF_PWD"))
 ```
 
-```{r gbif-download}
+```{r gbif-download, eval = .have_gbif_creds}
 key <- name_backbone(name = "Rusa unicolor")$usageKey
 
 allowed_basis <- c("HUMAN_OBSERVATION", "OCCURRENCE", "OBSERVATION")
@@ -169,7 +195,7 @@ nrow(raw)
 
 ## Clean and write the analysis-ready table
 
-```{r gbif-clean}
+```{r gbif-clean, eval = .have_gbif_creds}
 sambar <- raw %>%
   select(species,
          decimalLongitude, decimalLatitude,
