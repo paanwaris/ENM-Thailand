@@ -23,6 +23,27 @@ knitr::opts_chunk$set(
   fig.height = 5,
   dpi       = 100
 )
+
+# --- Data-presence guard ----------------------------------------------------
+# The workshop data is too large to ship with the repo. If it isn't on disk
+# (fresh clone, CI build, etc.) we show the code without running it so the
+# site still builds cleanly. Knit Day2a_Data_Download.Rmd once locally to get
+# live outputs.
+.workshop_data_ok <- file.exists("data/processed/bioclim_thailand.tif")
+knitr::opts_chunk$set(eval = .workshop_data_ok)
+```
+
+```{r data-status, echo = FALSE, results = "asis", eval = TRUE}
+if (!.workshop_data_ok) {
+  cat(
+    '<div class="alert alert-warning" style="padding:1em;border-left:4px solid #F2B705;background:#FFF8E1;">',
+    '<strong>Heads up:</strong> the workshop data is not on this build machine, ',
+    'so the chunks below are shown as <em>code only</em> (no outputs). To see ',
+    'live results, knit <code>Day2a_Data_Download.Rmd</code> locally first so ',
+    '<code>data/processed/</code> exists.',
+    '</div>\n\n'
+  )
+}
 ```
 
 # Overview
