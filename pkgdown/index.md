@@ -33,6 +33,8 @@ The full rendered workshop is published as four articles on the pkgdown site. Ea
 | 2b | [Environmental thinning with bean](https://paanwaris.github.io/ENM-Thailand/articles/Day2b_Bean_Processing.html) | [`Day2b_Bean_Processing.Rmd`](Day2b_Bean_Processing.Rmd) | [**bean**](https://github.com/paanwaris/bean) | Reduce **environmental sampling bias** in real Sambar occurrence data by thinning points that cluster in E-space, fit an ellipsoid niche, and project suitability back to G-space. |
 | 3 | [Temporally-explicit SDMs with TemporalModelR](https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html) | [`Day3_TemporalModelR.Rmd`](Day3_TemporalModelR.Rmd) | [**TemporalModelR**](https://github.com/CJHughes926/TemporalModelR) | Build a **temporally explicit SDM** by pairing each occurrence with the environment it experienced at the time of observation. Uses local annual LST, precipitation, and NDVI rasters (2010–2025) provided in `temporal_rasters/`. |
 
+> **Where the source lives:** all four workshop notebooks live in [`notebooks/`](notebooks/). They are written so paths resolve from the project root, so you can knit each Rmd directly with the RStudio **Knit** button (no `setwd()` needed).
+
 **Suggested order:** knit **Day 2a** first to populate `data/processed/` (one-time, ~15 min). After that, Day 1, Day 2b, and Day 3 are independent and can be knit in any order.
 
 ---
