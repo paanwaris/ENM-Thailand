@@ -46,19 +46,6 @@ if (requireNamespace("rprojroot", quietly = TRUE)) {
 knitr::opts_chunk$set(eval = .workshop_data_ok)
 ```
 
-```{r data-status, echo = FALSE, results = "asis", eval = TRUE}
-if (!.workshop_data_ok) {
-  cat(
-    '<div class="alert alert-warning" style="padding:1em;border-left:4px solid #F2B705;background:#FFF8E1;">',
-    '<strong>Heads up:</strong> the workshop data is not on this build machine, ',
-    'so the chunks below are shown as <em>code only</em> (no outputs). To see ',
-    'live results, knit <code>Day2a_Data_Download.Rmd</code> locally first so ',
-    '<code>data/processed/</code> exists.',
-    '</div>\n\n'
-  )
-}
-```
-
 # Overview
 
 > **Workshop navigation —** part 3 of 4 in the [ENM-Thailand 2026 workshop](https://paanwaris.github.io/ENM-Thailand/).
