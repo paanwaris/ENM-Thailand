@@ -11,8 +11,6 @@ output:
     code_folding: show
     theme: cosmo
     df_print: paged
-editor_options:
-  chunk_output_type: console
 ---
 
 ```{r setup, include = FALSE}
