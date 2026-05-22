@@ -71,9 +71,37 @@
 
     
     
+<div class="alert alert-warning" style="padding:1em;border-left:4px solid #F2B705;background:#FFF8E1;">
+<strong>Heads up:</strong> the workshop data is not on this build
+machine, so the chunks below are shown as <em>code only</em> (no
+outputs). To see live results, knit <code>Day2a_Data_Download.Rmd</code>
+locally first so <code>data/processed/</code> exists.
+</div>
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
+<blockquote>
+<p><strong>Workshop navigation —</strong> part 3 of 4 in the <a href="https://paanwaris.github.io/ENM-Thailand/">ENM-Thailand 2026
+workshop</a>.</p>
+<ul>
+<li>
+<a href="https://paanwaris.github.io/ENM-Thailand/articles/Day1_nicheR.html">Day
+1 — Virtual species with nicheR.</a> Build an ellipsoid niche by hand
+and project it.</li>
+<li>
+<a href="https://paanwaris.github.io/ENM-Thailand/articles/Day2a_Data_Download.html">Day
+2a — Downloading the workshop data.</a> Fetch Thailand, WorldClim and
+GBIF Sambar records.</li>
+<li>
+<strong>Day 2b (this page) — Environmental thinning with
+bean.</strong> Reduce E-space sampling bias before fitting a real
+niche.</li>
+<li>
+<a href="https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html">Day
+3 — Temporally-explicit SDMs with TemporalModelR.</a> Pair each
+occurrence with the environment it experienced.</li>
+</ul>
+</blockquote>
 <p><code>bean</code> reduces sampling bias by thinning occurrence points
 that are <strong>clustered in environmental space (E-space)</strong>
 instead of in geographic space. The intuition: most field campaigns
@@ -127,26 +155,17 @@ back to G-space.</li>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">2026</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">bioclim</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="st">"data/processed/bioclim_thailand.tif"</span><span class="op">)</span></span>
-<span><span class="va">thailand</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="st">"data/processed/thailand_boundary.gpkg"</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">bioclim</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="st">"data/processed/bioclim/bioclim_thailand.tif"</span><span class="op">)</span></span>
+<span><span class="va">thailand</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="st">"data/processed/boundary/thailand_boundary.gpkg"</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">sambar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="st">"data/processed/sambar_thailand.csv"</span>,</span>
+<span><span class="va">sambar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="st">"data/processed/gbif/sambar_thailand.csv"</span>,</span>
 <span>                   show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">sambar</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">##   species      decimalLongitude decimalLatitude  year month basisOfRecord gbifID</span></span>
-<span><span class="co">##   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">1</span> Rusa unicol…             101.            14.4  <span style="text-decoration: underline;">2</span>026     1 HUMAN_OBSERV… 6.13<span style="color: #949494;">e</span>9</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">2</span> Rusa unicol…             101.            14.4  <span style="text-decoration: underline;">2</span>026     1 HUMAN_OBSERV… 6.13<span style="color: #949494;">e</span>9</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">3</span> Rusa unicol…             101.            14.5  <span style="text-decoration: underline;">2</span>026     1 HUMAN_OBSERV… 6.13<span style="color: #949494;">e</span>9</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">4</span> Rusa unicol…             101.            14.4  <span style="text-decoration: underline;">2</span>026     1 HUMAN_OBSERV… 6.13<span style="color: #949494;">e</span>9</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">5</span> Rusa unicol…             101.            14.5  <span style="text-decoration: underline;">2</span>026     1 HUMAN_OBSERV… 6.13<span style="color: #949494;">e</span>9</span></span>
-<span><span class="co">## <span style="color: #BCBCBC;">6</span> Rusa unicol…             101.            14.5  <span style="text-decoration: underline;">2</span>026     1 HUMAN_OBSERV… 6.13<span style="color: #949494;">e</span>9</span></span></code></pre>
 <p>For a clean ellipsoid we use two informative bioclim variables. These
 also map well onto Sambar deer habitat (warm, wet evergreen and mixed
 forests).</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">env</span> <span class="op">&lt;-</span> <span class="va">bioclim</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span><span class="op">]</span><span class="op">]</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">env</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -156,7 +175,7 @@ forests).</p>
 <p><code><a href="https://paanwaris.github.io/bean/reference/prepare_bean.html" class="external-link">prepare_bean()</a></code> drops rows with missing coordinates,
 extracts environmental values at each occurrence, and returns a tidy
 data frame ready for thinning.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sambar_xy</span> <span class="op">&lt;-</span> <span class="va">sambar</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span>longitude <span class="op">=</span> <span class="va">decimalLongitude</span>,</span>
 <span>                latitude  <span class="op">=</span> <span class="va">decimalLatitude</span><span class="op">)</span></span>
@@ -168,11 +187,10 @@ data frame ready for thinning.</p>
 <span>                        transform   <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">prepped</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 1031</span></span></code></pre>
 <p>Look at the raw points in G-space and in E-space side by side. Notice
 the clustering in E-space — that’s the bias <code>bean</code> will
 reduce.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">thailand</span><span class="op">)</span>, border <span class="op">=</span> <span class="st">"grey20"</span>, main <span class="op">=</span> <span class="st">"G-space"</span><span class="op">)</span></span>
@@ -182,10 +200,9 @@ reduce.</p>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">prepped</span><span class="op">$</span><span class="va">bio1</span>, <span class="va">prepped</span><span class="op">$</span><span class="va">bio12</span>,</span>
 <span>     xlab <span class="op">=</span> <span class="st">"BIO1 — annual mean T (°C)"</span>, ylab <span class="op">=</span> <span class="st">"BIO12 — annual precip. (mm)"</span>,</span>
 <span>     pch <span class="op">=</span> <span class="fl">19</span>, col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/adjustcolor.html" class="external-link">adjustcolor</a></span><span class="op">(</span><span class="st">"tomato"</span>, alpha.f <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span>,</span>
-<span>     main <span class="op">=</span> <span class="st">"E-space"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2b_Bean_Processing_files/figure-html/raw-bias-1.png" width="900" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span>     main <span class="op">=</span> <span class="st">"E-space"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="step-2-choose-an-objective-environmental-resolution">Step 2 — Choose an objective environmental resolution<a class="anchor" aria-label="anchor" href="#step-2-choose-an-objective-environmental-resolution"></a>
@@ -194,25 +211,21 @@ reduce.</p>
 resolutions, looks at the average nearest-neighbour distance among
 points after thinning, and identifies the “elbow” where dense artificial
 clustering ends.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">res_search</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paanwaris.github.io/bean/reference/find_env_resolution.html" class="external-link">find_env_resolution</a></span><span class="op">(</span>data     <span class="op">=</span> <span class="va">prepped</span>,</span>
-<span>                                  env_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## Calculating nearest neighbor environmental distances and detecting elbows...</span></span></code></pre>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_search</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2b_Bean_Processing_files/figure-html/find-res-1.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">chosen_res</span> <span class="op">&lt;-</span> <span class="va">res_search</span><span class="op">$</span><span class="va">suggested_resolution</span></span>
+<span>                                  env_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">res_search</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">chosen_res</span> <span class="op">&lt;-</span> <span class="va">res_search</span><span class="op">$</span><span class="va">suggested_resolution</span></span>
 <span><span class="va">chosen_res</span></span></code></pre></div>
-<pre><code><span><span class="co">##        bio1       bio12       bio15 </span></span>
-<span><span class="co">## 0.002405167 1.000000000 0.034934998</span></span></code></pre>
 </div>
 <div class="section level2">
 <h2 id="step-3-apply-thinning">Step 3 — Apply thinning<a class="anchor" aria-label="anchor" href="#step-3-apply-thinning"></a>
 </h2>
 <p><code>bean</code> ships two thinning strategies; we run both for
 comparison.</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Stochastic: randomly retain one occurrence per "pod"</span></span>
 <span><span class="va">thin_nd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paanwaris.github.io/bean/reference/thin_env_nd.html" class="external-link">thin_env_nd</a></span><span class="op">(</span>data            <span class="op">=</span> <span class="va">prepped</span>,</span>
 <span>                       env_vars        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span>,</span>
@@ -223,35 +236,20 @@ comparison.</p>
 <span>                               env_vars        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span>,</span>
 <span>                               grid_resolution <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">50</span>, <span class="fl">20</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">thin_nd</span></span></code></pre></div>
-<pre><code><span><span class="co">## --- Bean Stochastic Thinning Results ---</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Thinned 1031 original points to 80 points.</span></span>
-<span><span class="co">## This represents a retention of 7.8% of the data.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## --------------------------------------</span></span></code></pre>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">thin_center</span></span></code></pre></div>
-<pre><code><span><span class="co">## --- Bean Deterministic Thinning Results ---</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Thinned 1031 original points to 66 unique grid cell centers.</span></span>
-<span><span class="co">## This represents a retention of 6.4% of the data.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## --------------------------------------</span></span></code></pre>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<span><span class="va">thin_nd</span></span>
+<span><span class="va">thin_center</span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://paanwaris.github.io/bean/reference/plot_bean.html" class="external-link">plot_bean</a></span><span class="op">(</span></span>
 <span>  original_data  <span class="op">=</span> <span class="va">prepped</span>,</span>
 <span>  thinned_object <span class="op">=</span> <span class="va">thin_nd</span>,</span>
 <span>  env_vars       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2b_Bean_Processing_files/figure-html/thin-vs-raw-1.png" width="900" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://paanwaris.github.io/bean/reference/plot_bean.html" class="external-link">plot_bean</a></span><span class="op">(</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://paanwaris.github.io/bean/reference/plot_bean.html" class="external-link">plot_bean</a></span><span class="op">(</span></span>
 <span>  original_data  <span class="op">=</span> <span class="va">prepped</span>,</span>
 <span>  thinned_object <span class="op">=</span> <span class="va">thin_center</span>,</span>
 <span>  env_vars       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2b_Bean_Processing_files/figure-html/thin-vs-raw-2.png" width="900" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="step-4-fit-the-ellipsoid-niche">Step 4 — Fit the ellipsoid niche<a class="anchor" aria-label="anchor" href="#step-4-fit-the-ellipsoid-niche"></a>
@@ -259,7 +257,7 @@ comparison.</p>
 <p><code><a href="https://paanwaris.github.io/bean/reference/fit_ellipsoid.html" class="external-link">fit_ellipsoid()</a></code> formalises the niche by fitting a
 bivariate (or multivariate) ellipsoid around the thinned points. We
 compare the ellipsoid fit on raw vs. thinned data.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">ell_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paanwaris.github.io/bean/reference/fit_ellipsoid.html" class="external-link">fit_ellipsoid</a></span><span class="op">(</span><span class="va">prepped</span>,</span>
 <span>                         env_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span>,</span>
 <span>                         method   <span class="op">=</span> <span class="st">"covmat"</span>,</span>
@@ -270,30 +268,24 @@ compare the ellipsoid fit on raw vs. thinned data.</p>
 <span>                             method   <span class="op">=</span> <span class="st">"covmat"</span>,</span>
 <span>                             level    <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ell_raw</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2b_Bean_Processing_files/figure-html/fit-ellipsoid-1.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ell_raw</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ell_raw</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ell_raw</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ell_thinned</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2b_Bean_Processing_files/figure-html/fit-ellipsoid-2.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ell_thinned</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ell_thinned</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ell_thinned</span>, dims <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="step-5-project-the-niche-back-to-g-space">Step 5 — Project the niche back to G-space<a class="anchor" aria-label="anchor" href="#step-5-project-the-niche-back-to-g-space"></a>
 </h2>
-<div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pred_raw</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">ell_raw</span>, <span class="va">env</span><span class="op">)</span></span>
 <span><span class="va">pred_thinned</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">ell_thinned</span>, <span class="va">env</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pred_raw</span><span class="op">$</span><span class="va">suitability</span>, main <span class="op">=</span> <span class="st">"Suitability — raw data"</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pred_thinned</span><span class="op">$</span><span class="va">suitability</span>, main <span class="op">=</span> <span class="st">"Suitability — thinned niche"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2b_Bean_Processing_files/figure-html/predict-1.png" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">pred_thinned</span><span class="op">$</span><span class="va">suitability</span>, main <span class="op">=</span> <span class="st">"Suitability — thinned niche"</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="st">"outputs"</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/writeRaster.html" class="external-link">writeRaster</a></span><span class="op">(</span><span class="va">pred_thinned</span>,</span>
 <span>                   <span class="st">"outputs/Day2_suitability_sambar_thinned.tif"</span>,</span>
