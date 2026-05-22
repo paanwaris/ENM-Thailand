@@ -30,6 +30,11 @@ if (length(missing_rmds)) {
        paste(missing_rmds, collapse = ", "))
 }
 
+# Tell Day 2a to render its code without hitting GADM / WorldClim / GBIF.
+# Day 1, 2b, 3 use their own file-existence guards.
+Sys.setenv(PKGDOWN_BUILD = "1")
+on.exit(Sys.unsetenv("PKGDOWN_BUILD"), add = TRUE)
+
 # ---- Build the site, step by step -------------------------------------------
 # init_site()  copies assets (CSS, JS, favicons) into docs/.
 # build_home() renders README.md + LICENSE.md as index.html / LICENSE.html.
