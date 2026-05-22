@@ -29,14 +29,16 @@ The full rendered website lives at **<https://paanwaris.github.io/ENM-Thailand/>
 
 ## Workshop overview
 
-| Day | Package | Focus |
-|-----|---------|-------|
-| 1 | [**nicheR**](https://github.com/castanedaM/nicheR) | Build an ellipsoid-based **virtual species** in environmental space, project it to Thailand, explore E-space in 3D (BIO1 × BIO12 × BIO15), and sample virtual occurrences under three strategies (`centroid`, `random`, `edge`). |
-| 2a | — | Download and prepare the shared workshop inputs: Thailand boundary from GADM, WorldClim v2.1 bioclim layers, and GBIF occurrence records for *Rusa unicolor*, strictly filtered to field-observation `basisOfRecord`. |
-| 2b | [**bean**](https://github.com/paanwaris/bean) | Reduce **environmental sampling bias** in real Sambar occurrence data by thinning points that cluster in E-space, fit an ellipsoid niche, and project suitability back to G-space. |
-| 3 | [**TemporalModelR**](https://github.com/CJHughes926/TemporalModelR) | Build a **temporally explicit SDM** by pairing each occurrence with the environment it experienced at the time of observation. Uses local annual LST, precipitation, and NDVI rasters (2010–2025) provided in `temporal_rasters/`. |
+The full rendered workshop is published as four articles on the pkgdown site. Each day is also delivered as a self-contained R Markdown notebook at the top of this repository.
 
-Each day is delivered as a self-contained R Markdown notebook at the top of the repository.
+| Day | Read on the site | Source | Package | Focus |
+|-----|------------------|--------|---------|-------|
+| 1 | [Virtual species with nicheR](https://paanwaris.github.io/ENM-Thailand/articles/Day1_nicheR.html) | [`Day1_nicheR.Rmd`](Day1_nicheR.Rmd) | [**nicheR**](https://github.com/castanedaM/nicheR) | Build an ellipsoid-based **virtual species** in environmental space, project it to Thailand, explore E-space in 3D (BIO1 × BIO12 × BIO15), and sample virtual occurrences under three strategies (`centroid`, `random`, `edge`). |
+| 2a | [Downloading the workshop data](https://paanwaris.github.io/ENM-Thailand/articles/Day2a_Data_Download.html) | [`Day2a_Data_Download.Rmd`](Day2a_Data_Download.Rmd) | — | Download and prepare the shared workshop inputs: Thailand boundary from GADM, WorldClim v2.1 bioclim layers, and GBIF occurrence records for *Rusa unicolor*, strictly filtered to field-observation `basisOfRecord`. |
+| 2b | [Environmental thinning with bean](https://paanwaris.github.io/ENM-Thailand/articles/Day2b_Bean_Processing.html) | [`Day2b_Bean_Processing.Rmd`](Day2b_Bean_Processing.Rmd) | [**bean**](https://github.com/paanwaris/bean) | Reduce **environmental sampling bias** in real Sambar occurrence data by thinning points that cluster in E-space, fit an ellipsoid niche, and project suitability back to G-space. |
+| 3 | [Temporally-explicit SDMs with TemporalModelR](https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html) | [`Day3_TemporalModelR.Rmd`](Day3_TemporalModelR.Rmd) | [**TemporalModelR**](https://github.com/CJHughes926/TemporalModelR) | Build a **temporally explicit SDM** by pairing each occurrence with the environment it experienced at the time of observation. Uses local annual LST, precipitation, and NDVI rasters (2010–2025) provided in `temporal_rasters/`. |
+
+**Suggested order:** knit **Day 2a** first to populate `data/processed/` (one-time, ~15 min). After that, Day 1, Day 2b, and Day 3 are independent and can be knit in any order.
 
 ---
 
