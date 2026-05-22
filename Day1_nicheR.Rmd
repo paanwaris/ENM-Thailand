@@ -48,6 +48,13 @@ if (!.workshop_data_ok) {
 
 # Overview
 
+> **Workshop navigation —** part 1 of 4 in the [ENM-Thailand 2026 workshop](https://paanwaris.github.io/ENM-Thailand/).
+>
+> - **Day 1 (this page) — Virtual species with nicheR.** Build an ellipsoid niche by hand and project it.
+> - [Day 2a — Downloading the workshop data.](https://paanwaris.github.io/ENM-Thailand/articles/Day2a_Data_Download.html) Fetch Thailand, WorldClim and GBIF Sambar records.
+> - [Day 2b — Environmental thinning with bean.](https://paanwaris.github.io/ENM-Thailand/articles/Day2b_Bean_Processing.html) Reduce E-space sampling bias before fitting a real niche.
+> - [Day 3 — Temporally-explicit SDMs with TemporalModelR.](https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html) Pair each occurrence with the environment it experienced.
+
 `nicheR` is an R package for building and visualising **ellipsoid-based ecological niches** in environmental space (E-space) and projecting them onto geographic space (G-space). Today we treat the niche as a hypothesis we control — a **virtual species** — so we never need any real occurrence data.
 
 This is the ideal way to learn ENM mechanics, because we can compare every output back to a known truth.
