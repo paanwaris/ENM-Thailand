@@ -74,6 +74,27 @@
 <div class="section level2">
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
+<blockquote>
+<p><strong>Workshop navigation —</strong> part 2 of 4 in the <a href="https://paanwaris.github.io/ENM-Thailand/">ENM-Thailand 2026
+workshop</a>.</p>
+<ul>
+<li>
+<a href="https://paanwaris.github.io/ENM-Thailand/articles/Day1_nicheR.html">Day
+1 — Virtual species with nicheR.</a> Build an ellipsoid niche by hand
+and project it.</li>
+<li>
+<strong>Day 2a (this page) — Downloading the workshop data.</strong>
+Fetch Thailand, WorldClim and GBIF Sambar records.</li>
+<li>
+<a href="https://paanwaris.github.io/ENM-Thailand/articles/Day2b_Bean_Processing.html">Day
+2b — Environmental thinning with bean.</a> Reduce E-space sampling bias
+before fitting a real niche.</li>
+<li>
+<a href="https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html">Day
+3 — Temporally-explicit SDMs with TemporalModelR.</a> Pair each
+occurrence with the environment it experienced.</li>
+</ul>
+</blockquote>
 <p>This notebook gathers every input the rest of the workshop needs.
 Knit it once at the start of Day 2 — everything else (Day 1, Day 2b, Day
 3) reads from <code>data/processed/</code>.</p>
@@ -117,10 +138,19 @@ unicolor</em>) in Thailand, strictly filtered to
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://readr.tidyverse.org" class="external-link">readr</a></span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">raw_dir</span> <span class="op">&lt;-</span> <span class="st">"data/raw"</span></span>
+<code class="sourceCode R"><span><span class="va">raw_dir</span>       <span class="op">&lt;-</span> <span class="st">"data/raw"</span></span>
 <span><span class="va">processed_dir</span> <span class="op">&lt;-</span> <span class="st">"data/processed"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">raw_dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">processed_dir</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+<span></span>
+<span><span class="co"># data/processed/ is organised into role-based subfolders.</span></span>
+<span><span class="va">boundary_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">processed_dir</span>, <span class="st">"boundary"</span><span class="op">)</span>   <span class="co"># Thailand polygon</span></span>
+<span><span class="va">bioclim_dir</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">processed_dir</span>, <span class="st">"bioclim"</span><span class="op">)</span>    <span class="co"># WorldClim layers</span></span>
+<span><span class="va">bias_dir</span>     <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">processed_dir</span>, <span class="st">"bias"</span><span class="op">)</span>       <span class="co"># sampling-bias proxies (Day 1)</span></span>
+<span><span class="va">gbif_dir</span>     <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">processed_dir</span>, <span class="st">"gbif"</span><span class="op">)</span>       <span class="co"># GBIF Sambar records</span></span>
+<span></span>
+<span><span class="kw">for</span> <span class="op">(</span><span class="va">d</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">raw_dir</span>, <span class="va">processed_dir</span>,</span>
+<span>            <span class="va">boundary_dir</span>, <span class="va">bioclim_dir</span>, <span class="va">bias_dir</span>, <span class="va">gbif_dir</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">d</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="step-1-thailand-boundary-gadm">Step 1 — Thailand boundary (GADM)<a class="anchor" aria-label="anchor" href="#step-1-thailand-boundary-gadm"></a>
@@ -130,7 +160,7 @@ unicolor</em>) in Thailand, strictly filtered to
 <span><span class="va">tha_sf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span><span class="va">tha</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_write.html" class="external-link">st_write</a></span><span class="op">(</span><span class="va">tha_sf</span>,</span>
-<span>             <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">processed_dir</span>, <span class="st">"thailand_boundary.gpkg"</span><span class="op">)</span>,</span>
+<span>             <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">boundary_dir</span>, <span class="st">"thailand_boundary.gpkg"</span><span class="op">)</span>,</span>
 <span>             delete_dsn <span class="op">=</span> <span class="cn">TRUE</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">tha_sf</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Thailand boundary (GADM level 0)"</span><span class="op">)</span></span></code></pre></div>
@@ -150,11 +180,11 @@ unicolor</em>) in Thailand, strictly filtered to
 <span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/writeRaster.html" class="external-link">writeRaster</a></span><span class="op">(</span></span>
 <span>  <span class="va">bio_tha</span>,</span>
-<span>  filename  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">processed_dir</span>, <span class="st">"bioclim_thailand.tif"</span><span class="op">)</span>,</span>
+<span>  filename  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bioclim_dir</span>, <span class="st">"bioclim_thailand.tif"</span><span class="op">)</span>,</span>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">bio_tha</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="st">"data/processed/bioclim_thailand.tif"</span><span class="op">)</span></span>
+<span><span class="va">bio_tha</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">bioclim_dir</span>, <span class="st">"bioclim_thailand.tif"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">bio_tha</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"bio1"</span>, <span class="st">"bio12"</span>, <span class="st">"bio15"</span><span class="op">)</span><span class="op">]</span><span class="op">]</span>,</span>
 <span>     main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIO1 — mean T (°C)"</span>,</span>
 <span>              <span class="st">"BIO12 — annual precip. (mm)"</span>,</span>
@@ -192,7 +222,14 @@ to GitHub never reveals your credentials.</p>
 <span>  gbif_user  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"GBIF_USER"</span>,  unset <span class="op">=</span> <span class="st">"[YOUR_GBIF_USERNAME]"</span><span class="op">)</span>,</span>
 <span>  gbif_email <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"GBIF_EMAIL"</span>, unset <span class="op">=</span> <span class="st">"[YOUR_EMAIL]"</span><span class="op">)</span>,</span>
 <span>  gbif_pwd   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"GBIF_PWD"</span>,   unset <span class="op">=</span> <span class="st">"[YOUR_GBIF_PASSWORD]"</span><span class="op">)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># If no real credentials are present (e.g. fresh clone, GitHub Actions),</span></span>
+<span><span class="co"># skip the GBIF download chunks so the document still builds. The code is</span></span>
+<span><span class="co"># still displayed.</span></span>
+<span><span class="va">.have_gbif_creds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"GBIF_USER"</span><span class="op">)</span><span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span>                    <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"GBIF_EMAIL"</span><span class="op">)</span><span class="op">)</span> <span class="op">&amp;&amp;</span></span>
+<span>                    <span class="fu"><a href="https://rdrr.io/r/base/nchar.html" class="external-link">nzchar</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"GBIF_PWD"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">key</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://docs.ropensci.org/rgbif/reference/name_backbone.html" class="external-link">name_backbone</a></span><span class="op">(</span>name <span class="op">=</span> <span class="st">"Rusa unicolor"</span><span class="op">)</span><span class="op">$</span><span class="va">usageKey</span></span>
 <span></span>
@@ -214,14 +251,13 @@ to GitHub never reveals your credentials.</p>
 <span><span class="co"># Belt-and-braces: enforce the filter again in case the API loosened it</span></span>
 <span><span class="va">raw</span> <span class="op">&lt;-</span> <span class="va">raw</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">basisOfRecord</span> <span class="op"><a href="https://rspatial.github.io/terra/reference/match.html" class="external-link">%in%</a></span> <span class="va">allowed_basis</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_csv</a></span><span class="op">(</span><span class="va">raw</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">processed_dir</span>, <span class="st">"sambar_gbif.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_csv</a></span><span class="op">(</span><span class="va">raw</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">gbif_dir</span>, <span class="st">"sambar_gbif.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/dimensions.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">raw</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## [1] 1035</span></span></code></pre>
 <div class="section level3">
 <h3 id="clean-and-write-the-analysis-ready-table">Clean and write the analysis-ready table<a class="anchor" aria-label="anchor" href="#clean-and-write-the-analysis-ready-table"></a>
 </h3>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">sambar</span> <span class="op">&lt;-</span> <span class="va">raw</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html" class="external-link">select</a></span><span class="op">(</span><span class="va">species</span>,</span>
 <span>         <span class="va">decimalLongitude</span>, <span class="va">decimalLatitude</span>,</span>
@@ -239,13 +275,12 @@ to GitHub never reveals your credentials.</p>
 <span><span class="va">inside</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_binary_pred.html" class="external-link">st_within</a></span><span class="op">(</span><span class="va">sambar_sf</span>, <span class="va">tha_sf</span>, sparse <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span><span class="op">[</span>, <span class="fl">1</span><span class="op">]</span></span>
 <span><span class="va">sambar</span> <span class="op">&lt;-</span> <span class="va">sambar</span><span class="op">[</span><span class="va">inside</span>, <span class="op">]</span></span>
 <span></span>
-<span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_csv</a></span><span class="op">(</span><span class="va">sambar</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">processed_dir</span>, <span class="st">"sambar_thailand.csv"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://readr.tidyverse.org/reference/write_delim.html" class="external-link">write_csv</a></span><span class="op">(</span><span class="va">sambar</span>, <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">gbif_dir</span>, <span class="st">"sambar_thailand.csv"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">tha_sf</span><span class="op">)</span>, border <span class="op">=</span> <span class="st">"grey20"</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Sambar deer occurrences"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/lines.html" class="external-link">points</a></span><span class="op">(</span><span class="va">sambar</span><span class="op">$</span><span class="va">decimalLongitude</span>, <span class="va">sambar</span><span class="op">$</span><span class="va">decimalLatitude</span>,</span>
 <span>       pch <span class="op">=</span> <span class="fl">21</span>, bg <span class="op">=</span> <span class="st">"tomato"</span>, col <span class="op">=</span> <span class="st">"white"</span>, cex <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2a_Data_Download_files/figure-html/gbif-clean-1.png" width="700" style="display: block; margin: auto;"></p>
 <p>Everything Day 1, Day 2b, and Day 3 need now lives in
 <code>data/processed/</code>. Day 3 additionally relies on the local
 <code>temporal_rasters/</code> folder, which holds pre-prepared annual
