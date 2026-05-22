@@ -237,4 +237,34 @@ points(sambar$decimalLongitude, sambar$decimalLatitude,
        pch = 21, bg = "tomato", col = "white", cex = 0.7)
 ```
 
-Everything Day 1, Day 2b, and Day 3 need now lives in `data/processed/`. Day 3 additionally relies on the local `temporal_rasters/` folder, which holds pre-prepared annual precipitation and temperature rasters for 2000–2025 (this folder is provided with the workshop materials).
+# Step 4 — Shortcut: download everything from Zenodo
+
+If anything in Steps 1–3 fails (GBIF rate-limit, no credentials, slow WorldClim mirror, etc.), participants can skip the live downloads and grab a pre-built copy of the **entire** `data/processed/` tree — including the annual LST + Precip + NDVI rasters Day 3 needs — from the workshop's Zenodo archive:
+
+> **DOI:** <https://zenodo.org/records/20344510>
+> **File:** `processed.zip` (the full `data/processed/` tree, including `temporal_split/`)
+
+The chunk below downloads the zip and unpacks it into `data/` (so paths line up with the rest of the workshop). It is **not run when this notebook is knit** — knitting would force a multi-hundred-MB download every time. Copy the chunk into your console and run it once when you actually need the data.
+
+```{r download-external, eval = FALSE}
+# ---- 1. Download URL ------------------------------------------------------
+zenodo_url <- "https://zenodo.org/records/20344510/files/processed.zip?download=1"
+
+# ---- 2. Download + unpack -------------------------------------------------
+target_dir <- "data"
+dir.create(target_dir, showWarnings = FALSE, recursive = TRUE)
+
+zip_path <- tempfile(fileext = ".zip")
+message("Downloading from: ", zenodo_url)
+utils::download.file(zenodo_url, destfile = zip_path, mode = "wb")
+
+message("Unpacking into: ", normalizePath(target_dir))
+utils::unzip(zip_path, exdir = target_dir, overwrite = TRUE)
+unlink(zip_path)
+```
+
+After running it, `data/processed/{boundary, bioclim, bias, gbif, temporal_split, ...}/` is fully populated and you can move straight on to **Day 2b**.
+
+---
+
+Everything Day 1, Day 2b, and Day 3 need now lives in `data/processed/`. Day 3 reads its annual rasters from `data/processed/temporal_split/`, populated either by running Step 1 of Day 3 locally or by the Zenodo shortcut above.
