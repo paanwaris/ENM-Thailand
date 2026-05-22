@@ -13,7 +13,7 @@
 <img src="man/figures/logo_kuias.jpg" style="height: 50px; width: auto; margin: 0 10px;"/>
 <img src="man/figures/logo_wcs.png" style="height: 50px; width: auto; margin: 0 10px;"/> 
 <img src="man/figures/logo_nsf.png" style="height: 50px; width: auto; margin: 0 10px;"/>
-
+<img src="man/figures/logo_nih.png" style="height: 50px; width: auto; margin: 0 10px;"/>
 </p>
 
 A three-day hands-on workshop on **ecological niche modelling (ENM)** and **species distribution modelling (SDM)** in R, using Sambar deer (*Rusa unicolor*) in Thailand as the case study. The workshop walks participants through three modern R packages developed for the field, building each day on the outputs of the previous one.
