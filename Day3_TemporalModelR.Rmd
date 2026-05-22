@@ -54,6 +54,13 @@ if (!.workshop_data_ok) {
 
 # Overview
 
+> **Workshop navigation —** part 4 of 4 in the [ENM-Thailand 2026 workshop](https://paanwaris.github.io/ENM-Thailand/).
+>
+> - [Day 1 — Virtual species with nicheR.](https://paanwaris.github.io/ENM-Thailand/articles/Day1_nicheR.html) Build an ellipsoid niche by hand and project it.
+> - [Day 2a — Downloading the workshop data.](https://paanwaris.github.io/ENM-Thailand/articles/Day2a_Data_Download.html) Fetch Thailand, WorldClim and GBIF Sambar records.
+> - [Day 2b — Environmental thinning with bean.](https://paanwaris.github.io/ENM-Thailand/articles/Day2b_Bean_Processing.html) Reduce E-space sampling bias before fitting a real niche.
+> - **Day 3 (this page) — Temporally-explicit SDMs with TemporalModelR.** Pair each occurrence with the environment it experienced.
+
 `TemporalModelR` builds **temporally-explicit** species distribution models. Each occurrence is paired with the environmental conditions *at the time it was recorded*, rather than against a long-term average. Models can then project predictions as time-series surfaces and detect pixel-level temporal trajectories (always-suitable, increasing, decreasing, fluctuating, etc.).
 
 > **Data.** Day 3 uses the pre-prepared annual rasters that already live in `temporal_rasters/` — one precipitation (`prec_YYYY.tif`) and one temperature (`temp_YYYY.tif`) file per year for 2000–2025. **We do not download new climate data here**; we simply read the local files and stack them. Day 2a produced the Sambar GBIF table and the Thailand polygon we use alongside them.
