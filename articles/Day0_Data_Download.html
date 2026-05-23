@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Day 2a — Downloading the workshop data • ENMThailand</title>
+<title>Day 0 — Downloading the workshop data • ENMThailand</title>
 <!-- favicons --><link rel="icon" type="image/png" sizes="96x96" href="../favicon-96x96.png">
 <link rel="icon" type="”image/svg+xml”" href="../favicon.svg">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png">
@@ -15,7 +15,7 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Day 2a — Downloading the workshop data">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Day 0 — Downloading the workshop data">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -38,9 +38,9 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/Day1_nicheR.html">Day 1 — Virtual species with nicheR</a></li>
-    <li><a class="dropdown-item" href="../articles/Day2a_Data_Download.html">Day 2a — Downloading the workshop data</a></li>
-    <li><a class="dropdown-item" href="../articles/Day2b_Bean_Processing.html">Day 2b — Environmental thinning with bean</a></li>
+<li><a class="dropdown-item" href="../articles/Day0_Data_Download.html">Day 0 — Downloading the workshop data</a></li>
+    <li><a class="dropdown-item" href="../articles/Day1_nicheR.html">Day 1 — Virtual species with nicheR</a></li>
+    <li><a class="dropdown-item" href="../articles/Day2_bean.html">Day 2 — Environmental thinning with bean</a></li>
     <li><a class="dropdown-item" href="../articles/Day3_TemporalModelR.html">Day 3 — Temporally-explicit SDMs with TemporalModelR</a></li>
   </ul>
 </li>
@@ -62,11 +62,11 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="../logo.png" class="logo" alt=""><h1>Day 2a — Downloading the workshop data</h1>
+      <img src="../logo.png" class="logo" alt=""><h1>Day 0 — Downloading the workshop data</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/paanwaris/ENM-Thailand/blob/HEAD/vignettes/Day2a_Data_Download.Rmd" class="external-link"><code>vignettes/Day2a_Data_Download.Rmd</code></a></small>
-      <div class="d-none name"><code>Day2a_Data_Download.Rmd</code></div>
+      <small class="dont-index">Source: <a href="https://github.com/paanwaris/ENM-Thailand/blob/HEAD/vignettes/Day0_Data_Download.Rmd" class="external-link"><code>vignettes/Day0_Data_Download.Rmd</code></a></small>
+      <div class="d-none name"><code>Day0_Data_Download.Rmd</code></div>
     </div>
 
     
@@ -75,19 +75,20 @@
 <h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
 </h2>
 <blockquote>
-<p><strong>Workshop navigation —</strong> part 2 of 4 in the <a href="https://paanwaris.github.io/ENM-Thailand/">ENM-Thailand 2026
+<p><strong>Workshop navigation —</strong> prep step (Day 0) of the <a href="https://paanwaris.github.io/ENM-Thailand/">ENM-Thailand 2026
 workshop</a>.</p>
 <ul>
+<li>
+<strong>Day 0 (this page) — Downloading the workshop data.</strong>
+Fetch Thailand, WorldClim and GBIF Sambar records before the workshop
+starts.</li>
 <li>
 <a href="https://paanwaris.github.io/ENM-Thailand/articles/Day1_nicheR.html">Day
 1 — Virtual species with nicheR.</a> Build an ellipsoid niche by hand
 and project it.</li>
 <li>
-<strong>Day 2a (this page) — Downloading the workshop data.</strong>
-Fetch Thailand, WorldClim and GBIF Sambar records.</li>
-<li>
-<a href="https://paanwaris.github.io/ENM-Thailand/articles/Day2b_Bean_Processing.html">Day
-2b — Environmental thinning with bean.</a> Reduce E-space sampling bias
+<a href="https://paanwaris.github.io/ENM-Thailand/articles/Day2_bean.html">Day
+2 — Environmental thinning with bean.</a> Reduce E-space sampling bias
 before fitting a real niche.</li>
 <li>
 <a href="https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html">Day
@@ -96,8 +97,9 @@ occurrence with the environment it experienced.</li>
 </ul>
 </blockquote>
 <p>This notebook gathers every input the rest of the workshop needs.
-Knit it once at the start of Day 2 — everything else (Day 1, Day 2b, Day
-3) reads from <code>data/processed/</code>.</p>
+<strong>Knit it once before the workshop starts</strong> — Day 1, Day 2,
+and Day 3 all read from <code>data/processed/</code>, so running this
+notebook ahead of time means every lesson day will run smoothly.</p>
 <p>What we will download / prepare:</p>
 <ol style="list-style-type: decimal">
 <li>
@@ -164,7 +166,7 @@ unicolor</em>) in Thailand, strictly filtered to
 <span>             delete_dsn <span class="op">=</span> <span class="cn">TRUE</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_geometry.html" class="external-link">st_geometry</a></span><span class="op">(</span><span class="va">tha_sf</span><span class="op">)</span>, main <span class="op">=</span> <span class="st">"Thailand boundary (GADM level 0)"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2a_Data_Download_files/figure-html/tha-boundary-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="Day0_Data_Download_files/figure-html/tha-boundary-1.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="step-2-worldclim-bioclim-10-arc-min">Step 2 — WorldClim bioclim (10 arc-min)<a class="anchor" aria-label="anchor" href="#step-2-worldclim-bioclim-10-arc-min"></a>
@@ -189,7 +191,7 @@ unicolor</em>) in Thailand, strictly filtered to
 <span>     main <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"BIO1 — mean T (°C)"</span>,</span>
 <span>              <span class="st">"BIO12 — annual precip. (mm)"</span>,</span>
 <span>              <span class="st">"BIO15 — precip. seasonality (CV)"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="Day2a_Data_Download_files/figure-html/bioclim-1.png" width="700" style="display: block; margin: auto;"></p>
+<p><img src="Day0_Data_Download_files/figure-html/bioclim-1.png" width="700" style="display: block; margin: auto;"></p>
 </div>
 <div class="section level2">
 <h2 id="step-3-gbif-occurrences-for-sambar-deer">Step 3 — GBIF occurrences for Sambar deer<a class="anchor" aria-label="anchor" href="#step-3-gbif-occurrences-for-sambar-deer"></a>
@@ -322,9 +324,9 @@ console and run it once when you actually need the data.</p>
 <p>After running it,
 <code>data/processed/{boundary, bioclim, bias, gbif, temporal_split, ...}/</code>
 is fully populated and you can move straight on to <strong>Day
-2b</strong>.</p>
+1</strong>.</p>
 <hr>
-<p>Everything Day 1, Day 2b, and Day 3 need now lives in
+<p>Everything Day 1, Day 2, and Day 3 need now lives in
 <code>data/processed/</code>. Day 3 reads its annual rasters from
 <code>data/processed/temporal_split/</code>, populated either by running
 Step 1 of Day 3 locally or by the Zenodo shortcut above.</p>
