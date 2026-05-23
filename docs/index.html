@@ -41,9 +41,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/Day1_nicheR.html">Day 1 — Virtual species with nicheR</a></li>
-    <li><a class="dropdown-item" href="articles/Day2a_Data_Download.html">Day 2a — Downloading the workshop data</a></li>
-    <li><a class="dropdown-item" href="articles/Day2b_Bean_Processing.html">Day 2b — Environmental thinning with bean</a></li>
+<li><a class="dropdown-item" href="articles/Day0_Data_Download.html">Day 0 — Downloading the workshop data</a></li>
+    <li><a class="dropdown-item" href="articles/Day1_nicheR.html">Day 1 — Virtual species with nicheR</a></li>
+    <li><a class="dropdown-item" href="articles/Day2_bean.html">Day 2 — Environmental thinning with bean</a></li>
     <li><a class="dropdown-item" href="articles/Day3_TemporalModelR.html">Day 3 — Temporally-explicit SDMs with TemporalModelR</a></li>
   </ul>
 </li>
@@ -95,6 +95,14 @@ ENM-Thailand workshop 2026
 </tr></thead>
 <tbody>
 <tr>
+<td>0</td>
+<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Day0_Data_Download.html">Downloading the workshop data</a></td>
+<td><a href="Day0_Data_Download.Rmd"><code>Day0_Data_Download.Rmd</code></a></td>
+<td>—</td>
+<td>
+<strong>Pre-workshop prep.</strong> Download and prepare the shared inputs: Thailand boundary from GADM, WorldClim v2.1 bioclim layers, and GBIF occurrence records for <em>Rusa unicolor</em>, strictly filtered to field-observation <code>basisOfRecord</code>.</td>
+</tr>
+<tr>
 <td>1</td>
 <td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Day1_nicheR.html">Virtual species with nicheR</a></td>
 <td><a href="Day1_nicheR.Rmd"><code>Day1_nicheR.Rmd</code></a></td>
@@ -102,16 +110,9 @@ ENM-Thailand workshop 2026
 <td>Build an ellipsoid-based <strong>virtual species</strong> in environmental space, project it to Thailand, explore E-space in 3D (BIO1 × BIO12 × BIO15), and sample virtual occurrences under three strategies (<code>centroid</code>, <code>random</code>, <code>edge</code>).</td>
 </tr>
 <tr>
-<td>2a</td>
-<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Day2a_Data_Download.html">Downloading the workshop data</a></td>
-<td><a href="Day2a_Data_Download.Rmd"><code>Day2a_Data_Download.Rmd</code></a></td>
-<td>—</td>
-<td>Download and prepare the shared workshop inputs: Thailand boundary from GADM, WorldClim v2.1 bioclim layers, and GBIF occurrence records for <em>Rusa unicolor</em>, strictly filtered to field-observation <code>basisOfRecord</code>.</td>
-</tr>
-<tr>
-<td>2b</td>
-<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Day2b_Bean_Processing.html">Environmental thinning with bean</a></td>
-<td><a href="Day2b_Bean_Processing.Rmd"><code>Day2b_Bean_Processing.Rmd</code></a></td>
+<td>2</td>
+<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Day2_bean.html">Environmental thinning with bean</a></td>
+<td><a href="Day2_bean.Rmd"><code>Day2_bean.Rmd</code></a></td>
 <td><a href="https://github.com/paanwaris/bean" class="external-link"><strong>bean</strong></a></td>
 <td>Reduce <strong>environmental sampling bias</strong> in real Sambar occurrence data by thinning points that cluster in E-space, fit an ellipsoid niche, and project suitability back to G-space.</td>
 </tr>
@@ -125,9 +126,9 @@ ENM-Thailand workshop 2026
 </tbody>
 </table>
 <blockquote>
-<p><strong>Where the source lives:</strong> all four workshop notebooks (<code>Day1_nicheR.Rmd</code>, <code>Day2a_Data_Download.Rmd</code>, <code>Day2b_Bean_Processing.Rmd</code>, <code>Day3_TemporalModelR.Rmd</code>) sit at the top of this repository and can be knit directly with the RStudio <strong>Knit</strong> button.</p>
+<p><strong>Where the source lives:</strong> all four workshop notebooks (<code>Day0_Data_Download.Rmd</code>, <code>Day1_nicheR.Rmd</code>, <code>Day2_bean.Rmd</code>, <code>Day3_TemporalModelR.Rmd</code>) sit at the top of this repository and can be knit directly with the RStudio <strong>Knit</strong> button.</p>
 </blockquote>
-<p><strong>Suggested order:</strong> knit <strong>Day 2a</strong> first to populate <code>data/processed/</code> (one-time, ~15 min). After that, Day 1, Day 2b, and Day 3 are independent and can be knit in any order.</p>
+<p><strong>Before the workshop:</strong> knit <strong>Day 0</strong> to populate <code>data/processed/</code> (one-time, ~15 min) — or use the Zenodo shortcut inside Day 0 to download a pre-built copy. Once Day 0 is done, Day 1, Day 2, and Day 3 are independent and can be knit in any order during the workshop.</p>
 <hr>
 </div>
 <div class="section level2">

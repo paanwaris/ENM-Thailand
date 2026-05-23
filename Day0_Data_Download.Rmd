@@ -1,0 +1,270 @@
+---
+title: "Day 0 — Downloading the workshop data"
+subtitle: "ENM-Thailand workshop · Sambar deer (*Rusa unicolor*)"
+author: "Workshop materials"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    theme: cosmo
+    df_print: paged
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  message   = FALSE,
+  warning   = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 5,
+  dpi       = 100
+)
+
+# Day 0 is the data-fetching notebook itself. When you build the public
+# pkgdown site we don't actually want to re-hit GADM / WorldClim / GBIF; we
+# just want the code visible. Detect that mode and skip evaluation.
+.fetch_live <- !nzchar(Sys.getenv("PKGDOWN_BUILD"))
+knitr::opts_chunk$set(eval = .fetch_live)
+```
+
+```{r data-status, echo = FALSE, results = "asis", eval = TRUE}
+if (!.fetch_live) {
+  cat(
+    '<div class="alert alert-info" style="padding:1em;border-left:4px solid #1B6E3F;background:#E8F5E9;">',
+    '<strong>Build mode:</strong> the live download chunks are <em>shown but ',
+    'not executed</em> on the published website. Knit this file locally with ',
+    'your GBIF credentials in <code>.Renviron</code> to actually populate ',
+    '<code>data/processed/</code>.',
+    '</div>\n\n'
+  )
+}
+```
+
+# Overview
+
+> **Workshop navigation —** prep step (Day 0) of the [ENM-Thailand 2026 workshop](https://paanwaris.github.io/ENM-Thailand/).
+>
+> - **Day 0 (this page) — Downloading the workshop data.** Fetch Thailand, WorldClim and GBIF Sambar records before the workshop starts.
+> - [Day 1 — Virtual species with nicheR.](https://paanwaris.github.io/ENM-Thailand/articles/Day1_nicheR.html) Build an ellipsoid niche by hand and project it.
+> - [Day 2 — Environmental thinning with bean.](https://paanwaris.github.io/ENM-Thailand/articles/Day2_bean.html) Reduce E-space sampling bias before fitting a real niche.
+> - [Day 3 — Temporally-explicit SDMs with TemporalModelR.](https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html) Pair each occurrence with the environment it experienced.
+
+This notebook gathers every input the rest of the workshop needs. **Knit it once before the workshop starts** — Day 1, Day 2, and Day 3 all read from `data/processed/`, so running this notebook ahead of time means every lesson day will run smoothly.
+
+What we will download / prepare:
+
+1. **Thailand national boundary** (GADM v4.1).
+2. **WorldClim v2.1 bioclim** (10 arc-min, 19 layers, cropped + masked to Thailand).
+3. **GBIF occurrence records** for Sambar deer (*Rusa unicolor*) in Thailand, strictly filtered to `basisOfRecord %in% c("HUMAN_OBSERVATION", "OCCURRENCE", "OBSERVATION")`.
+4. Two bias proxies (**species richness**, **night-time lights**) used by Day 1.
+
+# Install and load packages
+
+```{r install, eval = FALSE}
+cran_pkgs <- c(
+  "terra",
+  "sf",
+  "geodata",
+  "rgbif",
+  "dplyr",
+  "readr",
+  "rmarkdown",
+  "knitr",
+  "remotes"
+)
+to_install <- cran_pkgs[!cran_pkgs %in% rownames(installed.packages())]
+if (length(to_install)) install.packages(to_install, dependencies = TRUE)
+```
+
+```{r packages}
+library(terra)
+library(sf)
+library(geodata)
+library(rgbif)
+library(dplyr)
+library(readr)
+```
+
+```{r paths}
+raw_dir       <- "data/raw"
+processed_dir <- "data/processed"
+
+# data/processed/ is organised into role-based subfolders.
+boundary_dir <- file.path(processed_dir, "boundary")   # Thailand polygon
+bioclim_dir  <- file.path(processed_dir, "bioclim")    # WorldClim layers
+bias_dir     <- file.path(processed_dir, "bias")       # sampling-bias proxies (Day 1)
+gbif_dir     <- file.path(processed_dir, "gbif")       # GBIF Sambar records
+
+for (d in c(raw_dir, processed_dir,
+            boundary_dir, bioclim_dir, bias_dir, gbif_dir)) {
+  dir.create(d, recursive = TRUE, showWarnings = FALSE)
+}
+```
+
+# Step 1 — Thailand boundary (GADM)
+
+```{r tha-boundary}
+tha <- gadm(country = "THA", level = 0, path = raw_dir)
+tha_sf <- st_as_sf(tha)
+
+st_write(tha_sf,
+             file.path(boundary_dir, "thailand_boundary.gpkg"),
+             delete_dsn = TRUE, quiet = TRUE)
+
+plot(st_geometry(tha_sf), main = "Thailand boundary (GADM level 0)")
+```
+
+# Step 2 — WorldClim bioclim (10 arc-min)
+
+```{r bioclim}
+bio_global <- worldclim_global(var = "bio", res = 10, path = raw_dir)
+
+bio_tha <- crop(bio_global, terra::ext(tha))
+bio_tha <- mask(bio_tha, tha)
+
+# Tidy names: wc2.1_10m_bio_1 -> bio1
+names(bio_tha) <- paste0("bio", seq_len(terra::nlyr(bio_tha)))
+
+writeRaster(
+  bio_tha,
+  filename  = file.path(bioclim_dir, "bioclim_thailand.tif"),
+  overwrite = TRUE
+)
+
+bio_tha <- rast(file.path(bioclim_dir, "bioclim_thailand.tif"))
+plot(bio_tha[[c("bio1", "bio12", "bio15")]],
+     main = c("BIO1 — mean T (°C)",
+              "BIO12 — annual precip. (mm)",
+              "BIO15 — precip. seasonality (CV)"))
+```
+
+# Step 3 — GBIF occurrences for Sambar deer
+
+We pull a fresh GBIF download of *Rusa unicolor* in Thailand. The pipeline is **strictly filtered** so only the following `basisOfRecord` values are retained:
+
+- `HUMAN_OBSERVATION`
+- `OCCURRENCE`
+- `OBSERVATION`
+
+These are the field-observation types most relevant for ENM/SDM. Fossil, machine, material-sample, and preserved-specimen records are excluded.
+
+> **Credentials.** Never commit real passwords to git. The chunk below reads
+> from environment variables; populate them once in your user `.Renviron`
+> (`usethis::edit_r_environ()`):
+>
+> ```
+> GBIF_USER  = "your_gbif_username"
+> GBIF_EMAIL = "your_email@example.com"
+> GBIF_PWD   = "your_gbif_password"
+> ```
+>
+> Restart R so the values are loaded. If any variable is missing, the chunk
+> falls back to obvious placeholder strings so the source you commit to GitHub
+> never reveals your credentials.
+
+```{r gbif-creds}
+options(
+  gbif_user  = Sys.getenv("GBIF_USER",  unset = "[YOUR_GBIF_USERNAME]"),
+  gbif_email = Sys.getenv("GBIF_EMAIL", unset = "[YOUR_EMAIL]"),
+  gbif_pwd   = Sys.getenv("GBIF_PWD",   unset = "[YOUR_GBIF_PASSWORD]")
+)
+
+# If no real credentials are present (e.g. fresh clone, GitHub Actions),
+# skip the GBIF download chunks so the document still builds. The code is
+# still displayed.
+.have_gbif_creds <- nzchar(Sys.getenv("GBIF_USER")) &&
+                    nzchar(Sys.getenv("GBIF_EMAIL")) &&
+                    nzchar(Sys.getenv("GBIF_PWD"))
+```
+
+```{r gbif-download, eval = .have_gbif_creds}
+key <- name_backbone(name = "Rusa unicolor")$usageKey
+
+allowed_basis <- c("HUMAN_OBSERVATION", "OCCURRENCE", "OBSERVATION")
+
+raw_list <- lapply(allowed_basis, function(b) {
+  rgbif::occ_search(
+    taxonKey            = key,
+    country             = "TH",
+    basisOfRecord       = b,
+    hasCoordinate       = TRUE,
+    hasGeospatialIssue  = FALSE,
+    limit               = 5000
+  )$data
+})
+
+raw <- dplyr::bind_rows(raw_list)
+
+# Belt-and-braces: enforce the filter again in case the API loosened it
+raw <- raw %>% filter(basisOfRecord %in% allowed_basis)
+
+write_csv(raw, file.path(gbif_dir, "sambar_gbif.csv"))
+
+nrow(raw)
+```
+
+## Clean and write the analysis-ready table
+
+```{r gbif-clean, eval = .have_gbif_creds}
+sambar <- read_csv(file.path(gbif_dir, "sambar_gbif.csv"))
+
+sambar <- raw %>%
+  select(species,
+         decimalLongitude, decimalLatitude,
+         year, month,
+         basisOfRecord, gbifID) %>%
+  filter(!is.na(decimalLongitude),
+                !is.na(decimalLatitude),
+                basisOfRecord %in% allowed_basis)
+
+sambar_sf <- st_as_sf(sambar,
+                          coords = c("decimalLongitude", "decimalLatitude"),
+                          crs    = 4326, remove = FALSE)
+
+# Keep only points that actually fall inside Thailand
+inside <- st_within(sambar_sf, tha_sf, sparse = FALSE)[, 1]
+sambar <- sambar[inside, ]
+
+write_csv(sambar, file.path(gbif_dir, "sambar_thailand.csv"))
+
+plot(st_geometry(tha_sf), border = "grey20",
+     main = "Sambar deer occurrences")
+points(sambar$decimalLongitude, sambar$decimalLatitude,
+       pch = 21, bg = "tomato", col = "white", cex = 0.7)
+```
+
+# Step 4 — Shortcut: download everything from Zenodo
+
+If anything in Steps 1–3 fails (GBIF rate-limit, no credentials, slow WorldClim mirror, etc.), participants can skip the live downloads and grab a pre-built copy of the **entire** `data/processed/` tree — including the annual LST + Precip + NDVI rasters Day 3 needs — from the workshop's Zenodo archive:
+
+> **DOI:** <https://zenodo.org/records/20344510>
+> **File:** `processed.zip` (the full `data/processed/` tree, including `temporal_split/`)
+
+The chunk below downloads the zip and unpacks it into `data/` (so paths line up with the rest of the workshop). It is **not run when this notebook is knit** — knitting would force a multi-hundred-MB download every time. Copy the chunk into your console and run it once when you actually need the data.
+
+```{r download-external, eval = FALSE}
+# ---- 1. Download URL ------------------------------------------------------
+zenodo_url <- "https://zenodo.org/records/20344510/files/processed.zip?download=1"
+
+# ---- 2. Download + unpack -------------------------------------------------
+target_dir <- "data"
+dir.create(target_dir, showWarnings = FALSE, recursive = TRUE)
+
+zip_path <- tempfile(fileext = ".zip")
+message("Downloading from: ", zenodo_url)
+utils::download.file(zenodo_url, destfile = zip_path, mode = "wb")
+
+message("Unpacking into: ", normalizePath(target_dir))
+utils::unzip(zip_path, exdir = target_dir, overwrite = TRUE)
+unlink(zip_path)
+```
+
+After running it, `data/processed/{boundary, bioclim, bias, gbif, temporal_split, ...}/` is fully populated and you can move straight on to **Day 1**.
+
+---
+
+Everything Day 1, Day 2, and Day 3 need now lives in `data/processed/`. Day 3 reads its annual rasters from `data/processed/temporal_split/`, populated either by running Step 1 of Day 3 locally or by the Zenodo shortcut above.

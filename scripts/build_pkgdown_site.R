@@ -10,7 +10,7 @@
 #
 # Prerequisites:
 #   * The shared inputs (data/processed/, temporal_rasters/) already exist —
-#     knit Day2a_Data_Download.Rmd first so every vignette can run end-to-end.
+#     knit Day0_Data_Download.Rmd first so every vignette can run end-to-end.
 #   * `pkgdown` is installed.
 # =============================================================================
 
@@ -19,9 +19,9 @@ missing <- needed[!needed %in% rownames(installed.packages())]
 if (length(missing)) install.packages(missing, dependencies = TRUE)
 
 rmds <- c(
+  "Day0_Data_Download.Rmd",
   "Day1_nicheR.Rmd",
-  "Day2a_Data_Download.Rmd",
-  "Day2b_Bean_Processing.Rmd",
+  "Day2_bean.Rmd",
   "Day3_TemporalModelR.Rmd"
 )
 missing_rmds <- rmds[!file.exists(rmds)]
@@ -32,7 +32,7 @@ if (length(missing_rmds)) {
   )
 }
 
-# Tell Day 2a to render its code without hitting GADM / WorldClim / GBIF.
+# Tell Day 0 to render its code without hitting GADM / WorldClim / GBIF.
 # Day 1, 2b, 3 use their own file-existence guards.
 Sys.setenv(PKGDOWN_BUILD = "1")
 on.exit(Sys.unsetenv("PKGDOWN_BUILD"), add = TRUE)

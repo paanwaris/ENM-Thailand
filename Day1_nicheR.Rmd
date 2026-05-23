@@ -27,11 +27,11 @@ knitr::opts_chunk$set(
 
 # Overview
 
-> **Workshop navigation —** part 1 of 4 in the [ENM-Thailand 2026 workshop](https://paanwaris.github.io/ENM-Thailand/).
+> **Workshop navigation —** part of the [ENM-Thailand 2026 workshop](https://paanwaris.github.io/ENM-Thailand/).
 >
+> - [Day 0 — Downloading the workshop data.](https://paanwaris.github.io/ENM-Thailand/articles/Day0_Data_Download.html) Pre-workshop prep: fetch Thailand, WorldClim and GBIF Sambar records.
 > - **Day 1 (this page) — Virtual species with nicheR.** Build an ellipsoid niche by hand and project it.
-> - [Day 2a — Downloading the workshop data.](https://paanwaris.github.io/ENM-Thailand/articles/Day2a_Data_Download.html) Fetch Thailand, WorldClim and GBIF Sambar records.
-> - [Day 2b — Environmental thinning with bean.](https://paanwaris.github.io/ENM-Thailand/articles/Day2b_Bean_Processing.html) Reduce E-space sampling bias before fitting a real niche.
+> - [Day 2 — Environmental thinning with bean.](https://paanwaris.github.io/ENM-Thailand/articles/Day2_bean.html) Reduce E-space sampling bias before fitting a real niche.
 > - [Day 3 — Temporally-explicit SDMs with TemporalModelR.](https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html) Pair each occurrence with the environment it experienced.
 
 `nicheR` is an R package for building and visualising **ellipsoid-based ecological niches** in environmental space (E-space) and projecting them onto geographic space (G-space). Today we treat the niche as a hypothesis we control — a **virtual species** — so we never need any real occurrence data.
@@ -81,7 +81,7 @@ set.seed(2026)
 
 # Data
 
-For Day 1 we work with the WorldClim bioclim rasters and the Thailand polygon. These files are produced by Day 2a (`Day2a_Data_Download.Rmd`) — please knit Day 2a once before Day 1 so the files exist in `data/processed/`.
+For Day 1 we work with the WorldClim bioclim rasters and the Thailand polygon. These files are produced by the pre-workshop notebook `Day0_Data_Download.Rmd` — please knit Day 0 once before Day 1 so the files exist in `data/processed/`.
 
 ```{r load-data}
 bio_path <- "data/processed/bioclim/bioclim_thailand.tif"
@@ -185,7 +185,7 @@ plot(binary_rast,
 
 Real-world surveys are biased toward accessible places. We can simulate that bias and apply it on top of suitability.
 
-For this lesson we use species-richness and nighttime-lights rasters (written by `Day2a_Data_Download.Rmd`) as proxies for survey effort.
+For this lesson we use species-richness and nighttime-lights rasters (written by `Day0_Data_Download.Rmd`) as proxies for survey effort.
 
 ```{r bias-layer}
 sp_rich_layer   <- rast("data/processed/bias/sp_richness_TH.tif")

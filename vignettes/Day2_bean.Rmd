@@ -1,0 +1,11 @@
+---
+title: "Day 2 — Environmental thinning with bean"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Day 2 — Environmental thinning with bean}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r child = "../Day2_bean.Rmd"}
+```
