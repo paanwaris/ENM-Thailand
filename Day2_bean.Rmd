@@ -110,7 +110,7 @@ prepped <- prepare_bean(data        = sambar_xy,
                         env_rasters = env,
                         longitude   = "longitude",
                         latitude    = "latitude",
-                        transform   = "none")
+                        transform   = "scale")
 
 nrow(prepped)
 ```
