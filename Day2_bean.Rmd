@@ -195,12 +195,16 @@ ell_thinned <- fit_ellipsoid(thin_nd$thinned_data,
                              level    = 0.95)
 ```
 
-```{r ell-3d-1, webgl = TRUE, fig.width = 7, fig.height = 6}
+Visualize an ellipsoid of the raw data
+
+```{r ell-3d-1, webgl = TRUE, fig.width = 5, fig.height = 5}
 plot(ell_raw, dims = c(1, 2))
 plot(ell_raw, dims = c(1, 2, 3))
 ```
 
-```{r ell-3d-2, webgl = TRUE, fig.width = 7, fig.height = 6}
+Visualize an ellipsoid of the thinned data
+
+```{r ell-3d-2, webgl = TRUE, fig.width = 5, fig.height = 5}
 plot(ell_thinned, dims = c(1, 2))
 plot(ell_thinned, dims = c(1, 2, 3))
 ```
@@ -208,8 +212,8 @@ plot(ell_thinned, dims = c(1, 2, 3))
 # Step 5 — Project the niche back to G-space
 
 ```{r predict}
-pred_raw <- predict(ell_raw, env)
-pred_thinned <- predict(ell_thinned, env)
+pred_raw <- predict(ell_raw, scale(env))
+pred_thinned <- predict(ell_thinned, scale(env))
 
 par(mfrow = c(1, 2))
 plot(pred_raw$suitability, main = "Suitability — raw data")
