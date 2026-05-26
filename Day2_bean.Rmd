@@ -159,7 +159,7 @@ thin_nd <- thin_env_nd(data            = prepped,
 # Deterministic: replace each occupied pod with its centre
 thin_center <- thin_env_center(data            = prepped,
                                env_vars        = c("bio1", "bio12", "bio15"),
-                               grid_resolution = c(0.5, 50, 20))
+                               grid_resolution = c(1, 1, 1))
 
 thin_nd
 thin_center
@@ -197,14 +197,14 @@ ell_thinned <- fit_ellipsoid(thin_nd$thinned_data,
 
 Visualize an ellipsoid of the raw data
 
-```{r ell-3d-1, webgl = TRUE, fig.width = 5, fig.height = 5}
+```{r ell-3d-1, webgl = TRUE, fig.width = 7, fig.height = 6}
 plot(ell_raw, dims = c(1, 2))
 plot(ell_raw, dims = c(1, 2, 3))
 ```
 
 Visualize an ellipsoid of the thinned data
 
-```{r ell-3d-2, webgl = TRUE, fig.width = 5, fig.height = 5}
+```{r ell-3d-2, webgl = TRUE, fig.width = 7, fig.height = 6}
 plot(ell_thinned, dims = c(1, 2))
 plot(ell_thinned, dims = c(1, 2, 3))
 ```
