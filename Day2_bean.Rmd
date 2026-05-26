@@ -108,11 +108,11 @@ sambar_xy <- sambar %>%
   dplyr::select(longitude = decimalLongitude,
                 latitude  = decimalLatitude)
 
-prepped <- prepare_bean(data        = sambar_xy,
+prepped <- prepare_bean(data = sambar_xy,
                         env_rasters = env,
-                        longitude   = "longitude",
-                        latitude    = "latitude",
-                        transform   = "scale")
+                        longitude = "longitude",
+                        latitude = "latitude",
+                        transform = "scale")
 
 nrow(prepped)
 ```
@@ -147,9 +147,9 @@ Three classic bandwidth selectors are supported:
 If Sheather–Jones fails (this can happen with strongly tied data) the function automatically falls back to Silverman's rule for that variable and emits a message.
 
 ```{r find-res}
-res_search <- find_env_resolution(data     = prepped,
+res_search <- find_env_resolution(data = prepped,
                                   env_vars = c("bio1", "bio12", "bio15"),
-                                  method   = "sheather-jones")
+                                  method = "sheather-jones")
 
 # The print method shows one row per variable
 res_search
@@ -166,9 +166,9 @@ chosen_res
 For comparison, try Silverman's rule of thumb — it usually returns a slightly larger (smoother) cell width because it assumes near-Gaussian shape:
 
 ```{r find-res-silverman}
-res_silverman <- find_env_resolution(data     = prepped,
+res_silverman <- find_env_resolution(data = prepped,
                                      env_vars = c("bio1", "bio12", "bio15"),
-                                     method   = "silverman")
+                                     method = "silverman")
 res_silverman
 ```
 
@@ -178,13 +178,13 @@ res_silverman
 
 ```{r thin}
 # Stochastic: randomly retain one occurrence per "pod"
-thin_nd <- thin_env_nd(data            = prepped,
-                       env_vars        = c("bio1", "bio12", "bio15"),
+thin_nd <- thin_env_nd(data = prepped,
+                       env_vars = c("bio1", "bio12", "bio15"),
                        grid_resolution = chosen_res)
 
 # Deterministic: replace each occupied pod with its centre
-thin_center <- thin_env_center(data            = prepped,
-                               env_vars        = c("bio1", "bio12", "bio15"),
+thin_center <- thin_env_center(data = prepped,
+                               env_vars = c("bio1", "bio12", "bio15"),
                                grid_resolution = chosen_res)
 
 thin_nd
@@ -195,13 +195,13 @@ thin_center
 plot_bean(
   original_data  = prepped,
   thinned_object = thin_nd,
-  env_vars       = c("bio1", "bio12", "bio15")
+  env_vars = c("bio1", "bio12", "bio15")
 )
 
 plot_bean(
-  original_data  = prepped,
+  original_data = prepped,
   thinned_object = thin_center,
-  env_vars       = c("bio1", "bio12", "bio15")
+  env_vars = c("bio1", "bio12", "bio15")
 )
 ```
 
@@ -212,13 +212,13 @@ plot_bean(
 ```{r fit-ellipsoid}
 ell_raw <- fit_ellipsoid(prepped,
                          env_vars = c("bio1", "bio12", "bio15"),
-                         method   = "covmat",
-                         level    = 0.95)
+                         method = "covmat",
+                         level = 0.95)
 
 ell_thinned <- fit_ellipsoid(thin_nd$thinned_data,
                              env_vars = c("bio1", "bio12", "bio15"),
-                             method   = "covmat",
-                             level    = 0.95)
+                             method = "covmat",
+                             level = 0.95)
 ```
 
 Visualize an ellipsoid of the raw data
