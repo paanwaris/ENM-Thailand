@@ -90,14 +90,14 @@ library(readr)
 ```
 
 ```{r paths}
-raw_dir       <- "data/raw"
+raw_dir <- "data/raw"
 processed_dir <- "data/processed"
 
 # data/processed/ is organised into role-based subfolders.
 boundary_dir <- file.path(processed_dir, "boundary")   # Thailand polygon
-bioclim_dir  <- file.path(processed_dir, "bioclim")    # WorldClim layers
-bias_dir     <- file.path(processed_dir, "bias")       # sampling-bias proxies (Day 1)
-gbif_dir     <- file.path(processed_dir, "gbif")       # GBIF Sambar records
+bioclim_dir <- file.path(processed_dir, "bioclim")    # WorldClim layers
+bias_dir <- file.path(processed_dir, "bias")       # sampling-bias proxies (Day 1)
+gbif_dir <- file.path(processed_dir, "gbif")       # GBIF Sambar records
 
 for (d in c(raw_dir, processed_dir,
             boundary_dir, bioclim_dir, bias_dir, gbif_dir)) {
@@ -168,9 +168,9 @@ These are the field-observation types most relevant for ENM/SDM. Fossil, machine
 
 ```{r gbif-creds}
 options(
-  gbif_user  = Sys.getenv("GBIF_USER",  unset = "[YOUR_GBIF_USERNAME]"),
+  gbif_user = Sys.getenv("GBIF_USER", unset = "[YOUR_GBIF_USERNAME]"),
   gbif_email = Sys.getenv("GBIF_EMAIL", unset = "[YOUR_EMAIL]"),
-  gbif_pwd   = Sys.getenv("GBIF_PWD",   unset = "[YOUR_GBIF_PASSWORD]")
+  gbif_pwd = Sys.getenv("GBIF_PWD", unset = "[YOUR_GBIF_PASSWORD]")
 )
 
 # If no real credentials are present (e.g. fresh clone, GitHub Actions),
@@ -188,12 +188,12 @@ allowed_basis <- c("HUMAN_OBSERVATION", "OCCURRENCE", "OBSERVATION")
 
 raw_list <- lapply(allowed_basis, function(b) {
   rgbif::occ_search(
-    taxonKey            = key,
-    country             = "TH",
-    basisOfRecord       = b,
-    hasCoordinate       = TRUE,
-    hasGeospatialIssue  = FALSE,
-    limit               = 5000
+    taxonKey = key,
+    country = "TH",
+    basisOfRecord = b,
+    hasCoordinate = TRUE,
+    hasGeospatialIssue = FALSE,
+    limit = 5000
   )$data
 })
 
@@ -223,7 +223,7 @@ sambar <- raw %>%
 
 sambar_sf <- st_as_sf(sambar,
                           coords = c("decimalLongitude", "decimalLatitude"),
-                          crs    = 4326, remove = FALSE)
+                          crs = 4326, remove = FALSE)
 
 # Keep only points that actually fall inside Thailand
 inside <- st_within(sambar_sf, tha_sf, sparse = FALSE)[, 1]
