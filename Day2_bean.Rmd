@@ -63,9 +63,11 @@ to_install <- cran_pkgs[!cran_pkgs %in% rownames(installed.packages())]
 if (length(to_install)) install.packages(to_install, dependencies = TRUE)
 
 # ---- bean from GitHub ------------------------------------------------------
-if (!requireNamespace("bean", quietly = TRUE)) {
-  remotes::install_github("paanwaris/bean", upgrade = "never")
-}
+# Always pull the latest bean (the find_env_resolution() API was rewritten;
+# old installs will not have the new KDE-bandwidth selectors).
+remotes::install_github("paanwaris/bean",
+                        upgrade = "never",
+                        force   = TRUE)
 ```
 
 ```{r packages}
@@ -134,21 +136,45 @@ par(mfrow = c(1, 1))
 
 # Step 2 — Choose an objective environmental resolution
 
-`find_env_resolution()` walks a grid of candidate resolutions, looks at the average nearest-neighbour distance among points after thinning, and identifies the "elbow" where dense artificial clustering ends.
+`find_env_resolution()` derives a **per-variable** environmental grid resolution from the kernel-density bandwidth of each variable's marginal distribution. The intuition: at the bandwidth scale, two occurrences carry essentially the same environmental information, so it is a natural cell width for thinning. The function returns one suggested resolution per environmental variable, in the units of that variable.
+
+Three classic bandwidth selectors are supported:
+
+- `"sheather-jones"` *(default)* — Sheather & Jones (1991) plug-in selector; robust for non-Gaussian data and the modern recommended default.
+- `"silverman"` — Silverman's rule of thumb; fast and stable when the distribution is roughly Gaussian.
+- `"scott"` — Scott's rule; the Gaussian-optimal variant of Silverman.
+
+If Sheather–Jones fails (this can happen with strongly tied data) the function automatically falls back to Silverman's rule for that variable and emits a message.
 
 ```{r find-res}
 res_search <- find_env_resolution(data     = prepped,
-                                  env_vars = c("bio1", "bio12", "bio15"))
+                                  env_vars = c("bio1", "bio12", "bio15"),
+                                  method   = "sheather-jones")
 
+# The print method shows one row per variable
+res_search
+
+# The plot method draws one KDE panel per variable, with the bandwidth
+# shown as a red scale bar = the suggested cell width
 plot(res_search)
 
+# The named numeric vector we'll pass to the thinning functions below
 chosen_res <- res_search$suggested_resolution
 chosen_res
 ```
 
+For comparison, try Silverman's rule of thumb — it usually returns a slightly larger (smoother) cell width because it assumes near-Gaussian shape:
+
+```{r find-res-silverman}
+res_silverman <- find_env_resolution(data     = prepped,
+                                     env_vars = c("bio1", "bio12", "bio15"),
+                                     method   = "silverman")
+res_silverman
+```
+
 # Step 3 — Apply thinning
 
-`bean` ships two thinning strategies; we run both for comparison.
+`bean` ships two thinning strategies; we run both for comparison. Both accept the **per-variable** resolution returned by `find_env_resolution()` — one cell width per variable, in that variable's units.
 
 ```{r thin}
 # Stochastic: randomly retain one occurrence per "pod"
@@ -159,7 +185,7 @@ thin_nd <- thin_env_nd(data            = prepped,
 # Deterministic: replace each occupied pod with its centre
 thin_center <- thin_env_center(data            = prepped,
                                env_vars        = c("bio1", "bio12", "bio15"),
-                               grid_resolution = c(1, 1, 1))
+                               grid_resolution = chosen_res)
 
 thin_nd
 thin_center
