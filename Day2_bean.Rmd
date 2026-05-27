@@ -248,11 +248,7 @@ par(mfrow = c(1, 1))
 ```
 
 ```{r save}
-dir.create("outputs", showWarnings = FALSE)
-terra::writeRaster(pred_thinned,
-                   "outputs/Day2_suitability_sambar_thinned.tif",
-                   overwrite = TRUE)
-saveRDS(ell_thinned, "outputs/Day2_ellipsoid_thinned.rds")
+write.csv(ell_thinned$all_points_used, "data/processed/gbif/sambar_thailand_thinned.csv")
 ```
 
 # Wrap-up

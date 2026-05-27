@@ -73,10 +73,19 @@ if (length(to_install)) install.packages(to_install, dependencies = TRUE)
 if (!requireNamespace("TemporalModelR", quietly = TRUE)) {
   remotes::install_github("CJHughes926/TemporalModelR")
 }
+
+# ---- bean from GitHub ------------------------------------------------------
+# Used for per-year environmental thinning of occurrences (Day 3 borrows the
+# Day 2 workflow). Force-reinstall so users pick up the new KDE-based
+# find_env_resolution() API.
+remotes::install_github("paanwaris/bean",
+                        upgrade = "never",
+                        force   = TRUE)
 ```
 
 ```{r packages}
 library(TemporalModelR)
+library(bean)
 library(terra)
 library(sf)
 library(dplyr)
@@ -130,6 +139,65 @@ raster_align(
 )
 
 par(mfrow = c(1, 1))
+```
+
+## Per-year environmental thinning with `bean`
+
+Before any temporal extraction, reduce **environmental sampling bias within each year** using `bean`. We use the three current environmental layers loaded above (`prec_ex`, `temp_ex`, `NDVI_ex`) as a common reference E-space, and call `find_env_resolution()` + `thin_env_nd()` with their defaults (Sheather–Jones bandwidth selector for the cell width, stochastic per-pod thinning).
+
+Every column of the original `sambar` table is preserved on the output (we recover the kept rows by matching on `longitude`/`latitude`), so the rest of the temporally-explicit pipeline — rarefaction, extraction, partitioning, modelling — works on the thinned table without any further changes.
+
+```{r year-thin}
+# Reference E-space for thinning (the three "current" layers above)
+env_ref <- c(prec_ex, temp_ex, NDVI_ex)
+names(env_ref) <- c("prec", "temp", "NDVI")
+
+# Per-year thinning, applied independently to every year of records.
+sambar_thinned <- do.call(rbind, lapply(split(sambar, sambar$year),
+                                        function(yr_df) {
+
+  # find_env_resolution() needs at least four complete cases.
+  if (nrow(yr_df) < 5) return(yr_df)
+
+  # Slim down to just coordinates for bean; full attributes are recovered
+  # below by joining on (longitude, latitude).
+  yr_xy <- yr_df[, c("longitude", "latitude")]
+
+  prepped <- prepare_bean(
+    data        = yr_xy,
+    env_rasters = env_ref,
+    longitude   = "longitude",
+    latitude    = "latitude",
+    transform   = "scale"
+  )
+
+  res <- find_env_resolution(
+    data     = prepped,
+    env_vars = c("prec", "temp", "NDVI")
+  )
+
+  thin_out <- thin_env_nd(
+    data            = prepped,
+    env_vars        = c("prec", "temp", "NDVI"),
+    grid_resolution = res$suggested_resolution
+  )
+
+  # Recover every original column by matching on the coordinate pair.
+  keep_key <- paste(thin_out$thinned_data$longitude,
+                    thin_out$thinned_data$latitude)
+  yr_df[paste(yr_df$longitude, yr_df$latitude) %in% keep_key, , drop = FALSE]
+}))
+
+# Before / after counts per year
+data.frame(
+  year   = sort(unique(sambar$year)),
+  before = as.integer(table(sambar$year)),
+  after  = as.integer(table(factor(sambar_thinned$year,
+                                   levels = sort(unique(sambar$year)))))
+)
+
+# Use the thinned table for everything that follows.
+sambar <- sambar_thinned
 ```
 
 ## Spatio-temporal rarefaction
@@ -419,7 +487,7 @@ regional$plots$total_change_by_unit
 
 What we covered:
 
-- Read pre-prepared annual precipitation, temperature rasters, and NDVI (2000–2025) directly from `temporal_rasters/` and stacked them — **no new downloads**.
+- Read pre-prepared annual precipitation, temperature rasters, and NDVI (2000–2025) directly from `temporal_split/` and stacked them — **no new downloads**.
 - Built a fully temporally-explicit pipeline: time-stamped occurrences ↔ time-stamped rasters.
 - Used spatio-temporal cross-validation folds and fold-stratified pseudoabsences.
 - Fit GLM and RF temporal models and projected through time.
