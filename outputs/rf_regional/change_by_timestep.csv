@@ -74,7 +74,7 @@
 "Buri Ram",2018,0,0
 "Buri Ram",2019,0,0
 "Buri Ram",2020,0,0
-"Buri Ram",2021,0,0
+"Buri Ram",2021,1,0
 "Buri Ram",2022,0,0
 "Buri Ram",2023,0,0
 "Buri Ram",2024,0,0
@@ -82,12 +82,12 @@
 "Chachoengsao",2010,0,0
 "Chachoengsao",2011,0,0
 "Chachoengsao",2012,0,0
-"Chachoengsao",2013,0,1
-"Chachoengsao",2014,0,0
+"Chachoengsao",2013,0,3
+"Chachoengsao",2014,0,4
 "Chachoengsao",2015,0,0
-"Chachoengsao",2016,0,0
-"Chachoengsao",2017,0,1
-"Chachoengsao",2018,0,0
+"Chachoengsao",2016,0,1
+"Chachoengsao",2017,0,0
+"Chachoengsao",2018,0,1
 "Chachoengsao",2019,0,0
 "Chachoengsao",2020,0,0
 "Chachoengsao",2021,0,0
@@ -114,12 +114,12 @@
 "Chaiyaphum",2010,0,0
 "Chaiyaphum",2011,0,0
 "Chaiyaphum",2012,0,0
-"Chaiyaphum",2013,0,3
+"Chaiyaphum",2013,0,4
 "Chaiyaphum",2014,0,0
 "Chaiyaphum",2015,0,0
 "Chaiyaphum",2016,0,0
 "Chaiyaphum",2017,0,0
-"Chaiyaphum",2018,0,0
+"Chaiyaphum",2018,1,0
 "Chaiyaphum",2019,0,0
 "Chaiyaphum",2020,0,0
 "Chaiyaphum",2021,0,0
@@ -130,10 +130,10 @@
 "Chanthaburi",2010,0,0
 "Chanthaburi",2011,0,0
 "Chanthaburi",2012,0,0
-"Chanthaburi",2013,0,1
-"Chanthaburi",2014,0,3
+"Chanthaburi",2013,0,7
+"Chanthaburi",2014,0,2
 "Chanthaburi",2015,0,0
-"Chanthaburi",2016,0,0
+"Chanthaburi",2016,1,0
 "Chanthaburi",2017,0,1
 "Chanthaburi",2018,0,0
 "Chanthaburi",2019,0,0
@@ -146,15 +146,15 @@
 "Chiang Mai",2010,0,0
 "Chiang Mai",2011,0,0
 "Chiang Mai",2012,0,0
-"Chiang Mai",2013,0,1
-"Chiang Mai",2014,1,1
-"Chiang Mai",2015,1,1
+"Chiang Mai",2013,0,2
+"Chiang Mai",2014,0,2
+"Chiang Mai",2015,2,1
 "Chiang Mai",2016,0,0
-"Chiang Mai",2017,0,3
-"Chiang Mai",2018,1,1
-"Chiang Mai",2019,0,3
+"Chiang Mai",2017,1,0
+"Chiang Mai",2018,0,0
+"Chiang Mai",2019,0,4
 "Chiang Mai",2020,0,1
-"Chiang Mai",2021,1,0
+"Chiang Mai",2021,0,1
 "Chiang Mai",2022,0,0
 "Chiang Mai",2023,0,0
 "Chiang Mai",2024,0,0
@@ -162,15 +162,15 @@
 "Chiang Rai",2010,0,0
 "Chiang Rai",2011,0,0
 "Chiang Rai",2012,0,0
-"Chiang Rai",2013,0,1
+"Chiang Rai",2013,0,4
 "Chiang Rai",2014,0,1
-"Chiang Rai",2015,1,1
-"Chiang Rai",2016,0,1
-"Chiang Rai",2017,0,1
-"Chiang Rai",2018,0,2
-"Chiang Rai",2019,0,3
+"Chiang Rai",2015,2,0
+"Chiang Rai",2016,2,0
+"Chiang Rai",2017,0,0
+"Chiang Rai",2018,0,1
+"Chiang Rai",2019,0,2
 "Chiang Rai",2020,0,0
-"Chiang Rai",2021,0,0
+"Chiang Rai",2021,0,1
 "Chiang Rai",2022,0,0
 "Chiang Rai",2023,0,0
 "Chiang Rai",2024,0,0
@@ -178,10 +178,10 @@
 "Chon Buri",2010,0,0
 "Chon Buri",2011,0,0
 "Chon Buri",2012,0,0
-"Chon Buri",2013,0,1
-"Chon Buri",2014,0,0
+"Chon Buri",2013,0,2
+"Chon Buri",2014,1,2
 "Chon Buri",2015,0,0
-"Chon Buri",2016,0,0
+"Chon Buri",2016,0,1
 "Chon Buri",2017,0,0
 "Chon Buri",2018,0,0
 "Chon Buri",2019,0,0
@@ -194,15 +194,15 @@
 "Chumphon",2010,0,0
 "Chumphon",2011,0,0
 "Chumphon",2012,0,0
-"Chumphon",2013,0,1
-"Chumphon",2014,0,2
+"Chumphon",2013,0,3
+"Chumphon",2014,0,0
 "Chumphon",2015,0,0
 "Chumphon",2016,0,0
-"Chumphon",2017,0,0
-"Chumphon",2018,0,0
-"Chumphon",2019,0,0
-"Chumphon",2020,3,0
-"Chumphon",2021,0,0
+"Chumphon",2017,1,0
+"Chumphon",2018,1,0
+"Chumphon",2019,1,1
+"Chumphon",2020,0,0
+"Chumphon",2021,1,0
 "Chumphon",2022,0,0
 "Chumphon",2023,0,0
 "Chumphon",2024,0,0
@@ -210,14 +210,14 @@
 "Kalasin",2010,0,0
 "Kalasin",2011,0,0
 "Kalasin",2012,0,0
-"Kalasin",2013,0,1
-"Kalasin",2014,0,2
+"Kalasin",2013,0,0
+"Kalasin",2014,0,0
 "Kalasin",2015,0,0
-"Kalasin",2016,0,0
-"Kalasin",2017,0,0
-"Kalasin",2018,0,1
+"Kalasin",2016,0,1
+"Kalasin",2017,0,2
+"Kalasin",2018,0,0
 "Kalasin",2019,0,0
-"Kalasin",2020,0,0
+"Kalasin",2020,0,1
 "Kalasin",2021,0,0
 "Kalasin",2022,0,0
 "Kalasin",2023,0,0
@@ -226,11 +226,11 @@
 "Kamphaeng Phet",2010,0,0
 "Kamphaeng Phet",2011,0,0
 "Kamphaeng Phet",2012,0,0
-"Kamphaeng Phet",2013,0,2
+"Kamphaeng Phet",2013,0,1
 "Kamphaeng Phet",2014,0,1
 "Kamphaeng Phet",2015,0,0
-"Kamphaeng Phet",2016,0,1
-"Kamphaeng Phet",2017,0,1
+"Kamphaeng Phet",2016,0,0
+"Kamphaeng Phet",2017,1,2
 "Kamphaeng Phet",2018,0,0
 "Kamphaeng Phet",2019,0,0
 "Kamphaeng Phet",2020,0,0
@@ -242,14 +242,14 @@
 "Kanchanaburi",2010,0,0
 "Kanchanaburi",2011,0,0
 "Kanchanaburi",2012,0,0
-"Kanchanaburi",2013,0,14
+"Kanchanaburi",2013,0,10
 "Kanchanaburi",2014,0,3
 "Kanchanaburi",2015,0,0
-"Kanchanaburi",2016,0,0
-"Kanchanaburi",2017,0,2
-"Kanchanaburi",2018,0,1
-"Kanchanaburi",2019,0,4
-"Kanchanaburi",2020,0,1
+"Kanchanaburi",2016,0,3
+"Kanchanaburi",2017,1,3
+"Kanchanaburi",2018,0,3
+"Kanchanaburi",2019,1,3
+"Kanchanaburi",2020,0,0
 "Kanchanaburi",2021,0,0
 "Kanchanaburi",2022,0,0
 "Kanchanaburi",2023,0,0
@@ -259,11 +259,11 @@
 "Khon Kaen",2011,0,0
 "Khon Kaen",2012,0,0
 "Khon Kaen",2013,0,0
-"Khon Kaen",2014,0,1
+"Khon Kaen",2014,0,0
 "Khon Kaen",2015,0,0
-"Khon Kaen",2016,0,0
+"Khon Kaen",2016,0,1
 "Khon Kaen",2017,0,0
-"Khon Kaen",2018,0,0
+"Khon Kaen",2018,1,0
 "Khon Kaen",2019,0,0
 "Khon Kaen",2020,0,0
 "Khon Kaen",2021,0,0
@@ -274,15 +274,15 @@
 "Krabi",2010,0,0
 "Krabi",2011,0,0
 "Krabi",2012,0,0
-"Krabi",2013,0,0
-"Krabi",2014,0,0
+"Krabi",2013,0,1
+"Krabi",2014,1,0
 "Krabi",2015,0,0
 "Krabi",2016,0,0
 "Krabi",2017,0,0
 "Krabi",2018,0,0
 "Krabi",2019,0,0
 "Krabi",2020,0,0
-"Krabi",2021,0,0
+"Krabi",2021,1,0
 "Krabi",2022,0,0
 "Krabi",2023,0,0
 "Krabi",2024,0,0
@@ -290,12 +290,12 @@
 "Lampang",2010,0,0
 "Lampang",2011,0,0
 "Lampang",2012,0,0
-"Lampang",2013,0,3
-"Lampang",2014,0,3
-"Lampang",2015,0,1
-"Lampang",2016,0,1
-"Lampang",2017,0,4
-"Lampang",2018,0,0
+"Lampang",2013,0,2
+"Lampang",2014,0,1
+"Lampang",2015,1,1
+"Lampang",2016,0,2
+"Lampang",2017,0,1
+"Lampang",2018,0,2
 "Lampang",2019,0,2
 "Lampang",2020,0,0
 "Lampang",2021,0,0
@@ -306,15 +306,15 @@
 "Lamphun",2010,0,0
 "Lamphun",2011,0,0
 "Lamphun",2012,0,0
-"Lamphun",2013,0,2
-"Lamphun",2014,0,1
+"Lamphun",2013,0,0
+"Lamphun",2014,0,0
 "Lamphun",2015,0,0
 "Lamphun",2016,0,0
 "Lamphun",2017,0,0
 "Lamphun",2018,0,0
 "Lamphun",2019,0,0
 "Lamphun",2020,0,0
-"Lamphun",2021,1,0
+"Lamphun",2021,0,0
 "Lamphun",2022,0,0
 "Lamphun",2023,0,0
 "Lamphun",2024,0,0
@@ -322,14 +322,14 @@
 "Loei",2010,0,0
 "Loei",2011,0,0
 "Loei",2012,0,0
-"Loei",2013,0,1
-"Loei",2014,0,4
-"Loei",2015,0,1
-"Loei",2016,0,1
-"Loei",2017,0,3
-"Loei",2018,0,2
-"Loei",2019,0,1
-"Loei",2020,0,0
+"Loei",2013,0,3
+"Loei",2014,0,1
+"Loei",2015,0,0
+"Loei",2016,0,2
+"Loei",2017,0,0
+"Loei",2018,0,0
+"Loei",2019,0,0
+"Loei",2020,0,1
 "Loei",2021,0,0
 "Loei",2022,0,0
 "Loei",2023,0,0
@@ -338,7 +338,7 @@
 "Lop Buri",2010,0,0
 "Lop Buri",2011,0,0
 "Lop Buri",2012,0,0
-"Lop Buri",2013,2,0
+"Lop Buri",2013,0,0
 "Lop Buri",2014,0,0
 "Lop Buri",2015,0,0
 "Lop Buri",2016,0,0
@@ -355,13 +355,13 @@
 "Mae Hong Son",2011,0,0
 "Mae Hong Son",2012,0,0
 "Mae Hong Son",2013,0,0
-"Mae Hong Son",2014,0,0
-"Mae Hong Son",2015,0,1
+"Mae Hong Son",2014,1,0
+"Mae Hong Son",2015,0,0
 "Mae Hong Son",2016,0,0
-"Mae Hong Son",2017,0,1
-"Mae Hong Son",2018,0,1
-"Mae Hong Son",2019,0,0
-"Mae Hong Son",2020,0,1
+"Mae Hong Son",2017,0,0
+"Mae Hong Son",2018,0,0
+"Mae Hong Son",2019,0,1
+"Mae Hong Son",2020,0,0
 "Mae Hong Son",2021,0,0
 "Mae Hong Son",2022,0,0
 "Mae Hong Son",2023,0,0
@@ -393,7 +393,7 @@
 "Mukdahan",2017,0,0
 "Mukdahan",2018,0,0
 "Mukdahan",2019,0,0
-"Mukdahan",2020,0,0
+"Mukdahan",2020,0,2
 "Mukdahan",2021,0,0
 "Mukdahan",2022,0,0
 "Mukdahan",2023,0,0
@@ -410,7 +410,7 @@
 "Nakhon Nayok",2018,0,0
 "Nakhon Nayok",2019,0,0
 "Nakhon Nayok",2020,0,0
-"Nakhon Nayok",2021,0,0
+"Nakhon Nayok",2021,1,0
 "Nakhon Nayok",2022,0,0
 "Nakhon Nayok",2023,0,0
 "Nakhon Nayok",2024,0,0
@@ -450,15 +450,15 @@
 "Nakhon Ratchasima",2010,0,0
 "Nakhon Ratchasima",2011,0,0
 "Nakhon Ratchasima",2012,0,0
-"Nakhon Ratchasima",2013,0,3
-"Nakhon Ratchasima",2014,0,0
+"Nakhon Ratchasima",2013,0,0
+"Nakhon Ratchasima",2014,1,0
 "Nakhon Ratchasima",2015,0,0
 "Nakhon Ratchasima",2016,0,0
 "Nakhon Ratchasima",2017,0,0
 "Nakhon Ratchasima",2018,0,0
-"Nakhon Ratchasima",2019,0,1
-"Nakhon Ratchasima",2020,0,0
-"Nakhon Ratchasima",2021,0,0
+"Nakhon Ratchasima",2019,0,0
+"Nakhon Ratchasima",2020,1,0
+"Nakhon Ratchasima",2021,0,1
 "Nakhon Ratchasima",2022,0,0
 "Nakhon Ratchasima",2023,0,0
 "Nakhon Ratchasima",2024,0,0
@@ -466,13 +466,13 @@
 "Nakhon Sawan",2010,0,0
 "Nakhon Sawan",2011,0,0
 "Nakhon Sawan",2012,0,0
-"Nakhon Sawan",2013,0,0
-"Nakhon Sawan",2014,0,1
+"Nakhon Sawan",2013,0,1
+"Nakhon Sawan",2014,0,0
 "Nakhon Sawan",2015,0,0
 "Nakhon Sawan",2016,0,0
 "Nakhon Sawan",2017,0,0
 "Nakhon Sawan",2018,0,0
-"Nakhon Sawan",2019,0,1
+"Nakhon Sawan",2019,0,0
 "Nakhon Sawan",2020,0,0
 "Nakhon Sawan",2021,0,0
 "Nakhon Sawan",2022,0,0
@@ -482,15 +482,15 @@
 "Nakhon Si Thammarat",2010,0,0
 "Nakhon Si Thammarat",2011,0,0
 "Nakhon Si Thammarat",2012,0,0
-"Nakhon Si Thammarat",2013,0,0
+"Nakhon Si Thammarat",2013,0,2
 "Nakhon Si Thammarat",2014,0,1
-"Nakhon Si Thammarat",2015,1,0
+"Nakhon Si Thammarat",2015,1,1
 "Nakhon Si Thammarat",2016,0,0
 "Nakhon Si Thammarat",2017,0,0
 "Nakhon Si Thammarat",2018,0,0
-"Nakhon Si Thammarat",2019,0,0
-"Nakhon Si Thammarat",2020,0,0
-"Nakhon Si Thammarat",2021,0,0
+"Nakhon Si Thammarat",2019,3,0
+"Nakhon Si Thammarat",2020,0,1
+"Nakhon Si Thammarat",2021,1,0
 "Nakhon Si Thammarat",2022,0,0
 "Nakhon Si Thammarat",2023,0,0
 "Nakhon Si Thammarat",2024,0,0
@@ -498,14 +498,14 @@
 "Nan",2010,0,0
 "Nan",2011,0,0
 "Nan",2012,0,0
-"Nan",2013,0,2
-"Nan",2014,0,4
+"Nan",2013,0,5
+"Nan",2014,0,3
 "Nan",2015,0,2
-"Nan",2016,1,2
+"Nan",2016,0,1
 "Nan",2017,0,1
-"Nan",2018,0,0
-"Nan",2019,0,3
-"Nan",2020,0,1
+"Nan",2018,0,1
+"Nan",2019,1,2
+"Nan",2020,0,0
 "Nan",2021,0,0
 "Nan",2022,0,0
 "Nan",2023,0,0
@@ -514,15 +514,15 @@
 "Narathiwat",2010,0,0
 "Narathiwat",2011,0,0
 "Narathiwat",2012,0,0
-"Narathiwat",2013,0,0
+"Narathiwat",2013,1,0
 "Narathiwat",2014,0,0
 "Narathiwat",2015,0,0
-"Narathiwat",2016,0,0
+"Narathiwat",2016,1,0
 "Narathiwat",2017,0,0
-"Narathiwat",2018,0,0
+"Narathiwat",2018,1,0
 "Narathiwat",2019,0,0
-"Narathiwat",2020,0,0
-"Narathiwat",2021,3,0
+"Narathiwat",2020,1,0
+"Narathiwat",2021,2,0
 "Narathiwat",2022,0,0
 "Narathiwat",2023,0,0
 "Narathiwat",2024,0,0
@@ -530,9 +530,9 @@
 "Nong Bua Lam Phu",2010,0,0
 "Nong Bua Lam Phu",2011,0,0
 "Nong Bua Lam Phu",2012,0,0
-"Nong Bua Lam Phu",2013,0,0
+"Nong Bua Lam Phu",2013,0,1
 "Nong Bua Lam Phu",2014,0,0
-"Nong Bua Lam Phu",2015,0,1
+"Nong Bua Lam Phu",2015,0,0
 "Nong Bua Lam Phu",2016,0,0
 "Nong Bua Lam Phu",2017,0,0
 "Nong Bua Lam Phu",2018,0,0
@@ -596,11 +596,11 @@
 "Pattani",2012,0,0
 "Pattani",2013,0,0
 "Pattani",2014,0,0
-"Pattani",2015,0,0
-"Pattani",2016,0,0
+"Pattani",2015,1,0
+"Pattani",2016,0,2
 "Pattani",2017,0,0
 "Pattani",2018,0,0
-"Pattani",2019,0,0
+"Pattani",2019,0,1
 "Pattani",2020,0,0
 "Pattani",2021,0,0
 "Pattani",2022,0,0
@@ -610,9 +610,9 @@
 "Phangnga",2010,0,0
 "Phangnga",2011,0,0
 "Phangnga",2012,0,0
-"Phangnga",2013,0,0
-"Phangnga",2014,0,1
-"Phangnga",2015,0,1
+"Phangnga",2013,2,2
+"Phangnga",2014,1,0
+"Phangnga",2015,0,0
 "Phangnga",2016,0,0
 "Phangnga",2017,0,0
 "Phangnga",2018,0,0
@@ -626,15 +626,15 @@
 "Phatthalung",2010,0,0
 "Phatthalung",2011,0,0
 "Phatthalung",2012,0,0
-"Phatthalung",2013,0,0
-"Phatthalung",2014,0,0
+"Phatthalung",2013,0,2
+"Phatthalung",2014,1,0
 "Phatthalung",2015,0,0
-"Phatthalung",2016,1,0
+"Phatthalung",2016,0,1
 "Phatthalung",2017,0,0
 "Phatthalung",2018,0,0
 "Phatthalung",2019,0,0
 "Phatthalung",2020,0,0
-"Phatthalung",2021,0,0
+"Phatthalung",2021,0,1
 "Phatthalung",2022,0,0
 "Phatthalung",2023,0,0
 "Phatthalung",2024,0,0
@@ -642,14 +642,14 @@
 "Phayao",2010,0,0
 "Phayao",2011,0,0
 "Phayao",2012,0,0
-"Phayao",2013,0,2
+"Phayao",2013,0,7
 "Phayao",2014,0,2
-"Phayao",2015,0,1
-"Phayao",2016,1,2
-"Phayao",2017,0,1
-"Phayao",2018,0,0
-"Phayao",2019,0,1
-"Phayao",2020,0,0
+"Phayao",2015,0,0
+"Phayao",2016,0,2
+"Phayao",2017,0,0
+"Phayao",2018,0,1
+"Phayao",2019,0,0
+"Phayao",2020,1,0
 "Phayao",2021,0,0
 "Phayao",2022,0,0
 "Phayao",2023,0,0
@@ -658,12 +658,12 @@
 "Phetchabun",2010,0,0
 "Phetchabun",2011,0,0
 "Phetchabun",2012,0,0
-"Phetchabun",2013,0,2
-"Phetchabun",2014,0,4
+"Phetchabun",2013,0,3
+"Phetchabun",2014,0,1
 "Phetchabun",2015,0,1
 "Phetchabun",2016,0,0
-"Phetchabun",2017,1,0
-"Phetchabun",2018,0,4
+"Phetchabun",2017,0,0
+"Phetchabun",2018,0,0
 "Phetchabun",2019,0,0
 "Phetchabun",2020,0,0
 "Phetchabun",2021,0,0
@@ -674,14 +674,14 @@
 "Phetchaburi",2010,0,0
 "Phetchaburi",2011,0,0
 "Phetchaburi",2012,0,0
-"Phetchaburi",2013,0,5
-"Phetchaburi",2014,0,3
+"Phetchaburi",2013,0,9
+"Phetchaburi",2014,0,4
 "Phetchaburi",2015,0,0
 "Phetchaburi",2016,0,0
 "Phetchaburi",2017,0,1
 "Phetchaburi",2018,0,0
-"Phetchaburi",2019,0,0
-"Phetchaburi",2020,0,0
+"Phetchaburi",2019,0,2
+"Phetchaburi",2020,0,1
 "Phetchaburi",2021,0,0
 "Phetchaburi",2022,0,0
 "Phetchaburi",2023,0,0
@@ -707,14 +707,14 @@
 "Phitsanulok",2011,0,0
 "Phitsanulok",2012,0,0
 "Phitsanulok",2013,0,0
-"Phitsanulok",2014,0,2
+"Phitsanulok",2014,0,1
 "Phitsanulok",2015,0,0
-"Phitsanulok",2016,0,0
-"Phitsanulok",2017,0,2
-"Phitsanulok",2018,1,1
+"Phitsanulok",2016,1,0
+"Phitsanulok",2017,0,0
+"Phitsanulok",2018,0,1
 "Phitsanulok",2019,0,0
 "Phitsanulok",2020,0,0
-"Phitsanulok",2021,0,0
+"Phitsanulok",2021,0,1
 "Phitsanulok",2022,0,0
 "Phitsanulok",2023,0,0
 "Phitsanulok",2024,0,0
@@ -738,13 +738,13 @@
 "Phrae",2010,0,0
 "Phrae",2011,0,0
 "Phrae",2012,0,0
-"Phrae",2013,0,0
-"Phrae",2014,0,3
+"Phrae",2013,0,1
+"Phrae",2014,0,0
 "Phrae",2015,0,0
 "Phrae",2016,0,1
 "Phrae",2017,0,2
-"Phrae",2018,0,1
-"Phrae",2019,0,1
+"Phrae",2018,0,0
+"Phrae",2019,0,0
 "Phrae",2020,0,0
 "Phrae",2021,0,0
 "Phrae",2022,0,0
@@ -770,15 +770,15 @@
 "Prachin Buri",2010,0,0
 "Prachin Buri",2011,0,0
 "Prachin Buri",2012,0,0
-"Prachin Buri",2013,0,2
+"Prachin Buri",2013,0,0
 "Prachin Buri",2014,0,1
 "Prachin Buri",2015,0,0
 "Prachin Buri",2016,0,0
-"Prachin Buri",2017,0,1
+"Prachin Buri",2017,0,0
 "Prachin Buri",2018,0,0
-"Prachin Buri",2019,0,1
+"Prachin Buri",2019,0,0
 "Prachin Buri",2020,0,0
-"Prachin Buri",2021,0,0
+"Prachin Buri",2021,1,1
 "Prachin Buri",2022,0,0
 "Prachin Buri",2023,0,0
 "Prachin Buri",2024,0,0
@@ -786,14 +786,14 @@
 "Prachuap Khiri Khan",2010,0,0
 "Prachuap Khiri Khan",2011,0,0
 "Prachuap Khiri Khan",2012,0,0
-"Prachuap Khiri Khan",2013,0,2
-"Prachuap Khiri Khan",2014,0,3
+"Prachuap Khiri Khan",2013,0,4
+"Prachuap Khiri Khan",2014,0,5
 "Prachuap Khiri Khan",2015,0,0
 "Prachuap Khiri Khan",2016,0,0
 "Prachuap Khiri Khan",2017,0,1
-"Prachuap Khiri Khan",2018,0,1
-"Prachuap Khiri Khan",2019,0,0
-"Prachuap Khiri Khan",2020,0,1
+"Prachuap Khiri Khan",2018,0,0
+"Prachuap Khiri Khan",2019,0,1
+"Prachuap Khiri Khan",2020,0,0
 "Prachuap Khiri Khan",2021,0,0
 "Prachuap Khiri Khan",2022,0,0
 "Prachuap Khiri Khan",2023,0,0
@@ -802,14 +802,14 @@
 "Ranong",2010,0,0
 "Ranong",2011,0,0
 "Ranong",2012,0,0
-"Ranong",2013,0,1
-"Ranong",2014,0,3
-"Ranong",2015,0,1
+"Ranong",2013,1,0
+"Ranong",2014,0,0
+"Ranong",2015,0,0
 "Ranong",2016,0,0
 "Ranong",2017,0,0
-"Ranong",2018,0,0
+"Ranong",2018,1,0
 "Ranong",2019,0,0
-"Ranong",2020,2,0
+"Ranong",2020,0,0
 "Ranong",2021,0,0
 "Ranong",2022,0,0
 "Ranong",2023,0,0
@@ -818,10 +818,10 @@
 "Ratchaburi",2010,0,0
 "Ratchaburi",2011,0,0
 "Ratchaburi",2012,0,0
-"Ratchaburi",2013,0,2
-"Ratchaburi",2014,0,1
-"Ratchaburi",2015,0,0
-"Ratchaburi",2016,1,0
+"Ratchaburi",2013,0,3
+"Ratchaburi",2014,0,0
+"Ratchaburi",2015,1,0
+"Ratchaburi",2016,0,0
 "Ratchaburi",2017,0,1
 "Ratchaburi",2018,0,0
 "Ratchaburi",2019,0,0
@@ -834,12 +834,12 @@
 "Rayong",2010,0,0
 "Rayong",2011,0,0
 "Rayong",2012,0,0
-"Rayong",2013,0,2
+"Rayong",2013,1,2
 "Rayong",2014,0,1
 "Rayong",2015,0,0
 "Rayong",2016,0,0
-"Rayong",2017,0,0
-"Rayong",2018,0,0
+"Rayong",2017,0,1
+"Rayong",2018,1,0
 "Rayong",2019,0,0
 "Rayong",2020,0,0
 "Rayong",2021,0,0
@@ -866,15 +866,15 @@
 "Sa Kaeo",2010,0,0
 "Sa Kaeo",2011,0,0
 "Sa Kaeo",2012,0,0
-"Sa Kaeo",2013,0,3
-"Sa Kaeo",2014,0,1
+"Sa Kaeo",2013,0,2
+"Sa Kaeo",2014,0,2
 "Sa Kaeo",2015,0,0
 "Sa Kaeo",2016,0,0
 "Sa Kaeo",2017,0,0
-"Sa Kaeo",2018,0,1
+"Sa Kaeo",2018,0,0
 "Sa Kaeo",2019,0,0
-"Sa Kaeo",2020,0,1
-"Sa Kaeo",2021,0,0
+"Sa Kaeo",2020,0,0
+"Sa Kaeo",2021,1,0
 "Sa Kaeo",2022,0,0
 "Sa Kaeo",2023,0,0
 "Sa Kaeo",2024,0,0
@@ -882,12 +882,12 @@
 "Sakon Nakhon",2010,0,0
 "Sakon Nakhon",2011,0,0
 "Sakon Nakhon",2012,0,0
-"Sakon Nakhon",2013,0,1
-"Sakon Nakhon",2014,0,2
+"Sakon Nakhon",2013,0,0
+"Sakon Nakhon",2014,0,0
 "Sakon Nakhon",2015,0,0
 "Sakon Nakhon",2016,0,0
-"Sakon Nakhon",2017,0,0
-"Sakon Nakhon",2018,0,1
+"Sakon Nakhon",2017,0,1
+"Sakon Nakhon",2018,0,0
 "Sakon Nakhon",2019,0,0
 "Sakon Nakhon",2020,0,0
 "Sakon Nakhon",2021,0,0
@@ -918,7 +918,7 @@
 "Samut Sakhon",2014,0,0
 "Samut Sakhon",2015,0,0
 "Samut Sakhon",2016,0,0
-"Samut Sakhon",2017,0,0
+"Samut Sakhon",2017,0,1
 "Samut Sakhon",2018,0,0
 "Samut Sakhon",2019,0,0
 "Samut Sakhon",2020,0,0
@@ -932,8 +932,8 @@
 "Samut Songkhram",2012,0,0
 "Samut Songkhram",2013,0,0
 "Samut Songkhram",2014,0,0
-"Samut Songkhram",2015,0,0
-"Samut Songkhram",2016,1,0
+"Samut Songkhram",2015,1,0
+"Samut Songkhram",2016,0,0
 "Samut Songkhram",2017,0,0
 "Samut Songkhram",2018,0,0
 "Samut Songkhram",2019,0,0
@@ -952,7 +952,7 @@
 "Saraburi",2016,0,0
 "Saraburi",2017,0,0
 "Saraburi",2018,0,0
-"Saraburi",2019,1,0
+"Saraburi",2019,0,0
 "Saraburi",2020,0,0
 "Saraburi",2021,0,0
 "Saraburi",2022,0,0
@@ -963,14 +963,14 @@
 "Satun",2011,0,0
 "Satun",2012,0,0
 "Satun",2013,0,0
-"Satun",2014,0,0
+"Satun",2014,1,1
 "Satun",2015,0,0
 "Satun",2016,0,0
-"Satun",2017,1,0
+"Satun",2017,0,0
 "Satun",2018,0,0
-"Satun",2019,0,0
-"Satun",2020,0,0
-"Satun",2021,2,0
+"Satun",2019,0,1
+"Satun",2020,1,0
+"Satun",2021,0,0
 "Satun",2022,0,0
 "Satun",2023,0,0
 "Satun",2024,0,0
@@ -978,12 +978,12 @@
 "Si Sa Ket",2010,0,0
 "Si Sa Ket",2011,0,0
 "Si Sa Ket",2012,0,0
-"Si Sa Ket",2013,0,0
-"Si Sa Ket",2014,0,2
+"Si Sa Ket",2013,0,1
+"Si Sa Ket",2014,0,0
 "Si Sa Ket",2015,0,0
 "Si Sa Ket",2016,0,0
-"Si Sa Ket",2017,0,0
-"Si Sa Ket",2018,0,1
+"Si Sa Ket",2017,1,0
+"Si Sa Ket",2018,0,0
 "Si Sa Ket",2019,0,0
 "Si Sa Ket",2020,0,0
 "Si Sa Ket",2021,0,0
@@ -1010,15 +1010,15 @@
 "Songkhla",2010,0,0
 "Songkhla",2011,0,0
 "Songkhla",2012,0,0
-"Songkhla",2013,0,0
-"Songkhla",2014,1,0
-"Songkhla",2015,0,0
-"Songkhla",2016,0,0
+"Songkhla",2013,3,0
+"Songkhla",2014,2,0
+"Songkhla",2015,4,0
+"Songkhla",2016,0,2
 "Songkhla",2017,0,0
 "Songkhla",2018,0,0
 "Songkhla",2019,0,0
 "Songkhla",2020,0,0
-"Songkhla",2021,2,0
+"Songkhla",2021,1,0
 "Songkhla",2022,0,0
 "Songkhla",2023,0,0
 "Songkhla",2024,0,0
@@ -1028,9 +1028,9 @@
 "Sukhothai",2012,0,0
 "Sukhothai",2013,0,1
 "Sukhothai",2014,0,0
-"Sukhothai",2015,0,0
+"Sukhothai",2015,1,0
 "Sukhothai",2016,0,0
-"Sukhothai",2017,0,1
+"Sukhothai",2017,0,0
 "Sukhothai",2018,0,0
 "Sukhothai",2019,0,0
 "Sukhothai",2020,0,0
@@ -1048,7 +1048,7 @@
 "Suphan Buri",2016,0,0
 "Suphan Buri",2017,0,0
 "Suphan Buri",2018,0,0
-"Suphan Buri",2019,0,0
+"Suphan Buri",2019,1,0
 "Suphan Buri",2020,0,0
 "Suphan Buri",2021,0,0
 "Suphan Buri",2022,0,0
@@ -1058,15 +1058,15 @@
 "Surat Thani",2010,0,0
 "Surat Thani",2011,0,0
 "Surat Thani",2012,0,0
-"Surat Thani",2013,0,1
-"Surat Thani",2014,0,0
-"Surat Thani",2015,0,1
+"Surat Thani",2013,0,2
+"Surat Thani",2014,0,2
+"Surat Thani",2015,0,0
 "Surat Thani",2016,0,0
-"Surat Thani",2017,0,0
-"Surat Thani",2018,0,0
-"Surat Thani",2019,1,0
-"Surat Thani",2020,1,0
-"Surat Thani",2021,0,0
+"Surat Thani",2017,1,0
+"Surat Thani",2018,2,0
+"Surat Thani",2019,6,0
+"Surat Thani",2020,4,0
+"Surat Thani",2021,1,0
 "Surat Thani",2022,0,0
 "Surat Thani",2023,0,0
 "Surat Thani",2024,0,0
@@ -1075,11 +1075,11 @@
 "Surin",2011,0,0
 "Surin",2012,0,0
 "Surin",2013,0,0
-"Surin",2014,0,1
+"Surin",2014,0,0
 "Surin",2015,0,0
 "Surin",2016,0,0
 "Surin",2017,0,0
-"Surin",2018,0,1
+"Surin",2018,0,0
 "Surin",2019,0,0
 "Surin",2020,0,0
 "Surin",2021,0,0
@@ -1090,15 +1090,15 @@
 "Tak",2010,0,0
 "Tak",2011,0,0
 "Tak",2012,0,0
-"Tak",2013,0,3
+"Tak",2013,0,1
 "Tak",2014,0,2
 "Tak",2015,0,0
-"Tak",2016,0,1
-"Tak",2017,0,2
-"Tak",2018,1,0
+"Tak",2016,0,0
+"Tak",2017,4,2
+"Tak",2018,0,1
 "Tak",2019,0,5
-"Tak",2020,0,0
-"Tak",2021,0,1
+"Tak",2020,0,1
+"Tak",2021,0,0
 "Tak",2022,0,0
 "Tak",2023,0,0
 "Tak",2024,0,0
@@ -1106,14 +1106,14 @@
 "Trang",2010,0,0
 "Trang",2011,0,0
 "Trang",2012,0,0
-"Trang",2013,0,0
+"Trang",2013,0,2
 "Trang",2014,0,0
 "Trang",2015,0,0
 "Trang",2016,0,0
 "Trang",2017,0,0
 "Trang",2018,0,0
-"Trang",2019,0,0
-"Trang",2020,0,0
+"Trang",2019,2,0
+"Trang",2020,1,0
 "Trang",2021,0,0
 "Trang",2022,0,0
 "Trang",2023,0,0
@@ -1122,15 +1122,15 @@
 "Trat",2010,0,0
 "Trat",2011,0,0
 "Trat",2012,0,0
-"Trat",2013,0,0
-"Trat",2014,0,1
-"Trat",2015,0,0
+"Trat",2013,0,1
+"Trat",2014,0,0
+"Trat",2015,1,0
 "Trat",2016,0,0
-"Trat",2017,0,0
+"Trat",2017,1,0
 "Trat",2018,0,0
 "Trat",2019,0,0
-"Trat",2020,0,0
-"Trat",2021,2,0
+"Trat",2020,1,0
+"Trat",2021,0,0
 "Trat",2022,0,0
 "Trat",2023,0,0
 "Trat",2024,0,0
@@ -1138,14 +1138,14 @@
 "Ubon Ratchathani",2010,0,0
 "Ubon Ratchathani",2011,0,0
 "Ubon Ratchathani",2012,0,0
-"Ubon Ratchathani",2013,0,4
-"Ubon Ratchathani",2014,0,0
+"Ubon Ratchathani",2013,0,1
+"Ubon Ratchathani",2014,0,1
 "Ubon Ratchathani",2015,0,0
 "Ubon Ratchathani",2016,0,0
-"Ubon Ratchathani",2017,0,1
+"Ubon Ratchathani",2017,0,0
 "Ubon Ratchathani",2018,0,0
-"Ubon Ratchathani",2019,0,0
-"Ubon Ratchathani",2020,0,0
+"Ubon Ratchathani",2019,0,1
+"Ubon Ratchathani",2020,1,0
 "Ubon Ratchathani",2021,0,0
 "Ubon Ratchathani",2022,0,0
 "Ubon Ratchathani",2023,0,0
@@ -1155,11 +1155,11 @@
 "Udon Thani",2011,0,0
 "Udon Thani",2012,0,0
 "Udon Thani",2013,0,0
-"Udon Thani",2014,0,2
-"Udon Thani",2015,0,1
-"Udon Thani",2016,0,1
+"Udon Thani",2014,0,0
+"Udon Thani",2015,0,0
+"Udon Thani",2016,0,0
 "Udon Thani",2017,0,0
-"Udon Thani",2018,0,1
+"Udon Thani",2018,0,0
 "Udon Thani",2019,0,0
 "Udon Thani",2020,0,0
 "Udon Thani",2021,0,0
@@ -1170,13 +1170,13 @@
 "Uthai Thani",2010,0,0
 "Uthai Thani",2011,0,0
 "Uthai Thani",2012,0,0
-"Uthai Thani",2013,0,1
-"Uthai Thani",2014,0,0
+"Uthai Thani",2013,1,2
+"Uthai Thani",2014,0,1
 "Uthai Thani",2015,0,0
-"Uthai Thani",2016,0,0
+"Uthai Thani",2016,1,1
 "Uthai Thani",2017,0,0
-"Uthai Thani",2018,0,2
-"Uthai Thani",2019,0,2
+"Uthai Thani",2018,2,0
+"Uthai Thani",2019,1,1
 "Uthai Thani",2020,0,0
 "Uthai Thani",2021,0,0
 "Uthai Thani",2022,0,0
@@ -1186,13 +1186,13 @@
 "Uttaradit",2010,0,0
 "Uttaradit",2011,0,0
 "Uttaradit",2012,0,0
-"Uttaradit",2013,0,3
-"Uttaradit",2014,0,2
+"Uttaradit",2013,0,1
+"Uttaradit",2014,0,0
 "Uttaradit",2015,0,0
 "Uttaradit",2016,0,0
 "Uttaradit",2017,0,1
-"Uttaradit",2018,1,2
-"Uttaradit",2019,0,1
+"Uttaradit",2018,0,1
+"Uttaradit",2019,1,0
 "Uttaradit",2020,0,0
 "Uttaradit",2021,0,0
 "Uttaradit",2022,0,0
@@ -1202,12 +1202,12 @@
 "Yala",2010,0,0
 "Yala",2011,0,0
 "Yala",2012,0,0
-"Yala",2013,0,0
-"Yala",2014,0,0
+"Yala",2013,0,2
+"Yala",2014,1,0
 "Yala",2015,0,0
 "Yala",2016,0,0
 "Yala",2017,0,0
-"Yala",2018,0,0
+"Yala",2018,1,0
 "Yala",2019,0,0
 "Yala",2020,0,0
 "Yala",2021,0,0
