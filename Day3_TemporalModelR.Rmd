@@ -148,8 +148,13 @@ Before any temporal extraction, reduce **environmental sampling bias within each
 Every column of the original `sambar` table is preserved on the output (we recover the kept rows by matching on `longitude`/`latitude`), so the rest of the temporally-explicit pipeline — rarefaction, extraction, partitioning, modelling — works on the thinned table without any further changes.
 
 ```{r year-thin}
-# Reference E-space for thinning (the three "current" layers above)
-env_ref <- c(prec_ex, temp_ex, NDVI_ex)
+# The three "current" layers have different extents/resolutions/CRSs,
+# so bring prec_ex and temp_ex onto NDVI_ex's grid before stacking
+# (NDVI_ex is the same reference raster used by raster_align() above).
+prec_ref <- terra::project(prec_ex, NDVI_ex)
+temp_ref <- terra::project(temp_ex, NDVI_ex)
+
+env_ref <- c(prec_ref, temp_ref, NDVI_ex)
 names(env_ref) <- c("prec", "temp", "NDVI")
 
 # Per-year thinning, applied independently to every year of records.
@@ -488,7 +493,4 @@ regional$plots$total_change_by_unit
 What we covered:
 
 - Read pre-prepared annual precipitation, temperature rasters, and NDVI (2000–2025) directly from `temporal_split/` and stacked them — **no new downloads**.
-- Built a fully temporally-explicit pipeline: time-stamped occurrences ↔ time-stamped rasters.
-- Used spatio-temporal cross-validation folds and fold-stratified pseudoabsences.
-- Fit GLM and RF temporal models and projected through time.
-- Classified pixel-level temporal trajectories and aggregated by region.
+- Built a fully temporally-explicit pipeline: time-stamped occurrences ↔ ti
