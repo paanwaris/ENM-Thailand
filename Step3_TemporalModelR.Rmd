@@ -1,0 +1,298 @@
+---
+title: "Step 3 — Temporally-explicit SDMs with **TemporalModelR**"
+subtitle: "ENM-Thailand workshop · Sambar deer (*Rusa unicolor*)"
+author: "Workshop materials"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: show
+    theme: cosmo
+    df_print: paged
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  echo      = TRUE,
+  message   = FALSE,
+  warning   = FALSE,
+  fig.align = "center",
+  fig.width = 7,
+  fig.height = 5,
+  dpi       = 100
+)
+```
+
+# Overview
+
+> **Workshop navigation**
+>
+> - [**Pre-workshop** — Downloading the workshop data.](https://paanwaris.github.io/ENM-Thailand/articles/Pre-workshop.html) Get the Thailand boundary, WorldClim climate layers, and GBIF Sambar records before the workshop starts.
+> - [**Step 1: nicheR** — Virtual species with nicheR.](https://paanwaris.github.io/ENM-Thailand/articles/Step1_nicheR.html) Build a virtual species niche and map it.
+> - [**Step 2: bean** — Environmental thinning with bean.](https://paanwaris.github.io/ENM-Thailand/articles/Step2_bean.html) Reduce environmental sampling bias before fitting a real niche.
+> - **Step 3: TemporalModelR — Temporally-explicit models with TemporalModelR.** Link species occurrences with environmental data through time.
+
+`TemporalModelR` builds **temporally-explicit** species distribution models. Each occurrence is paired with the environmental conditions *at the time it was recorded*, rather than against a long-term average. Models can then project predictions as time-series surfaces and detect pixel-level temporal trajectories (always-suitable, never-suitable, increasing, decreasing, or fluctuating).
+
+> **Data.** Step 3 uses the pre-prepared annual rasters that live under `data/processed/temporal_split/` — one precipitation (`prec_YYYY.tif`), one temperature (`temp_YYYY.tif`, derived from land-surface temperature), and one NDVI (`NDVI_YYYY.tif`) file per year. **No new climate data is downloaded here** — we simply read the local files and stack them. The `Pre-workshop.Rmd` notebook produced the Sambar deer GBIF table and the Thailand polygon we use alongside them.
+
+In this Step we will:
+
+1.  Read the per-year precipitation, temperature, and NDVI rasters and align them to a common grid.
+2.  Build a temporal-mean E-space, thin the GBIF Sambar deer occurrences **once** with `bean` against it, then rarefy with `spatiotemporal_rarefaction()`, and pair each surviving record with the environment it actually experienced using `temporally_explicit_extraction()`.
+3.  Z-score the rasters, summarise their temporal mean, build spatiotemporal CV folds, and create fold-stratified pseudoabsences.
+4.  Fit `build_temporal_glm()` and `build_temporal_rf()` models and project predictions across years with `generate_spatiotemporal_predictions()`.
+5.  Postprocess with `summarize_raster_outputs()`, `analyze_temporal_patterns()`, and `analyze_trends_by_spatial_unit()`.
+
+All function names and arguments below follow the official package documentation: <https://cjhughes926.github.io/TemporalModelR/>
+
+# Install and load packages
+
+```{r install, eval = FALSE}
+# ---- CRAN dependencies -----------------------------------------------------
+cran_pkgs <- c(
+  "terra",
+  "sf",
+  "dplyr",
+  "readr",
+  "viridis",
+  "randomForest",
+  "fastcpd",
+  "rmarkdown",
+  "knitr",
+  "remotes",
+  "geodata",
+  "bean"        
+)
+to_install <- cran_pkgs[!cran_pkgs %in% rownames(installed.packages())]
+if (length(to_install)) install.packages(to_install, dependencies = TRUE)
+
+# ---- TemporalModelR from GitHub --------------------------------------------
+if (!requireNamespace("TemporalModelR", quietly = TRUE)) {
+  remotes::install_github("CJHughes926/TemporalModelR")
+}
+```
+
+```{r packages}
+library(TemporalModelR)  # temporally-explicit SDM pipeline
+library(bean)            # per-year environmental thinning
+library(terra)           # modern raster + vector spatial backend
+library(sf)              # tidy vector spatial data ("simple features")
+library(dplyr)           # tidy data manipulation
+library(readr)           # fast, friendly CSV reading and writing
+
+# Make every random draw in the rest of the file reproducible.
+set.seed(2026)
+```
+
+# Inputs
+
+```{r load-base}
+# Thailand polygon (from the Pre-workshop). `quiet = TRUE` suppresses the
+# usual GDAL chatter so the rendered page stays clean.
+thailand <- st_read("data/processed/boundary/thailand_boundary.gpkg",
+                    quiet = TRUE)
+
+# Clean GBIF Sambar deer table from the Pre-workshop. We:
+#   * restrict to 2010-2025 (the range covered by every per-year raster);
+#   * rename the GBIF coordinate columns to the conventional `longitude` /
+#     `latitude` so they match the names bean and TemporalModelR expect;
+#   * add a `presence = 1L` column so the table is ready to be combined
+#     with pseudoabsences (presence = 0) later on.
+sambar <- read_csv("data/processed/gbif/sambar_thailand.csv",
+                   show_col_types = FALSE) %>%
+  filter(year >= 2010, year <= 2025) %>%       # keep modelled years only
+  rename(longitude = decimalLongitude,         # GBIF -> conventional name
+         latitude  = decimalLatitude) %>%      # GBIF -> conventional name
+  mutate(presence = 1L)                        # every GBIF record is a presence
+
+# How many records per year survive that filter?
+table(sambar$year)
+```
+
+# Preprocessing
+
+## Align rasters
+
+`raster_align()` reprojects and resamples every raster found in `input_dir` against a reference, then writes the aligned copies into `output_dir`. Because the three variables come from different sources, they do not share an extent, resolution, or CRS out of the box — we use one of the per-year NDVI files as the reference grid for everything.
+
+```{r raster-align}
+# Quick visual sanity-check of the three "current" layers.
+prec_ex <- rast("data/processed/temporal_split/prec_2025.tif")
+temp_ex <- rast("data/processed/temporal_split/temp_2025.tif")
+NDVI_ex <- rast("data/processed/temporal_split/NDVI_2025.tif")
+
+par(mfrow = c(1, 3))
+plot(prec_ex, main = "Precipitation 2025")
+plot(temp_ex, main = "Temperature 2025")
+plot(NDVI_ex, main = "NDVI 2025")
+par(mfrow = c(1, 1))     # reset the plot region back to a single panel
+
+# Source directory of the per-variable per-year split rasters, and target
+# directory where the aligned copies will be written.
+split_dir   <- "data/processed/temporal_split"
+aligned_dir <- "data/processed/rasters_aligned"
+dir.create(aligned_dir, showWarnings = FALSE, recursive = TRUE)
+
+# Use NDVI as the reference grid — every per-year raster will be reprojected
+# / resampled to match its extent, resolution, and CRS.
+ref_raster <- NDVI_ex
+
+raster_align(
+  input_dir        = split_dir,    # where the per-year rasters currently live
+  output_dir       = aligned_dir,  # where the aligned copies will be written
+  reference_raster = ref_raster,   # target grid (extent + resolution + CRS)
+  overwrite        = TRUE          # replace any aligned files left from a prior run
+)
+```
+
+## Build a temporal-mean E-space for thinning
+
+Before any thinning, we build a single **temporal-mean** reference E-space that summarises the environment Sambar deer experienced across the entire 2010–2025 window. We compute the per-pixel mean across years for each of the three aligned variables, then stack the three mean surfaces into one 3-layer `SpatRaster`.
+
+This temporal-mean stack will be the **reference environmental space** that `bean` uses to thin every year. Using a single, period-wide E-space (rather than the year-specific raster of each occurrence) keeps the thinning grid *consistent across years*: a 2014 record and a 2020 record that fall in the same temporal-mean pod are treated as environmentally redundant, even though their individual years' rasters may differ slightly.
+
+```{r temporal-mean-env}
+# List every aligned per-year raster, then split by variable name.
+aligned_files <- list.files(aligned_dir, pattern = "\\.tif$", full.names = TRUE)
+
+# Group the file list by variable name (prec_ / temp_ / NDVI_) so each
+# group becomes a multi-layer SpatRaster spanning every year.
+prec_files <- file.path(aligned_dir,
+                        grep("prec_",  basename(aligned_files), value = TRUE))
+temp_files <- file.path(aligned_dir,
+                        grep("temp_",  basename(aligned_files), value = TRUE))
+NDVI_files <- file.path(aligned_dir,
+                        grep("NDVI_",  basename(aligned_files), value = TRUE))
+
+# Per-pixel mean across years for each variable — terra::mean() over a
+# multi-layer SpatRaster collapses the time dimension into a single layer.
+mean_prec <- terra::mean(rast(prec_files), na.rm = TRUE)
+mean_temp <- terra::mean(rast(temp_files), na.rm = TRUE)
+mean_NDVI <- terra::mean(rast(NDVI_files), na.rm = TRUE)
+
+# Stack the three mean surfaces into one 3-layer reference E-space, and
+# rename the layers to the variable names bean will look up.
+env_ref <- c(mean_prec, mean_temp, mean_NDVI)
+names(env_ref) <- c("mean_prec", "mean_temp", "mean_NDVI")
+
+par(mfrow = c(1, 3))
+plot(mean_prec, main = "Mean precipitation (2010–2025)")
+plot(mean_temp, main = "Mean temperature (2010–2025)")
+plot(mean_NDVI, main = "Mean NDVI (2010–2025)")
+par(mfrow = c(1, 1))     # reset the plot region back to a single panel
+```
+
+Reading the panels: each map is the per-pixel average of the corresponding variable across the 16 modelled years, in the variable's natural units (mm for precipitation, °C-equivalent units for land-surface-temperature-derived `temp`, and a unitless 0–1 index for NDVI). Bright patches stand for places that were *consistently* wet, warm, or vegetated; dark patches stand for places that were *consistently* dry, cool, or sparse. This is the environmental landscape `bean` will use to define the thinning grid.
+
+## Environmental thinning with `bean`
+
+We reduce **environmental sampling bias** in the Sambar deer occurrences using `bean`, with the temporal-mean stack `env_ref` from the previous section as the reference E-space. Because the reference E-space is a single, period-wide summary (not year-specific), we run `bean` **once on the full occurrence table** rather than year by year — every record is judged against the same environmental landscape, so two records that fall in the same pod are environmentally redundant regardless of which year they were collected in.
+
+We use the **`"sheather-jones"`** bandwidth selector inside `find_env_resolution()`. Sheather–Jones is a data-adaptive, plug-in selector (Sheather & Jones, 1991) that is robust to the non-Gaussian shapes typical of real occurrence data — it is the modern recommended default and is what the workshop uses everywhere bean appears. We pair it with the stochastic `thin_env_nd()` so each pod retains one of the original GBIF coordinates rather than a synthetic centroid.
+
+Every column of the original `sambar` table is preserved on the output. After thinning bean returns only the longitude/latitude pair, so we recover the full original attributes (including the `year` column the temporal modelling needs) by matching on the coordinate pair.
+
+```{r thin-once}
+# Pass only the coordinate pair into bean; the full attribute table is
+# recovered below by joining the thinned coordinates back onto `sambar`.
+sambar_xy <- sambar[, c("longitude", "latitude")]
+
+# Extract the three temporal-mean env values at every occurrence, and
+# z-score them so all three axes share the same numeric scale.
+prepped <- prepare_bean(
+  data        = sambar_xy,
+  env_rasters = env_ref,        # temporal-mean 3-layer stack
+  longitude   = "longitude",
+  latitude    = "latitude",
+  transform   = "scale"
+)
+
+# Sheather-Jones plug-in bandwidth as the cell width (one width per
+# variable, in z-score units because prepare_bean() scaled the data).
+res <- find_env_resolution(
+  data     = prepped,
+  env_vars = c("mean_prec", "mean_temp", "mean_NDVI"),
+  method   = "sheather-jones"
+)
+
+# Build the environmental grid using `res$suggested_resolution` and
+# randomly retain one of the original occurrences in every occupied pod.
+thin_out <- thin_env_nd(
+  data            = prepped,
+  env_vars        = c("mean_prec", "mean_temp", "mean_NDVI"),
+  grid_resolution = res$suggested_resolution
+)
+
+# Recover every original column by matching on the coordinate pair.
+keep_key <- paste(thin_out$thinned_data$longitude,
+                  thin_out$thinned_data$latitude)
+sambar_thinned <- sambar[
+  paste(sambar$longitude, sambar$latitude) %in% keep_key, , drop = FALSE
+]
+
+# Before / after counts per year — verifies that the year column survived.
+data.frame(
+  year   = sort(unique(sambar$year)),
+  before = as.integer(table(sambar$year)),
+  after  = as.integer(table(factor(sambar_thinned$year,
+                                   levels = sort(unique(sambar$year)))))
+)
+
+# Use the thinned table for everything that follows.
+sambar <- sambar_thinned
+```
+
+Every pod of the temporal-mean E-space now contributes at most one Sambar deer occurrence, so the modelling table no longer over-represents the heavily-surveyed parts of the environment.
+
+## Spatio-temporal rarefaction
+
+Once the per-year thinning has reduced *environmental* duplication, we still want to reduce *spatial* duplication: keep at most one record per raster pixel **per year**, so a repeated visit to the same place in a later year is preserved as a temporally-independent observation.
+
+```{r rarefy}
+# Working directory for everything point-related downstream.
+points_dir <- "data/processed/points"
+dir.create(points_dir, showWarnings = FALSE, recursive = TRUE)
+
+# Persist the thinned table to disk so spatiotemporal_rarefaction() can
+# pick it up by file path.
+points_csv <- file.path(points_dir, "sambar_temporal.csv")
+write_csv(sambar, points_csv)
+
+# Use the CRS of the reference raster so points and rasters live in the
+# same coordinate system throughout the pipeline.
+study_crs <- st_crs(rast(ref_raster))
+
+rare_out <- spatiotemporal_rarefaction(
+  points_sp        = points_csv, # input CSV of presences
+  output_dir       = file.path(points_dir, "rarefied"), # where rarefied tables are written
+  reference_raster = ref_raster, # defines the pixel grid for rarefaction
+  time_cols        = "year", # column carrying the time stamp
+  xcol             = "longitude", # column with x coordinate
+  ycol             = "latitude", # column with y coordinate
+  points_crs       = study_crs, # CRS of the input points
+  output_prefix    = "Sambar_annual" # prefix for the written files
+)
+
+# The three counts below show how aggressive rarefaction was: how many
+# records went in, how many survive pure spatial rarefaction, and how
+# many survive spatio-temporal rarefaction (one record per pixel per
+# year).
+rare_out$input_points # n records that entered rarefaction
+rare_out$spatial_points # n surviving pure spatial rarefaction (one per pixel)
+rare_out$spatiotemporal_points # n surviving spatio-temporal (one per pixel per year)
+```
+
+## Match each observation to the environment it experienced
+
+`temporally_explicit_extraction()` walks the aligned raster directory using `variable_patterns`: clean variable names on the left, filename patterns with time placeholders (`YEAR`) on the right. For each surviving occurrence, it pulls the precipitation, temperature, and NDVI values from the raster of the matching year — so a 2014 record is paired with the 2014 climate, not the long-term average.
+
+```{r extract}
+# Output directory for the extracted tables and the scaling parameters.
+ext_dir <- file.path(points_dir, "extracted")
+
+ext_out <- temporally_explicit_extraction(
+  points_sp           = rare_out$files_created$spatiotemporal, # rarefied points to extract at
+  
