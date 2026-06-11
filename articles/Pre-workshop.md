@@ -424,9 +424,18 @@ nicheR**.
 
 ## References
 
+- Castaneda-Guzman M, Hughes C, Paansri P, Cobos M (2026). *nicheR:
+  Ellipsoid-Based Virtual Niches and Visualization*. R package version
+  0.1.0, <https://github.com/castanedaM/nicheR>.
 - Chamberlain S, Barve V, Mcglinn D, Oldoni D, Desmet P, Geffert L, Ram
   K (2026). *rgbif: Interface to the Global Biodiversity Information
   Facility API*. R package version 3.8.5.2,
   <https://CRAN.R-project.org/package=rgbif>.
 - Hijmans R (2026). *geodata: Access Geographic Data*. R package version
   0.6-10, <https://rspatial.github.io/geodata/>.
+- Hughes C, Castaneda-Guzman M, E. Escobar L (2026). *TemporalModelR:
+  Temporally Explicit Species Distribution Modelling in R*. R package
+  version 0.2.0, <https://github.com/CJHughes926/TemporalModelR>.
+- Paansri P, Escobar L (2026). *bean: Data Thinning of Species
+  Occurrences in Environmental Space*. R package version 0.2.1,
+  <https://github.com/paanwaris/bean>.

@@ -457,4 +457,336 @@ Pre-workshop:
 - **Night-time lights** — a satellite measure of artificial light. High
   light values mark cities and roads. Because remote Sambar deer habitat
   is *dark*, we treat night-time lights as an **inverse** proxy: more
-  light → *less* re
+  light → *less* relevant sampling effort for our forest-dwelling
+  virtual species.
+
+``` r
+
+sp_rich_layer   <- rast("data/processed/bias/sp_richness_TH.tif")
+nighttime_layer <- rast("data/processed/bias/nighttime_TH.tif")
+
+# Stack the two proxies into a 2-layer SpatRaster and rename for clarity.
+bias_layer <- c(sp_rich_layer, nighttime_layer)
+names(bias_layer) <- c("sp_richness", "nighttime_light")
+plot(bias_layer)
+```
+
+![](Step1_nicheR_files/figure-html/bias-layer-1.png)
+
+``` r
+
+# prepare_bias() rescales each proxy to 0-1, optionally inverts proxies whose
+# *high* values represent *low* sampling effort, and combines the two into a
+# single composite surface. `effect_direction = c("direct", "inverse")`
+# tells it to use richness directly but invert night-time lights.
+bias_prep <- prepare_bias(
+  bias_surface     = bias_layer,
+  effect_direction = c("direct", "inverse")
+)
+
+# The composite surface is a 0-1 map of "how likely a survey would happen
+# here": high values mark accessible, biodiversity-rich pixels; low values
+# mark remote, brightly-lit-but-empty pixels (essentially, urban areas).
+plot(bias_prep$composite_surface)
+```
+
+![](Step1_nicheR_files/figure-html/bias-layer-2.png)
+
+We then **multiply** the suitability by the bias surface to get a
+realised sampling probability. Pixels that are both suitable for the
+species *and* easy to survey light up; pixels that are biologically
+suitable but in remote areas dim down.
+
+``` r
+
+biased_pred <- apply_bias(
+  prepared_bias    = bias_prep,                 # the composite bias surface from prepare_bias()
+  prediction       = pred,                      # the projected ellipsoid from predict()
+  prediction_layer = "suitability",             # which layer of `pred` to multiply against bias
+  effect_direction = "direct"                   # high bias → high realised sampling
+)
+
+par(mfrow = c(1, 2))
+plot(pred$suitability,
+     main = "Unbiased suitability")
+plot(biased_pred$suitability_biased,
+     main = "Suitability × bias = realised sampling surface")
+```
+
+![](Step1_nicheR_files/figure-html/apply-bias-1.png)
+
+``` r
+
+par(mfrow = c(1, 1))
+```
+
+The biological niche is identical in both maps, but the
+realised-sampling surface concentrates around accessible,
+biodiversity-rich pixels of Thailand — only those parts of the niche
+would realistically generate records in a biased field survey.
+
+## Generate virtual occurrences under three sampling strategies
+
+So far we have a *niche* but no occurrences. To compare ENM methods
+later in **Step 2: bean** and **Step 3: TemporalModelR**, we draw
+virtual records from the niche. Generating virtual occurrences is
+essential to ENM teaching because — unlike with real species — we know
+the underlying truth and can measure how well any method recovers it.
+
+[`nicheR::sample_data()`](https://castanedam.github.io/nicheR/reference/sample_data.html)
+lets us choose **where in the niche** the simulated points are drawn
+from:
+
+- `"centroid"` — points weighted toward the niche centroid (preferred
+  conditions). Mimics surveys that find a species near the *heart* of
+  its range.
+- `"random"` — points drawn uniformly from inside the niche. The neutral
+  reference.
+- `"edge"` — points weighted toward the *periphery* of the niche
+  (marginal conditions). Mimics surveys at the species’ range edges.
+
+To ensure every simulated point falls **inside** the ellipsoid, we
+sample from the *truncated* suitability layer (`suitability_trunc`),
+which is 0 outside the niche by construction.
+
+``` r
+
+pts_centroid <- sample_data(
+  n_occ            = 50,                  # number of points to draw
+  prediction       = pred,                # SpatRaster we projected onto
+  sampling         = "centroid",          # weight toward the centre of the niche
+  prediction_layer = "suitability_trunc", # truncated → points fall *inside* the ellipsoid only
+  seed             = 123                  # reproducible random draws
+)
+
+pts_random   <- sample_data(
+  n_occ            = 50,
+  prediction       = pred,
+  sampling         = "random",            # uniform sampling inside the niche
+  prediction_layer = "suitability_trunc",
+  seed             = 123
+)
+
+pts_edge     <- sample_data(
+  n_occ            = 50,
+  prediction       = pred,
+  sampling         = "edge",              # weight toward the periphery of the niche
+  prediction_layer = "suitability_trunc",
+  seed             = 123
+)
+
+# Each returned table carries the (x, y) coordinate of the simulated point
+# and the environmental values extracted at that pixel.
+head(pts_centroid)
+```
+
+    ##              x        y     bio1 bio12    bio15 Mahalanobis suitability
+    ## 2229 102.08333 13.08333 25.89022  1813 77.81184   1.9474173  0.37767975
+    ## 2127 101.75000 13.41667 27.08018  1483 76.20728   5.5101608  0.06360391
+    ## 2179 102.08333 13.25000 26.23296  1663 76.44091   2.1701886  0.33786993
+    ## 1788 103.58333 14.58333 26.87372  1345 84.16775   7.5544573  0.02288603
+    ## 2027 101.75000 13.75000 27.58179  1443 77.30541   8.8631764  0.01189558
+    ## 1860  98.91667 14.25000 26.46350  1848 82.97742   0.8032656  0.66922646
+    ##      Mahalanobis_trunc suitability_trunc
+    ## 2229         1.9474173        0.37767975
+    ## 2127         5.5101608        0.06360391
+    ## 2179         2.1701886        0.33786993
+    ## 1788         7.5544573        0.02288603
+    ## 2027         8.8631764        0.01189558
+    ## 1860         0.8032656        0.66922646
+
+``` r
+
+head(pts_random)
+```
+
+    ##             x         y     bio1 bio12    bio15 Mahalanobis suitability
+    ## 1643 104.4167 15.083333 26.96973  1401 87.07952    9.687811 0.007876231
+    ## 2327 101.7500 12.750000 27.53995  1980 77.87899    5.090845 0.078439915
+    ## 1745 104.7500 14.750000 26.81006  1519 88.56891    9.326756 0.009434538
+    ## 3667 100.0833  8.250000 27.54879  2047 77.28593    5.889512 0.052614898
+    ## 4020 100.5833  7.083333 27.20664  1792 80.18128    2.072000 0.354871304
+    ## 869  100.4167 17.583333 26.29292  1368 87.25325    9.855314 0.007243455
+    ##      Mahalanobis_trunc suitability_trunc
+    ## 1643          9.687811       0.007876231
+    ## 2327          5.090845       0.078439915
+    ## 1745          9.326756       0.009434538
+    ## 3667          5.889512       0.052614898
+    ## 4020          2.072000       0.354871304
+    ## 869           9.855314       0.007243455
+
+``` r
+
+head(pts_edge)
+```
+
+    ##             x         y     bio1 bio12    bio15 Mahalanobis suitability
+    ## 1575 101.4167 15.250000 26.93975  1203 78.13216   10.004630 0.006722365
+    ## 4279 102.0833  6.250000 27.07854  2336 80.36767    6.382389 0.041122715
+    ## 2330 102.2500 12.750000 26.71942  2467 83.62048    9.481639 0.008731489
+    ## 4177 101.7500  6.583333 27.24115  2129 76.57499    4.911150 0.085813854
+    ## 4021 100.7500  7.083333 27.39359  1775 79.05531    3.394147 0.183218946
+    ## 1795 104.7500 14.583333 26.75018  1578 90.15889   11.114619 0.003859145
+    ##      Mahalanobis_trunc suitability_trunc
+    ## 1575         10.004630       0.006722365
+    ## 4279          6.382389       0.041122715
+    ## 2330          9.481639       0.008731489
+    ## 4177          4.911150       0.085813854
+    ## 4021          3.394147       0.183218946
+    ## 1795         11.114619       0.003859145
+
+A **bias-weighted** draw uses
+[`sample_biased_data()`](https://castanedam.github.io/nicheR/reference/sample_biased_data.html)
+together with the realised sampling surface from above. The result
+mimics what a *biased* field survey would record — samples cluster where
+the species can occur **and** where surveys actually happen.
+
+``` r
+
+biased_pts <- sample_biased_data(
+  n_occ            = 50,                            # number of points to draw
+  prediction       = biased_pred,                   # SpatRaster from apply_bias()
+  prediction_layer = "suitability_biased_direct",   # the layer apply_bias() produced
+  seed             = 123
+)
+
+head(biased_pts)
+```
+
+    ##              x        y suitability_biased_direct
+    ## 2179 102.08333 13.25000               0.169876848
+    ## 4279 102.08333  6.25000               0.032600839
+    ## 2277 101.75000 12.91667               0.147275526
+    ## 2077 101.75000 13.58333               0.009762376
+    ## 1690 103.91667 14.91667               0.003202499
+    ## 1860  98.91667 14.25000               0.434026880
+
+``` r
+
+# Pull the BIO1 / BIO12 / BIO15 values at each biased point so we can
+# overlay them in E-space alongside the other three samples below.
+occ_bias_env <- terra::extract(env_space, biased_pts[, c("x", "y")])
+```
+
+### Geographic view — where each strategy puts the points
+
+``` r
+
+par(mfrow = c(2, 2))
+
+plot(pred[["suitability"]],
+     main = "Centroid sample (n = 50)")
+points(pts_centroid[, c("x", "y")], pch = 19, cex = 0.6, col = "red")
+
+plot(pred[["suitability"]],
+     main = "Random sample (n = 50)")
+points(pts_random[, c("x", "y")], pch = 19, cex = 0.6, col = "red")
+
+plot(pred[["suitability"]],
+     main = "Edge sample (n = 50)")
+points(pts_edge[, c("x", "y")], pch = 19, cex = 0.6, col = "red")
+
+plot(biased_pred$suitability_biased,
+     main = "Bias-weighted sample (n = 50)")
+points(biased_pts[, c("x", "y")], pch = 19, cex = 0.6, col = "red")
+```
+
+![](Step1_nicheR_files/figure-html/plot-samples-1.png)
+
+``` r
+
+par(mfrow = c(1, 1))
+```
+
+Each panel shows the projected suitability surface in viridis (yellow =
+high suitability, dark = low), with the simulated 50 occurrences in
+**red**. Reading across the panels:
+
+- The **centroid** sample clusters around the *core* of the niche on the
+  map.
+- The **random** sample is scattered evenly *inside* the suitable area.
+- The **edge** sample drifts toward the *boundary* of the suitable area.
+- The **bias-weighted** sample collapses onto the *accessible* part of
+  the niche — the parts of the country where surveys would realistically
+  happen.
+
+### Environmental-space view — same points, different colours
+
+This time we draw **one panel per strategy** so the contrast between
+sampling rules is obvious. Each panel shows the same ellipsoid (the
+niche) and the same grey background cloud (Thailand’s available
+conditions), with the 50 simulated points of that strategy overlaid as
+coloured markers.
+
+``` r
+
+par(mfrow = c(2, 2))
+
+plot_ellipsoid(ell, background = env_space_df)
+title(main = "Centroid sample")
+points(pts_centroid[, c("bio1", "bio12")],
+       col = "blue", pch = 19, cex = 0.6)
+
+plot_ellipsoid(ell, background = env_space_df)
+title(main = "Random sample")
+points(pts_random[, c("bio1", "bio12")],
+       col = "darkgreen", pch = 17, cex = 0.6)
+
+plot_ellipsoid(ell, background = env_space_df)
+title(main = "Edge sample")
+points(pts_edge[, c("bio1", "bio12")],
+       col = "purple", pch = 15, cex = 0.6)
+
+plot_ellipsoid(ell, background = env_space_df)
+title(main = "Bias-weighted sample")
+points(occ_bias_env[, c("bio1", "bio12")],
+       col = "red", pch = 4, cex = 0.6)
+```
+
+![](Step1_nicheR_files/figure-html/samples-in-espace-1.png)
+
+``` r
+
+par(mfrow = c(1, 1))
+```
+
+Reading the panels: the ellipse is the 2-D projection of the niche; the
+grey cloud is Thailand’s available environmental conditions; the
+coloured markers are the 50 simulated records of each strategy. The
+centroid points hug the centre of the ellipse, the random points scatter
+evenly inside it, the edge points fringe the boundary, and the
+bias-weighted points concentrate on the side of the niche that overlaps
+the accessible, biodiversity-rich part of the country.
+
+## Wrap-up
+
+What we just did:
+
+- Defined a niche *a priori* as a 3-D ellipsoid in BIO1 × BIO12 × BIO15
+  space.
+- Explored Thailand’s available environmental space in 3D.
+- Projected the ellipsoid back to geography and inspected the
+  suitability and Mahalanobis-distance surfaces.
+- Built a sampling-bias surface from species richness and night-time
+  lights and combined it with suitability to obtain a realised sampling
+  surface.
+- Compared three sampling strategies (`centroid`, `random`, `edge`) plus
+  a bias-weighted draw, both geographically and in environmental space.
+
+## References
+
+- Castaneda-Guzman M, Hughes C, Paansri P, Cobos M (2026). *nicheR:
+  Ellipsoid-Based Virtual Niches and Visualization*. R package version
+  0.1.0, <https://github.com/castanedaM/nicheR>.
+- Chamberlain S, Barve V, Mcglinn D, Oldoni D, Desmet P, Geffert L, Ram
+  K (2026). *rgbif: Interface to the Global Biodiversity Information
+  Facility API*. R package version 3.8.5.2,
+  <https://CRAN.R-project.org/package=rgbif>.
+- Hijmans R (2026). *geodata: Access Geographic Data*. R package version
+  0.6-10, <https://rspatial.github.io/geodata/>.
+- Hughes C, Castaneda-Guzman M, E. Escobar L (2026). *TemporalModelR:
+  Temporally Explicit Species Distribution Modelling in R*. R package
+  version 0.2.0, <https://github.com/CJHughes926/TemporalModelR>.
+- Paansri P, Escobar L (2026). *bean: Data Thinning of Species
+  Occurrences in Environmental Space*. R package version 0.2.1,
+  <https://github.com/paanwaris/bean>.

@@ -304,5 +304,243 @@ chosen_res
   *randomly retains one of the original occurrences* in each pod. Real
   coordinates and GBIF metadata are preserved.
 - **[`thin_env_center()`](https://paanwaris.github.io/bean/reference/thin_env_center.html)
-  — deterministic.** Builds the grid and \*replaces the points in each
-  occupied pod with
+  — deterministic.** Builds the grid and *replaces the points in each
+  occupied pod with a single synthetic point at the centre of the pod*.
+  Output is reproducible without a seed, but the points are no longer
+  real observations.
+
+We will run both for comparison.
+
+``` r
+
+# Stochastic thinning: one randomly chosen occurrence per pod.
+thin_nd <- thin_env_nd(
+  data            = prepped,
+  env_vars        = c("bio1", "bio12", "bio15"),
+  grid_resolution = chosen_res          # per-variable cell widths from Sheather-Jones
+)
+
+# Deterministic thinning: one synthetic point at the centre of each pod.
+# We deliberately use a fixed, coarse resolution here (0.5 z-score units on
+# every axis). Because the data were scaled in prepare_bean(), 0.5 means
+# half a standard deviation per axis — a sensible "moderate smoothing"
+# choice that is easy to interpret and visualise.
+thin_center <- thin_env_center(
+  data            = prepped,
+  env_vars        = c("bio1", "bio12", "bio15"),
+  grid_resolution = c(0.5, 0.5, 0.5)
+)
+
+# Each `thin_*` object reports the number of input occurrences, the number
+# of occupied pods, the retained sample size, and stores the thinned table
+# in `$thinned_data`.
+thin_nd
+```
+
+    ## --- Bean Stochastic Thinning Results ---
+    ## 
+    ## Thinned 1031 original points to 80 points.
+    ## This represents a retention of 7.8% of the data.
+    ## 
+    ## --------------------------------------
+
+``` r
+
+thin_center
+```
+
+    ## --- Bean Deterministic Thinning Results ---
+    ## 
+    ## Thinned 1031 original points to 42 unique grid cell centers.
+    ## This represents a retention of 4.1% of the data.
+    ## 
+    ## --------------------------------------
+
+``` r
+
+# `plot_bean()` overlays the original data (grey, faded) and the retained
+# thinned points (highlighted) on the same E-space scatter.
+plot_bean(
+  original_data  = prepped,
+  thinned_object = thin_nd,
+  env_vars       = c("bio1", "bio12", "bio15")
+)
+```
+
+![](Step2_bean_files/figure-html/thin-vs-raw-1.png)
+
+``` r
+
+plot_bean(
+  original_data  = prepped,
+  thinned_object = thin_center,
+  env_vars       = c("bio1", "bio12", "bio15")
+)
+```
+
+![](Step2_bean_files/figure-html/thin-vs-raw-2.png)
+
+Reading the plots: the **pale grey dots** are the original occurrences
+(the same cloud you saw in the E-space panel earlier); the **highlighted
+markers** are the points that survive thinning. With `thin_env_nd` the
+highlighted markers sit *on top of* the original cloud (because real
+points are kept); with `thin_env_center` they sit on the regular grid
+points at the centres of occupied pods (synthetic locations). Notice
+that both methods break up the dense cluster that dominated the raw
+E-space plot.
+
+## Fit the ellipsoid niche
+
+[`fit_ellipsoid()`](https://paanwaris.github.io/bean/reference/fit_ellipsoid.html)
+formalises the niche by fitting a multivariate ellipsoid around a set of
+points. We fit two ellipsoids, one on the raw occurrences and one on the
+thinned ones, to see how thinning shifts the niche estimate.
+
+``` r
+
+# Raw ellipsoid (no thinning): biased toward the densest sampled environments.
+ell_raw <- fit_ellipsoid(
+  prepped,
+  env_vars = c("bio1", "bio12", "bio15"),
+  method   = "covmat",
+  level    = 0.95
+)
+
+# Thinned ellipsoid: each pod contributes at most one record.
+ell_thinned <- fit_ellipsoid(
+  thin_nd$thinned_data,
+  env_vars = c("bio1", "bio12", "bio15"),
+  method   = "covmat",
+  level    = 0.95
+)
+```
+
+Visualise the **raw** ellipsoid first, both in 2-D (a static projection
+onto BIO1 × BIO12) and in 3-D (a rotatable WebGL widget):
+
+``` r
+
+plot(ell_raw, dims = c(1, 2))
+```
+
+![](Step2_bean_files/figure-html/ell-3d-1-1.png)
+
+``` r
+
+plot(ell_raw, dims = c(1, 2, 3))
+```
+
+Reading the plots: in 2-D, the **ellipse** is the 95% confidence
+boundary of the niche projected onto BIO1 × BIO12; the **dots** are the
+occurrence points used to fit the niche. In 3-D, the **translucent
+mesh** is the full ellipsoidal surface in BIO1 × BIO12 × BIO15 space.
+Drag the 3-D plot with the mouse to rotate it and inspect the niche from
+any angle.
+
+Now compare with the **thinned** ellipsoid:
+
+``` r
+
+plot(ell_thinned, dims = c(1, 2))
+```
+
+![](Step2_bean_files/figure-html/ell-3d-2-1.png)
+
+``` r
+
+plot(ell_thinned, dims = c(1, 2, 3))
+```
+
+The thinned ellipsoid is typically a little *wider* than the raw one,
+because removing the dense cluster of redundant points lets the fit
+reach further into the niche’s true extent rather than collapsing around
+the over-sampled region.
+
+## Project the niche back to G-space
+
+Projection is delegated to the **nicheR** package, which has the same
+ellipsoid representation under the hood. We attach `nicheR` on the fly,
+then call
+[`nicheR::predict()`](https://castanedam.github.io/nicheR/reference/predict.html)
+on the scaled bioclim raster.
+
+``` r
+
+# nicheR provides the ellipsoid -> raster projection used here.
+if (!requireNamespace("nicheR", quietly = TRUE)) {
+  remotes::install_github("castanedaM/nicheR", upgrade = "never")
+}
+library(nicheR)
+
+# Both ellipsoids were fit on z-scored variables (transform = "scale" in
+# prepare_bean()), so we must project onto a z-scored raster too.
+pred_raw     <- predict(ell_raw,     scale(env))
+pred_thinned <- predict(ell_thinned, scale(env))
+
+par(mfrow = c(1, 2))
+plot(pred_raw$suitability,     main = "Suitability — raw data")
+plot(pred_thinned$suitability, main = "Suitability — thinned niche")
+```
+
+![](Step2_bean_files/figure-html/predict-1.png)
+
+``` r
+
+par(mfrow = c(1, 1))
+```
+
+Reading the plots: both panels show suitability as a 0–1 surface (yellow
+= high, dark = low). The **left** panel uses the biased, unthinned
+ellipsoid; the **right** uses the thinned one. The thinned suitability
+map is typically broader and reaches further into climatically
+appropriate but under-sampled areas — that is exactly the bias
+correction `bean` is designed to deliver.
+
+``` r
+
+# Persist the thinned occurrence table so Step 3 can re-use it directly.
+write.csv(ell_thinned$all_points_used,
+          "data/processed/gbif/sambar_thailand_thinned.csv",
+          row.names = FALSE)
+```
+
+## Wrap-up
+
+Take-homes:
+
+- Spatial bias in occurrence data **propagates into E-space** as dense
+  clusters.
+- `bean` thins *in environmental space* so the fitted niche is not
+  pulled toward the densest sampled environments.
+- [`find_env_resolution()`](https://paanwaris.github.io/bean/reference/find_env_resolution.html)
+  picks the grid cell width objectively from a KDE bandwidth —
+  Sheather–Jones is the recommended default for real occurrence data.
+- The two thinning methods trade randomness for fidelity to the original
+  records:
+  - `thin_env_nd` (stochastic) **keeps real coordinates and GBIF
+    metadata** (dates, recorder IDs, `gbifID`, etc.). Set the random
+    seed for reproducibility.
+  - `thin_env_center` (deterministic) replaces real records with
+    synthetic pod centres. Reproducible without a seed, but you lose
+    every original attribute.
+- **For Sambar deer in this workshop we recommend `thin_env_nd`.** The
+  GBIF metadata (especially the `year` column) is needed for the
+  temporally-explicit modelling in **Step 3: TemporalModelR**.
+
+## References
+
+- Castaneda-Guzman M, Hughes C, Paansri P, Cobos M (2026). *nicheR:
+  Ellipsoid-Based Virtual Niches and Visualization*. R package version
+  0.1.0, <https://github.com/castanedaM/nicheR>.
+- Chamberlain S, Barve V, Mcglinn D, Oldoni D, Desmet P, Geffert L, Ram
+  K (2026). *rgbif: Interface to the Global Biodiversity Information
+  Facility API*. R package version 3.8.5.2,
+  <https://CRAN.R-project.org/package=rgbif>.
+- Hijmans R (2026). *geodata: Access Geographic Data*. R package version
+  0.6-10, <https://rspatial.github.io/geodata/>.
+- Hughes C, Castaneda-Guzman M, E. Escobar L (2026). *TemporalModelR:
+  Temporally Explicit Species Distribution Modelling in R*. R package
+  version 0.2.0, <https://github.com/CJHughes926/TemporalModelR>.
+- Paansri P, Escobar L (2026). *bean: Data Thinning of Species
+  Occurrences in Environmental Space*. R package version 0.2.1,
+  <https://github.com/paanwaris/bean>.
