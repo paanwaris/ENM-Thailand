@@ -41,10 +41,10 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/Day0_Data_Download.html">Day 0 — Downloading the workshop data</a></li>
-    <li><a class="dropdown-item" href="articles/Day1_nicheR.html">Day 1 — Virtual species with nicheR</a></li>
-    <li><a class="dropdown-item" href="articles/Day2_bean.html">Day 2 — Environmental thinning with bean</a></li>
-    <li><a class="dropdown-item" href="articles/Day3_TemporalModelR.html">Day 3 — Temporally-explicit SDMs with TemporalModelR</a></li>
+<li><a class="dropdown-item" href="articles/Pre-workshop.html">Pre-workshop — Downloading and preparing the workshop data</a></li>
+    <li><a class="dropdown-item" href="articles/Step1_nicheR.html">Step 1 — Virtual species with nicheR</a></li>
+    <li><a class="dropdown-item" href="articles/Step2_bean.html">Step 2 — Environmental thinning with bean</a></li>
+    <li><a class="dropdown-item" href="articles/Step3_TemporalModelR.html">Step 3 — Temporally-explicit SDMs with TemporalModelR</a></li>
   </ul>
 </li>
       </ul>
@@ -62,74 +62,188 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 <img src="logo.png" class="logo" alt=""><h1 align="center">
-ENM-Thailand workshop 2026
 </h1>
 </div>
+<p>ENM-Thailand workshop 2026</p>
+
 <p align="center">
 </p>
 <p><a href="https://paanwaris.github.io/ENM-Thailand/"> <img src="https://img.shields.io/badge/pkgdown-site-1B6E3F?logo=r&amp;logoColor=white" alt="pkgdown site"></a> <a href="https://github.com/paanwaris/ENM-Thailand/blob/main/LICENSE.md" class="external-link"> <img src="https://img.shields.io/badge/license-MIT-F2B705" alt="MIT license"></a></p>
 
 <p align="center">
-<img src="reference/figures/logo_vt_deby.png" style="height: 50px; width: auto; margin: 0 10px;"><img src="reference/figures/logo_ku_forestry.jpg" style="height: 50px; width: auto; margin: 0 10px;"><img src="reference/figures/logo_kuias.jpg" style="height: 50px; width: auto; margin: 0 10px;"><img src="reference/figures/logo_wcs.png" style="height: 50px; width: auto; margin: 0 10px;"><img src="reference/figures/logo_nsf.png" style="height: 50px; width: auto; margin: 0 10px;"><img src="reference/figures/logo_nih.png" style="height: 50px; width: auto; margin: 0 10px;"></p>
-<p>A three-day hands-on workshop on <strong>ecological niche modelling (ENM)</strong> and <strong>species distribution modelling (SDM)</strong> in R, using Sambar deer (<em>Rusa unicolor</em>) in Thailand as the case study. The workshop walks participants through three modern R packages developed for the field, building each day on the outputs of the previous one.</p>
-<p>The full rendered website lives at <a href="https://paanwaris.github.io/ENM-Thailand/" class="uri"><strong>https://paanwaris.github.io/ENM-Thailand/</strong></a>.</p>
+</p>
+<p>Organized by: <img src="reference/figures/logo_vt_deby.png" style="height: 50px; width: auto; margin: 0 10px;"><img src="reference/figures/logo_ku_forestry.jpg" style="height: 50px; width: auto; margin: 0 10px;"> Supported by: <img src="reference/figures/logo_kuias.jpg" style="height: 50px; width: auto; margin: 0 10px;"><img src="reference/figures/logo_wcs.png" style="height: 50px; width: auto; margin: 0 10px;"><img src="reference/figures/logo_nsf.png" style="height: 50px; width: auto; margin: 0 10px;"><img src="reference/figures/logo_nih.png" style="height: 50px; width: auto; margin: 0 10px;"></p>
+
+<p>A hands-on workshop on <strong>ecological niche modeling (ENM)</strong> in R, using Sambar deer (<em>Rusa unicolor</em>) data as a case study. The workshop walks participants through three modern R packages that cover the fundamental theory and an applied predictive workflow. The material is organized as four self-contained <strong>Steps</strong>, so instructors can pace the workshop flexibly — from a single intensive day to a longer multi-session course.</p>
+<p>The full content is available at <a href="https://paanwaris.github.io/ENM-Thailand/" class="uri">https://paanwaris.github.io/ENM-Thailand/</a>.</p>
 <hr>
 <div class="section level2">
 <h2 id="workshop-overview">Workshop overview<a class="anchor" aria-label="anchor" href="#workshop-overview"></a>
 </h2>
-<p>The full rendered workshop is published as four articles on the pkgdown site. Each day is also delivered as a self-contained R Markdown notebook at the top of this repository.</p>
-<table style="width:100%;" class="table">
+<p>The workshop is delivered as four articles on the pkgdown site (Pre-workshop, nicheR, bean, and TemporalModelR). Each article is also a standalone R Markdown notebook in the repository.</p>
+<table class="table">
 <colgroup>
-<col width="10%">
-<col width="38%">
-<col width="17%">
-<col width="19%">
-<col width="14%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
+<col width="20%">
 </colgroup>
 <thead><tr>
-<th>Day</th>
+<th>Step</th>
 <th>Read on the site</th>
-<th>Source</th>
-<th>Package</th>
-<th>Focus</th>
+<th>Source notebook</th>
+<th>Package(s)</th>
+<th>Description</th>
 </tr></thead>
 <tbody>
 <tr>
-<td>0</td>
-<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Day0_Data_Download.html">Downloading the workshop data</a></td>
-<td><a href="Day0_Data_Download.Rmd"><code>Day0_Data_Download.Rmd</code></a></td>
-<td>—</td>
+<td><strong>Pre-workshop</strong></td>
+<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Pre-workshop.html">Downloading the workshop data</a></td>
+<td><a href="Pre-workshop.Rmd"><code>Pre-workshop.Rmd</code></a></td>
+<td>
+<a href="https://github.com/rspatial/geodata" class="external-link"><strong>geodata</strong></a> · <a href="https://github.com/ropensci/rgbif" class="external-link"><strong>rgbif</strong></a>
+</td>
 <td>
 <strong>Pre-workshop prep.</strong> Download and prepare the shared inputs: Thailand boundary from GADM, WorldClim v2.1 bioclim layers, and GBIF occurrence records for <em>Rusa unicolor</em>, strictly filtered to field-observation <code>basisOfRecord</code>.</td>
 </tr>
 <tr>
-<td>1</td>
-<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Day1_nicheR.html">Virtual species with nicheR</a></td>
-<td><a href="Day1_nicheR.Rmd"><code>Day1_nicheR.Rmd</code></a></td>
+<td><strong>Step 1</strong></td>
+<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Step1_nicheR.html">Virtual species with nicheR</a></td>
+<td><a href="Step1_nicheR.Rmd"><code>Step1_nicheR.Rmd</code></a></td>
 <td><a href="https://github.com/castanedaM/nicheR" class="external-link"><strong>nicheR</strong></a></td>
 <td>Build an ellipsoid-based <strong>virtual species</strong> in environmental space, project it to Thailand, explore E-space in 3D (BIO1 × BIO12 × BIO15), and sample virtual occurrences under three strategies (<code>centroid</code>, <code>random</code>, <code>edge</code>).</td>
 </tr>
 <tr>
-<td>2</td>
-<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Day2_bean.html">Environmental thinning with bean</a></td>
-<td><a href="Day2_bean.Rmd"><code>Day2_bean.Rmd</code></a></td>
+<td><strong>Step 2</strong></td>
+<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Step2_bean.html">Environmental thinning with bean</a></td>
+<td><a href="Step2_bean.Rmd"><code>Step2_bean.Rmd</code></a></td>
 <td><a href="https://github.com/paanwaris/bean" class="external-link"><strong>bean</strong></a></td>
 <td>Reduce <strong>environmental sampling bias</strong> in real Sambar occurrence data by thinning points that cluster in E-space, fit an ellipsoid niche, and project suitability back to G-space.</td>
 </tr>
 <tr>
-<td>3</td>
-<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Day3_TemporalModelR.html">Temporally-explicit SDMs with TemporalModelR</a></td>
-<td><a href="Day3_TemporalModelR.Rmd"><code>Day3_TemporalModelR.Rmd</code></a></td>
+<td><strong>Step 3</strong></td>
+<td><a href="https://paanwaris.github.io/ENM-Thailand/articles/Step3_TemporalModelR.html">Temporally-explicit SDMs with TemporalModelR</a></td>
+<td><a href="Step3_TemporalModelR.Rmd"><code>Step3_TemporalModelR.Rmd</code></a></td>
 <td><a href="https://github.com/CJHughes926/TemporalModelR" class="external-link"><strong>TemporalModelR</strong></a></td>
 <td>Build a <strong>temporally explicit SDM</strong> by pairing each occurrence with the environment it experienced at the time of observation. Uses local annual LST, precipitation, and NDVI rasters (2010–2025) provided in <code>temporal_rasters/</code>.</td>
 </tr>
 </tbody>
 </table>
 <blockquote>
-<p><strong>Where the source lives:</strong> all four workshop notebooks (<code>Day0_Data_Download.Rmd</code>, <code>Day1_nicheR.Rmd</code>, <code>Day2_bean.Rmd</code>, <code>Day3_TemporalModelR.Rmd</code>) sit at the top of this repository and can be knit directly with the RStudio <strong>Knit</strong> button.</p>
+<p><strong>Note:</strong> All four notebooks sit at the top of this repository and can be opened in RStudio and rendered directly with the <strong>Knit</strong> button. Once the Pre-workshop step is complete, <strong>Step 1</strong>, <strong>Step 2</strong>, and <strong>Step 3</strong> are independent and can be run in any order during the workshop.</p>
 </blockquote>
-<p><strong>Before the workshop:</strong> knit <strong>Day 0</strong> to populate <code>data/processed/</code> (one-time, ~15 min) — or use the Zenodo shortcut inside Day 0 to download a pre-built copy. Once Day 0 is done, Day 1, Day 2, and Day 3 are independent and can be knit in any order during the workshop.</p>
 <hr>
+</div>
+<div class="section level2">
+<h2 id="before-the-workshop">Before the workshop<a class="anchor" aria-label="anchor" href="#before-the-workshop"></a>
+</h2>
+<p>This workshop assumes some familiarity with R, but <strong>no prior programming experience is required to get set up</strong>. Please complete the steps below <em>before the first session</em>.</p>
+<div class="section level3">
+<h3 id="id_1-install-r-the-programming-language">1. Install R (the programming language)<a class="anchor" aria-label="anchor" href="#id_1-install-r-the-programming-language"></a>
+</h3>
+<p>Visit <a href="https://cran.r-project.org/" class="external-link uri">https://cran.r-project.org/</a> and download the installer that matches your operating system (Windows / macOS / Linux). Run the installer with all default settings.</p>
+</div>
+<div class="section level3">
+<h3 id="id_2-install-rstudio-desktop-the-editor-we-will-use">2. Install RStudio Desktop (the editor we will use)<a class="anchor" aria-label="anchor" href="#id_2-install-rstudio-desktop-the-editor-we-will-use"></a>
+</h3>
+<p>Visit <a href="https://posit.co/download/rstudio-desktop/" class="external-link uri">https://posit.co/download/rstudio-desktop/</a> and download the free <strong>RStudio Desktop</strong> installer. Run it with default settings.</p>
+<blockquote>
+<p>Think of <strong>R</strong> as the engine and <strong>RStudio</strong> as the dashboard — RStudio is the window you will actually interact with during the workshop.</p>
+</blockquote>
+</div>
+<div class="section level3">
+<h3 id="id_3-download-the-workshop-materials">3. Download the workshop materials<a class="anchor" aria-label="anchor" href="#id_3-download-the-workshop-materials"></a>
+</h3>
+<p>Choose whichever option you are most comfortable with:</p>
+<ul>
+<li><p><strong>Easiest — Download a ZIP.</strong> Visit <a href="https://github.com/paanwaris/ENM-Thailand" class="external-link uri">https://github.com/paanwaris/ENM-Thailand</a>, click the green <strong>Code</strong> button, choose <strong>Download ZIP</strong>, then unzip the folder somewhere memorable (for example, your Desktop).</p></li>
+<li>
+<p><strong>For Git users — Clone the repository.</strong> From a terminal, run:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/paanwaris/ENM-Thailand.git</span></code></pre></div>
+</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="id_4-open-the-project-in-rstudio">4. Open the project in RStudio<a class="anchor" aria-label="anchor" href="#id_4-open-the-project-in-rstudio"></a>
+</h3>
+<p>Inside the unzipped folder, double-click <strong><code>ENM-Thailand.Rproj</code></strong>. This opens the project in RStudio with all file paths correctly set, so every notebook will run from the same working directory.</p>
+</div>
+<div class="section level3">
+<h3 id="id_5-prepare-the-workshop-data">5. Prepare the workshop data<a class="anchor" aria-label="anchor" href="#id_5-prepare-the-workshop-data"></a>
+</h3>
+<p>Open <strong><code>Pre-workshop.Rmd</code></strong> in RStudio, then choose <strong>one</strong> of these two approaches:</p>
+<ul>
+<li>
+<strong>Recommended — Use the Zenodo shortcut (~5 minutes).</strong> Run only the chunk labeled <em>“Zenodo shortcut”</em> inside the notebook. It downloads a pre-built archive of every processed input we will use during the workshop.</li>
+<li>
+<strong>Build the data yourself (~15 minutes).</strong> Click the <strong>Knit</strong> button at the top of the notebook. This downloads Thailand boundaries from GADM, WorldClim climate layers, and Sambar deer records from GBIF. You will need a free GBIF account (sign up at <a href="https://www.gbif.org" class="external-link uri">https://www.gbif.org</a>) to complete this section.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="id_6-verify-everything-is-in-place">6. Verify everything is in place<a class="anchor" aria-label="anchor" href="#id_6-verify-everything-is-in-place"></a>
+</h3>
+<p>Then, the <code>data/processed/</code> folder should contain four sub-folders: <strong><code>bioclim/</code></strong>, <strong><code>boundary/</code></strong>, <strong><code>gbif/</code></strong>, and <strong><code>bias/</code></strong>. If you can see all four, you are ready for the workshop!</p>
+<hr>
+</div>
+</div>
+<div class="section level2">
+<h2 id="resources">Resources<a class="anchor" aria-label="anchor" href="#resources"></a>
+</h2>
+<p>A short guide to the tools and data sources you will encounter during the workshop. Each link below is safe to click before the workshop if you would like a preview.</p>
+<div class="section level3">
+<h3 id="software-you-need-to-install">Software you need to install<a class="anchor" aria-label="anchor" href="#software-you-need-to-install"></a>
+</h3>
+<ul>
+<li>
+<a href="https://cran.r-project.org/" class="external-link"><strong>R</strong></a> — the open-source programming language that powers every script in the workshop. You only need it installed; you will rarely interact with it directly.</li>
+<li>
+<a href="https://posit.co/download/rstudio-desktop/" class="external-link"><strong>RStudio Desktop</strong></a> — the editor we will use to open, edit, and run the workshop notebooks. The <strong>Knit</strong> button you will click lives here.</li>
+<li>
+<strong>R Markdown</strong> <em>(comes bundled with RStudio)</em> — the document format used by every <code>.Rmd</code> notebook. It mixes written explanations, R code, and figures in a single file you can run end-to-end.</li>
+</ul>
+</div>
+<div class="section level3">
+<h3 id="workshop-r-packages">Workshop R packages<a class="anchor" aria-label="anchor" href="#workshop-r-packages"></a>
+</h3>
+<p>These packages are installed automatically the first time you knit each notebook, so you do not need to install them by hand.</p>
+<ul>
+<li>
+<a href="https://github.com/castanedaM/nicheR" class="external-link"><strong>nicheR</strong></a> <em>(Step 1)</em> — builds and visualizes <strong>ellipsoid-shaped ecological niches</strong> in environmental space, projects them to geographic space, and lets us simulate a virtual species so we can compare model outputs against a known truth.</li>
+<li>
+<a href="https://github.com/paanwaris/bean" class="external-link"><strong>bean</strong></a> <em>(Step 2)</em> — reduces <strong>environmental sampling bias</strong> by thinning occurrence points in environmental space (not just geographic space), and fits ellipsoid niches on the thinned points.</li>
+<li>
+<a href="https://github.com/CJHughes926/TemporalModelR" class="external-link"><strong>TemporalModelR</strong></a> <em>(Step 3)</em> — builds <strong>temporally-explicit</strong> species distribution models by pairing each occurrence with the environment it actually experienced at the time of observation, then projects suitability across years.</li>
+<li>
+<a href="https://github.com/rspatial/geodata" class="external-link"><strong>geodata</strong></a> <em>(Pre-workshop)</em> — downloads ready-to-use spatial datasets (country boundaries, climate layers, etc.) directly from inside R.</li>
+<li>
+<a href="https://github.com/ropensci/rgbif" class="external-link"><strong>rgbif</strong></a> <em>(Pre-workshop)</em> — programmatic access to the GBIF species occurrence database from inside R.</li>
+</ul>
+</div>
+</div>
+<div class="section level2">
+<h2 id="data-sources">Data sources<a class="anchor" aria-label="anchor" href="#data-sources"></a>
+</h2>
+<ul>
+<li>
+<a href="https://www.gbif.org/" class="external-link"><strong>Occurrence data</strong></a> — the world’s largest open repository of species occurrence records. We download Sambar deer records from here in the Pre-workshop step.
+<ul>
+<li>GBIF.org (10 June 2026), GBIF Occurrence Download for <em>Rusa unicolor</em> via the <code>rgbif</code> package: <a href="https://doi.org/10.15468/dl.c4ts6s" class="external-link uri">https://doi.org/10.15468/dl.c4ts6s</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="https://www.worldclim.org/" class="external-link"><strong>Climate data</strong></a> — global gridded climate data at 1 km resolution. Provides the 19 “bioclim” variables we use as environmental predictors.
+<ul>
+<li>Fick, S.E. and R.J. Hijmans (2017). WorldClim 2: new 1-km spatial resolution climate surfaces for global land areas. <em>International Journal of Climatology</em>, 37 (12): 4302–4315. <a href="https://www.worldclim.org/" class="external-link uri">https://www.worldclim.org/</a>
+</li>
+</ul>
+</li>
+<li>
+<a href="https://gadm.org/" class="external-link"><strong>Thailand boundary</strong></a> — free administrative boundaries for every country and province. We use it for the Thailand boundary.</li>
+<li>
+<a href="https://zenodo.org/records/20344510" class="external-link"><strong>Zenodo archive (DOI 10.5281/zenodo.20344510)</strong></a> — a citable copy of the pre-processed inputs used in this workshop, with a permanent DOI. Faster to download than rebuilding the data from scratch.</li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="authors">Authors<a class="anchor" aria-label="anchor" href="#authors"></a>
@@ -160,28 +274,6 @@ ENM-Thailand workshop 2026
 </tr>
 </tbody>
 </table>
-<hr>
-</div>
-<div class="section level2">
-<h2 id="data-sources--citations">Data sources &amp; citations<a class="anchor" aria-label="anchor" href="#data-sources--citations"></a>
-</h2>
-<ul>
-<li>
-<strong>GBIF</strong>: GBIF.org occurrence download for <em>Rusa unicolor</em> via the <code>rgbif</code> package. Please cite the DOI returned by your own download.</li>
-<li>
-<strong>WorldClim v2.1</strong>: Fick, S.E. and R.J. Hijmans, 2017. WorldClim 2: new 1-km spatial resolution climate surfaces for global land areas. <em>International Journal of Climatology</em> 37 (12): 4302–4315. <a href="https://www.worldclim.org/" class="external-link uri">https://www.worldclim.org/</a>
-</li>
-<li>
-<strong>Thailand boundary</strong>: GADM v4.1 (free for academic and non-commercial use).</li>
-<li>
-<strong>Workshop packages</strong>:
-<ul>
-<li><code>nicheR</code></li>
-<li><code>bean</code></li>
-<li><code>TemporalModelR</code></li>
-</ul>
-</li>
-</ul>
 <hr>
 </div>
 <div class="section level2">
@@ -233,7 +325,7 @@ ENM-Thailand workshop 2026
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
