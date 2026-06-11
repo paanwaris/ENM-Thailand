@@ -1,0 +1,11 @@
+---
+title: "Step 3 — Temporally-explicit SDMs with TemporalModelR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Step 3 — Temporally-explicit SDMs with TemporalModelR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r child = "../Step3_TemporalModelR.Rmd"}
+```
