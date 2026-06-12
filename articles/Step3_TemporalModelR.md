@@ -46,17 +46,20 @@ In this Step we will:
     [`temporally_explicit_extraction()`](https://cjhughes926.github.io/TemporalModelR/reference/temporally_explicit_extraction.html).
 3.  Z-score the rasters, summarise their temporal mean, build
     spatiotemporal CV folds, and create fold-stratified pseudoabsences.
-4.  Fit
-    [`build_temporal_glm()`](https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_glm.html)
-    and
-    [`build_temporal_rf()`](https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_rf.html)
-    models and project predictions across years with
+4.  Fit all four `TemporalModelR` algorithms
+    ([`build_temporal_glm()`](https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_glm.html),
+    [`build_temporal_gam()`](https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_gam.html),
+    [`build_temporal_rf()`](https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_rf.html),
+    [`build_temporal_hv()`](https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_hv.html))
+    against the same partition and project predictions across years with
     [`generate_spatiotemporal_predictions()`](https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html).
-5.  Postprocess with
+5.  Postprocess **every model** with
     [`summarize_raster_outputs()`](https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html),
     [`analyze_temporal_patterns()`](https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html),
     and
-    [`analyze_trends_by_spatial_unit()`](https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html).
+    [`analyze_trends_by_spatial_unit()`](https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html)
+    so consensus surfaces, trajectory classifications, and provincial
+    summaries are directly comparable across algorithms.
 
 All function names and arguments below follow the official package
 documentation: <https://cjhughes926.github.io/TemporalModelR/>
@@ -72,13 +75,15 @@ cran_pkgs <- c(
   "dplyr",
   "readr",
   "viridis",
-  "randomForest",
+  "mgcv",          # backend for build_temporal_gam()
+  "randomForest",  # backend for build_temporal_rf()
+  "hypervolume",   # backend for build_temporal_hv() (presence-only)
   "fastcpd",
   "rmarkdown",
   "knitr",
   "remotes",
   "geodata",
-  "bean"        
+  "bean"
 )
 to_install <- cran_pkgs[!cran_pkgs %in% rownames(installed.packages())]
 if (length(to_install)) install.packages(to_install, dependencies = TRUE)
@@ -112,14 +117,14 @@ thailand <- st_read("data/processed/boundary/thailand_boundary.gpkg",
                     quiet = TRUE)
 
 # Clean GBIF Sambar deer table from the Pre-workshop. We:
-#   * restrict to 2010-2025 (the range covered by every per-year raster);
+#   * restrict to 2015-2025 (the range covered by every per-year raster);
 #   * rename the GBIF coordinate columns to the conventional `longitude` /
 #     `latitude` so they match the names bean and TemporalModelR expect;
 #   * add a `presence = 1L` column so the table is ready to be combined
 #     with pseudoabsences (presence = 0) later on.
 sambar <- read_csv("data/processed/gbif/sambar_thailand.csv",
                    show_col_types = FALSE) %>%
-  filter(year >= 2010, year <= 2025) %>%       # keep modelled years only
+  filter(year >= 2015, year <= 2025) %>%       # keep modelled years only
   rename(longitude = decimalLongitude,         # GBIF -> conventional name
          latitude  = decimalLatitude) %>%      # GBIF -> conventional name
   mutate(presence = 1L)                        # every GBIF record is a presence
@@ -129,8 +134,8 @@ table(sambar$year)
 ```
 
     ## 
-    ## 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025 
-    ##    7   23   22   27   29   31   30   31   40   55   19   17   68  106  143  226
+    ## 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025 
+    ##   31   30   31   40   55   19   17   68  106  143  226
 
 ## Preprocessing
 
@@ -318,22 +323,17 @@ data.frame(
 ```
 
     ##    year before after
-    ## 1  2010      7     0
-    ## 2  2011     23     4
-    ## 3  2012     22     4
-    ## 4  2013     27     5
-    ## 5  2014     29     2
-    ## 6  2015     31     3
-    ## 7  2016     30     4
-    ## 8  2017     31    10
-    ## 9  2018     40     4
-    ## 10 2019     55     3
-    ## 11 2020     19     4
-    ## 12 2021     17     2
-    ## 13 2022     68    11
-    ## 14 2023    106    18
-    ## 15 2024    143    18
-    ## 16 2025    226    28
+    ## 1  2015     31     7
+    ## 2  2016     30     6
+    ## 3  2017     31     7
+    ## 4  2018     40     5
+    ## 5  2019     55     3
+    ## 6  2020     19     5
+    ## 7  2021     17     3
+    ## 8  2022     68     8
+    ## 9  2023    106    22
+    ## 10 2024    143    16
+    ## 11 2025    226    29
 
 ``` r
 
@@ -368,14 +368,15 @@ write_csv(sambar, points_csv)
 study_crs <- st_crs(rast(ref_raster))
 
 rare_out <- spatiotemporal_rarefaction(
-  points_sp        = points_csv, # input CSV of presences
+  points_sp        = points_csv,                        # input CSV of presences
   output_dir       = file.path(points_dir, "rarefied"), # where rarefied tables are written
-  reference_raster = ref_raster, # defines the pixel grid for rarefaction
-  time_cols        = "year", # column carrying the time stamp
-  xcol             = "longitude", # column with x coordinate
-  ycol             = "latitude", # column with y coordinate
-  points_crs       = study_crs, # CRS of the input points
-  output_prefix    = "Sambar_annual" # prefix for the written files
+  reference_raster = ref_raster,                        # defines the pixel grid for rarefaction
+  time_cols        = "year",                            # column carrying the time stamp
+  xcol             = "longitude",                       # column with x coordinate
+  ycol             = "latitude",                        # column with y coordinate
+  points_crs       = study_crs,                         # CRS of the input points
+  output_prefix    = "Sambar_annual",                   # prefix for the written files
+  verbose          = FALSE                              # silence per-record progress messages
 )
 
 # The three counts below show how aggressive rarefaction was: how many
@@ -385,21 +386,21 @@ rare_out <- spatiotemporal_rarefaction(
 rare_out$input_points # n records that entered rarefaction
 ```
 
-    ## [1] 120
+    ## [1] 111
 
 ``` r
 
 rare_out$spatial_points # n surviving pure spatial rarefaction (one per pixel)
 ```
 
-    ## [1] 119
+    ## [1] 110
 
 ``` r
 
 rare_out$spatiotemporal_points # n surviving spatio-temporal (one per pixel per year)
 ```
 
-    ## [1] 119
+    ## [1] 110
 
 ### Match each observation to the environment it experienced
 
@@ -432,7 +433,8 @@ ext_out <- temporally_explicit_extraction(
   output_prefix       = "sambar_extracted",
   save_raw            = TRUE,                  # write the raw (un-scaled) extracted table
   save_scaled         = TRUE,                  # also write a z-scored copy
-  save_scaling_params = TRUE                   # write the per-variable means + SDs we'll reuse
+  save_scaling_params = TRUE,                  # write the per-variable means + SDs we'll reuse
+  verbose             = FALSE                  # silence per-record extraction progress
 )
 
 # Inspect the first few rows of the raw (un-scaled) extracted table.
@@ -444,7 +446,7 @@ head(ext_out$raw_values)
     ## 2 2022     1785 1563.137 28.29210 0.7183695  98.82302 18.68756
     ## 3 2021     3210 1561.478 25.62316 0.7308000 101.57942 17.36530
     ## 4 2025     3574 1649.073 27.18566 0.6480218 100.87285 16.99498
-    ## 5 2023     3676 1159.333 28.01327 0.6358696 101.66922 16.89389
+    ## 5 2025     3676 1558.965 25.64610 0.5752261 101.62258 16.97002
     ## 6 2025     3677 1590.410 24.14503 0.6517609 101.69314 16.96520
 
 ``` r
@@ -455,9 +457,9 @@ ext_out$scaling_params
 ```
 
     ##   variable         mean          sd
-    ## 1     prec 1610.9887521 450.0060632
-    ## 2     temp   27.9146341   2.6870713
-    ## 3     NDVI    0.6761184   0.1016402
+    ## 1     prec 1563.6098544 452.4398546
+    ## 2     temp   28.0566521   2.6989743
+    ## 3     NDVI    0.6732006   0.1062606
 
 ### Scale rasters
 
@@ -484,7 +486,8 @@ scale_rasters(
     "NDVI" = "NDVI_YEAR"
   ),
   time_cols = "year",
-  overwrite = TRUE       # replace any scaled files left from a previous run
+  overwrite = TRUE,       # replace any scaled files left from a previous run
+  verbose   = FALSE       # silence per-raster scaling progress
 )
 ```
 
@@ -510,7 +513,8 @@ partition <- spatiotemporal_partition(
   n_spatial_folds          = 2,         # how many blocks to split the country into
   n_temporal_folds         = 2,         # how many blocks to split the years into
   max_imbalance            = 0.15,      # max allowed presence imbalance between folds
-  create_plot              = TRUE       # produce the fold-map diagnostic
+  create_plot              = TRUE,      # produce the fold-map diagnostic
+  verbose                  = FALSE      # silence per-fold construction messages
 )
 ```
 
@@ -529,10 +533,10 @@ partition$summary
     ## 4               n_balanced_folds              0
     ## 5                 n_random_folds              0
     ## 6                 partition_mode spatiotemporal
-    ## 7                   total_points            119
+    ## 7                   total_points            110
     ## 8                 points_removed              0
     ## 9               pct_rows_removed              0
-    ## 10           final_imbalance_pct          14.29
+    ## 10           final_imbalance_pct          16.36
     ## 11 temporal_partitioning_enabled           TRUE
 
 ``` r
@@ -577,14 +581,35 @@ absences$summary
 ```
 
     ##   fold n_presences n_pseudoabsences ratio_achieved
-    ## 1    1          30               60              2
-    ## 2    2          29               58              2
-    ## 3    3          34               68              2
-    ## 4    4          26               52              2
+    ## 1    1          27               54              2
+    ## 2    2          27               54              2
+    ## 3    3          32               64              2
+    ## 4    4          24               48              2
 
 ## Modelling
 
-### GLM (with a quadratic term on temperature)
+`TemporalModelR` ships four model families, all with the same
+`partition_result` + (optionally) `pseudoabsence_result` interface so
+swapping algorithms is a one-chunk change:
+
+- **GLM** — generalised linear model (`build_temporal_glm`). Linear /
+  polynomial responses, easiest to interpret.
+- **GAM** — generalised additive model (`build_temporal_gam`, via
+  `mgcv`). Smooth, data-adaptive nonlinear responses while still
+  per-variable interpretable.
+- **Random forest** — ensemble of decision trees (`build_temporal_rf`,
+  via `randomForest`). Captures non-linear interactions automatically;
+  less interpretable than GLM/GAM.
+- **Hypervolume** — *n*-dimensional kernel-density envelope
+  (`build_temporal_hv`, via `hypervolume`). **Presence-only** — no
+  pseudoabsences needed and no probability threshold.
+
+We will fit all four against the same partition so the per-fold metrics
+are directly comparable. Three of them (GLM, GAM, RF) consume the same
+presence/absence table; only the hypervolume omits
+`pseudoabsence_result`.
+
+### GLM (linear + a quadratic on temperature)
 
 The temperature niche is expected to peak at some intermediate value and
 fall away on either side, so we add a quadratic term on `temp` to
@@ -606,162 +631,538 @@ glm_res <- build_temporal_glm(
   verbose              = FALSE
 )
 
-# Out-of-fold test metrics — one row per fold.
+# Out-of-fold E-space test metrics — one row per fold.
 glm_res$fold_test_metrics
 ```
 
     ##   Fold Threshold Testing_TP Testing_FN Testing_TN Testing_FP Sensitivity
-    ## 1    1      0.30         20         10         31         29      0.6667
-    ## 2    2      0.38         17         12         40         18      0.5862
-    ## 3    3      0.27         25          9         40         28      0.7353
-    ## 4    4      0.35         17          9         32         20      0.6538
+    ## 1    1      0.32         17         10         26         28      0.6296
+    ## 2    2      0.42         17         10         43         11      0.6296
+    ## 3    3      0.41         20         12         41         20      0.6250
+    ## 4    4      0.37         14         10         23         24      0.5833
     ##   Specificity    TSS  Kappa    AUC
-    ## 1      0.5167 0.1833 0.1583 0.5694
-    ## 2      0.6897 0.2759 0.2623 0.7271
-    ## 3      0.5882 0.3235 0.2839 0.7379
-    ## 4      0.6154 0.2692 0.2435 0.7041
+    ## 1      0.4815 0.1111 0.0952 0.5734
+    ## 2      0.7963 0.4259 0.4220 0.7277
+    ## 3      0.6721 0.2971 0.2805 0.7172
+    ## 4      0.4894 0.0727 0.0636 0.5949
 
-### Random forest
+### GAM (smooth nonlinear responses)
 
-The same setup but with a 500-tree random forest instead of a GLM. RFs
-capture non-linear interactions automatically and usually outperform the
-GLM at the cost of a less interpretable model.
+A GAM lets each predictor have a *smooth, data-adaptive* response curve
+without hand-coding polynomials. We wrap every predictor in `s()`
+(thin-plate regression spline) and let `mgcv` choose the basis
+dimension. The link function, threshold rule, and fold structure are the
+same as the GLM, so the two are directly comparable.
+
+``` r
+
+gam_res <- build_temporal_gam(
+  partition_result     = partition,                        # CV folds in space + time
+  pseudoabsence_result = absences,                         # presences + absences per fold
+  model_formula        = ~ s(temp) + s(prec) + s(NDVI),    # `s()` = univariate smooth (mgcv thin-plate spline)
+  link                 = "logit",                          # binary GAM with logit link
+  gam_params           = list(method = "REML"),            # smoothing-parameter selection rule (mgcv default REML)
+  threshold_method     = "tss",                            # pick threshold maximising True Skill Statistic
+  output_dir           = "outputs/GAM_Models",
+  create_plot          = FALSE,                            # skip the smooth-response curves to keep output compact
+  overwrite            = TRUE,
+  time_cols            = "year",
+  verbose              = FALSE                             # silence per-fold smoothing progress
+)
+
+# Out-of-fold E-space test metrics — one row per fold.
+gam_res$fold_test_metrics
+```
+
+    ##   Fold Threshold Testing_TP Testing_FN Testing_TN Testing_FP Sensitivity
+    ## 1    1      0.35         16         11         28         26      0.5926
+    ## 2    2      0.45         10         17         48          6      0.3704
+    ## 3    3      0.29         23          9         31         30      0.7188
+    ## 4    4      0.42         11         13         35         12      0.4583
+    ##   Specificity    TSS  Kappa    AUC
+    ## 1      0.5185 0.1111 0.0976 0.5748
+    ## 2      0.8889 0.2593 0.2887 0.7181
+    ## 3      0.5082 0.2269 0.1963 0.7059
+    ## 4      0.7447 0.2030 0.2051 0.5417
+
+### Random forest (flexible ensemble)
+
+A 500-tree random forest. RFs capture non-linear interactions
+automatically and usually outperform the GLM/GAM at the cost of a less
+interpretable model.
 
 ``` r
 
 rf_res <- build_temporal_rf(
   partition_result     = partition,                  # CV folds in space + time
   pseudoabsence_result = absences,                   # presences + absences per fold
-  model_vars           = c("temp", "prec", "NDVI"),  # predictors (RF needs no formula)
-  rf_params            = list(ntree = 500),          # 500-tree forest
+  model_vars           = c("temp", "prec", "NDVI"),  # RF needs predictor names, not a formula
+  rf_params            = list(ntree = 500),          # number of decision trees grown per fold
   threshold_method     = "tss",                      # pick threshold maximising True Skill Statistic
   output_dir           = "outputs/RF_Models",
-  create_plot          = FALSE,
+  create_plot          = FALSE,                      # skip variable-importance plot
   overwrite            = TRUE,
-  time_cols            = "year"
+  time_cols            = "year",
+  verbose              = FALSE                       # silence per-fold tree-growth progress
 )
 
+# Out-of-fold E-space test metrics — one row per fold.
 rf_res$fold_test_metrics
 ```
 
     ##   Fold Threshold Testing_TP Testing_FN Testing_TN Testing_FP Sensitivity
-    ## 1    1      0.35         13         17         42         18      0.4333
-    ## 2    2      0.34         13         16         43         15      0.4483
-    ## 3    3      0.35         19         15         47         21      0.5588
-    ## 4    4      0.33         17          9         32         20      0.6538
+    ## 1    1      0.34         15         12         32         22      0.5556
+    ## 2    2      0.34         13         14         35         19      0.4815
+    ## 3    3      0.33         23          9         39         22      0.7188
+    ## 4    4      0.36         10         14         33         14      0.4167
     ##   Specificity    TSS  Kappa    AUC
-    ## 1      0.7000 0.1333 0.1322 0.5900
-    ## 2      0.7414 0.1897 0.1913 0.6231
-    ## 3      0.6912 0.2500 0.2394 0.6730
-    ## 4      0.6154 0.2692 0.2435 0.6435
+    ## 1      0.5926 0.1481 0.1356 0.6063
+    ## 2      0.6481 0.1296 0.1239 0.6070
+    ## 3      0.6393 0.3581 0.3266 0.7316
+    ## 4      0.7021 0.1188 0.1188 0.6055
+
+### Hypervolume (presence-only kernel density)
+
+The hypervolume builds an *n*-dimensional kernel-density envelope around
+the presence points alone — it does not need pseudoabsences and does not
+produce a probability scale, so there is no `pseudoabsence_result` or
+`threshold_method` argument. Only sensitivity-based metrics are reported
+(specificity / AUC / TSS require negative training data).
+
+> **Heads-up.** Hypervolume fitting can be slow (several minutes per
+> fold on real data) because it samples millions of random points per
+> envelope. If you are running the workshop on a laptop, you can comment
+> this chunk out and skip the HV columns in the plots below.
+
+``` r
+
+hv_res <- build_temporal_hv(
+  partition_result   = partition,                 # CV folds in space + time (presences only)
+  model_vars         = c("temp", "prec", "NDVI"), # predictors defining the envelope axes
+  method             = "gaussian",                # Gaussian KDE envelope (alternative: "svm" = one-class SVM)
+  hypervolume_params = list(),                    # accept hypervolume::hypervolume_gaussian() defaults
+  output_dir         = "outputs/HV_Models",
+  create_plot        = FALSE,                     # skip the per-fold pairplots
+  verbose            = FALSE                      # silence per-fold KDE-construction progress
+)
+
+# Presence-only E-space metrics: sensitivity, envelope volume, per-fold overlap.
+hv_res$fold_test_metrics
+```
+
+    ##   Fold N_Test E_Volume Testing_TP Testing_FN Sensitivity
+    ## 1    1     30  87.5480         30          0      1.0000
+    ## 2    2     29  85.9348         29          0      1.0000
+    ## 3    3     34  59.0094         30          4      0.8824
+    ## 4    4     26  62.5078         21          5      0.8077
+
+``` r
+
+hv_res$volumes
+```
+
+    ##    fold1    fold2    fold3    fold4 
+    ## 87.54798 85.93478 59.00938 62.50780
 
 ## Project predictions through time
 
 [`generate_spatiotemporal_predictions()`](https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html)
-walks every time step, loads the matching rasters, applies the fitted
-model, and writes one prediction raster per fold × year combination. We
-run it once for the GLM and once for the random forest.
+walks every requested time step, loads the matching rasters, applies the
+fitted models, and writes **one fold-vote consensus raster per time
+step**. Every cell of the output carries a *count* (`0`, `1`, …, *N*) of
+how many of the *N* folds voted that the pixel was suitable in that time
+step — these are the package’s native fold-vote outputs, which we will
+visualise with the package’s default
+[`terra::plot()`](https://rspatial.github.io/terra/reference/plot.html)
+styling.
+
+The call signature is identical for all four model types; `model_type`
+inside `model_result` tells the function which projection logic to
+apply. The hypervolume projection simply omits `pseudoabsence_result`
+because the model was never fit against absences.
+
+Key arguments shared by every call below:
+
+- **`raster_dir`** — the folder of *scaled* per-year predictor rasters
+  written by
+  [`scale_rasters()`](https://cjhughes926.github.io/TemporalModelR/reference/scale_rasters.html).
+  Predictions must use the same transformation as the training points.
+- **`variable_patterns`** — a named vector mapping each predictor name
+  (left) to its filename pattern (right) with the `YEAR` placeholder, so
+  `temp_YEAR` resolves to `temp_2015.tif` for year 2015.
+- **`time_steps`** — a `data.frame` giving every (year, …) combination
+  to project. We use 2015–2025 to match the `sambar` filter and the 3 ×
+  4 plot grid below.
+- **`output_dir`** — where the per-fold per-time-step prediction rasters
+  get written. Each model writes to its own folder so the
+  post-processing later can address them separately.
 
 ``` r
 
-time_steps <- data.frame(year = 2010:2025)
+time_steps <- data.frame(year = 2015:2025)        # 11 years -> fits a 3 x 4 plot grid
+
+# A single named vector used by every projection call.
+var_patterns <- c("prec" = "prec_YEAR",
+                  "temp" = "temp_YEAR",
+                  "NDVI" = "NDVI_YEAR")
+
+# Clear stale prediction files from any previous run so each model's folder
+# contains exactly one raster per modelled year. This matters because the
+# downstream post-processing functions match the number of layers in the
+# consensus stack to the number of rows in `time_steps`; an orphan raster
+# from an earlier 2010-2025 run would cause a mismatch error.
+unlink("outputs/glm_predictions", recursive = TRUE, force = TRUE)
+unlink("outputs/gam_predictions", recursive = TRUE, force = TRUE)
+unlink("outputs/rf_predictions",  recursive = TRUE, force = TRUE)
+unlink("outputs/hv_predictions",  recursive = TRUE, force = TRUE)
 
 glm_preds <- generate_spatiotemporal_predictions(
-  partition_result     = partition,                  # fold geometry to apply
-  model_result         = glm_res,                    # fitted GLM models (one per fold)
-  pseudoabsence_result = absences,                   # used to project on each fold's domain
-  raster_dir           = scaled_dir,                 # z-scored per-year predictor rasters
-  variable_patterns    = c("prec" = "prec_YEAR",
-                           "temp" = "temp_YEAR",
-                           "NDVI" = "NDVI_YEAR"),
+  partition_result     = partition,
+  model_result         = glm_res,
+  pseudoabsence_result = absences,
+  raster_dir           = scaled_dir,
+  variable_patterns    = var_patterns,
   time_cols            = "year",
-  time_steps           = time_steps,                 # years to project (data frame above)
+  time_steps           = time_steps,
   output_dir           = "outputs/glm_predictions",
-  overwrite            = TRUE
+  overwrite            = TRUE,
+  verbose              = FALSE
+)
+
+gam_preds <- generate_spatiotemporal_predictions(
+  partition_result     = partition,
+  model_result         = gam_res,
+  pseudoabsence_result = absences,
+  raster_dir           = scaled_dir,
+  variable_patterns    = var_patterns,
+  time_cols            = "year",
+  time_steps           = time_steps,
+  output_dir           = "outputs/gam_predictions",
+  overwrite            = TRUE,
+  verbose              = FALSE
 )
 
 rf_preds <- generate_spatiotemporal_predictions(
   partition_result     = partition,
-  model_result         = rf_res,                     # fitted RF models (one per fold)
+  model_result         = rf_res,
   pseudoabsence_result = absences,
   raster_dir           = scaled_dir,
-  variable_patterns    = c("prec" = "prec_YEAR",
-                           "temp" = "temp_YEAR",
-                           "NDVI" = "NDVI_YEAR"),
+  variable_patterns    = var_patterns,
   time_cols            = "year",
   time_steps           = time_steps,
   output_dir           = "outputs/rf_predictions",
-  overwrite            = TRUE
+  overwrite            = TRUE,
+  verbose              = FALSE
+)
+
+hv_preds <- generate_spatiotemporal_predictions(
+  partition_result     = partition,
+  model_result         = hv_res,
+  raster_dir           = scaled_dir,
+  variable_patterns    = var_patterns,
+  time_cols            = "year",
+  time_steps           = time_steps,
+  output_dir           = "outputs/hv_predictions",
+  overwrite            = TRUE,
+  verbose              = FALSE
 )
 ```
 
-Quick look at four representative years for the RF model:
+### Visualise the consensus maps
+
+For each model we stack the per-time-step prediction rasters straight
+from `preds$prediction_files` and pass them to
+[`terra::plot()`](https://rspatial.github.io/terra/reference/plot.html)
+— the package’s default visualisation. Every raster cell is a
+**fold-vote count** (0 to *N*) of how many folds agreed the pixel was
+suitable in that year. With 11 modelled years (2015–2025), each stack
+lays out as a 3 × 4 grid.
 
 ``` r
 
-# Pick a few representative years inside the modelled range (2010-2025).
-sample_years <- c(2010, 2015, 2020, 2025)
-
-rf_files <- list.files(
-  "outputs/rf_predictions",
-  pattern    = paste0("Prediction_.*(",
-                      paste(sample_years, collapse = "|"),
-                      ").*\\.tif$"),
-  full.names = TRUE
-)
-
-# Stack at most as many prediction rasters as we have sample_years.
-rf_stack <- terra::rast(rf_files[seq_len(min(length(sample_years),
-                                             length(rf_files)))])
-
-par(mfrow = c(1, terra::nlyr(rf_stack)))
-for (i in seq_len(terra::nlyr(rf_stack))) {
-  plot(rf_stack[[i]],
-       main = names(rf_stack)[i])
-  plot(sf::st_geometry(thailand), add = TRUE, border = "grey20")
-}
+glm_pred_stack <- terra::rast(glm_preds$prediction_files)
+names(glm_pred_stack) <- sub("\\.tif$", "", basename(glm_preds$prediction_files))
+terra::plot(glm_pred_stack, nr = 3, nc = 4,
+            mar    = c(1.0, 1.0, 1.5, 3.0),
+            legend = FALSE)
 ```
 
-![](Step3_TemporalModelR_files/figure-html/plot-years-1.png)
+![](Step3_TemporalModelR_files/figure-html/plot-glm-1.png)
+
+``` r
+
+gam_pred_stack <- terra::rast(gam_preds$prediction_files)
+names(gam_pred_stack) <- sub("\\.tif$", "", basename(gam_preds$prediction_files))
+terra::plot(gam_pred_stack, nr = 3, nc = 4,
+            mar    = c(1.0, 1.0, 1.5, 3.0),
+            legend = FALSE)
+```
+
+![](Step3_TemporalModelR_files/figure-html/plot-gam-1.png)
+
+``` r
+
+rf_pred_stack <- terra::rast(rf_preds$prediction_files)
+names(rf_pred_stack) <- sub("\\.tif$", "", basename(rf_preds$prediction_files))
+terra::plot(rf_pred_stack, nr = 3, nc = 4,
+            mar    = c(1.0, 1.0, 1.5, 3.0),
+            legend = FALSE)
+```
+
+![](Step3_TemporalModelR_files/figure-html/plot-rf-1.png)
+
+``` r
+
+hv_pred_stack <- terra::rast(hv_preds$prediction_files)
+names(hv_pred_stack) <- sub("\\.tif$", "", basename(hv_preds$prediction_files))
+terra::plot(hv_pred_stack, nr = 3, nc = 4,
+            mar    = c(1.0, 1.0, 1.5, 3.0),
+            legend = FALSE)
+```
+
+![](Step3_TemporalModelR_files/figure-html/plot-hv-1.png)
+
+Reading these grids: each panel is one year (2015 in the top-left, 2025
+in the bottom-right of each 3 × 4 grid). Brighter pixels mean more folds
+agreed the pixel was suitable in that year; darker pixels mean fewer or
+no folds did. Any *shift* in the bright patches across panels is the
+model’s view of how Sambar deer habitat changed during 2015–2025.
+Comparing the four model grids side-by-side highlights where the
+algorithms agree on the niche and where they disagree.
+
+### Per-model performance diagnostics
+
+[`plot_model_assessment()`](https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html)
+is the package’s default diagnostic plot. It produces per-fold
+time-series of percent suitable, sensitivity (and, for presence/absence
+models, specificity), and the cumulative-binomial-probability (CBP)
+test, overlaid with the overall E-space metrics from
+`$fold_test_metrics` when `model_result` is supplied. We run it once per
+model below so the four algorithms are directly comparable.
+
+Key arguments:
+
+- **`predictions`** — the object returned by
+  [`generate_spatiotemporal_predictions()`](https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html)
+  for that model.
+- **`time_column`** — the name(s) of the time column(s) in the
+  partition. Single annual axis here, so `"year"`.
+- **`model_result`** — the fitted-model object; supplying it overlays
+  the E-space `$fold_test_metrics` as reference lines on the
+  per-time-step series.
+
+``` r
+
+plot_model_assessment(
+  predictions  = glm_preds,
+  time_column  = "year",
+  model_result = glm_res
+)
+```
+
+![](Step3_TemporalModelR_files/figure-html/assess-glm-1.png)![](Step3_TemporalModelR_files/figure-html/assess-glm-2.png)![](Step3_TemporalModelR_files/figure-html/assess-glm-3.png)![](Step3_TemporalModelR_files/figure-html/assess-glm-4.png)![](Step3_TemporalModelR_files/figure-html/assess-glm-5.png)![](Step3_TemporalModelR_files/figure-html/assess-glm-6.png)
+
+``` r
+
+plot_model_assessment(
+  predictions  = gam_preds,
+  time_column  = "year",
+  model_result = gam_res
+)
+```
+
+![](Step3_TemporalModelR_files/figure-html/assess-gam-1.png)![](Step3_TemporalModelR_files/figure-html/assess-gam-2.png)![](Step3_TemporalModelR_files/figure-html/assess-gam-3.png)![](Step3_TemporalModelR_files/figure-html/assess-gam-4.png)![](Step3_TemporalModelR_files/figure-html/assess-gam-5.png)![](Step3_TemporalModelR_files/figure-html/assess-gam-6.png)
+
+``` r
+
+plot_model_assessment(
+  predictions  = rf_preds,
+  time_column  = "year",
+  model_result = rf_res
+)
+```
+
+![](Step3_TemporalModelR_files/figure-html/assess-rf-1.png)![](Step3_TemporalModelR_files/figure-html/assess-rf-2.png)![](Step3_TemporalModelR_files/figure-html/assess-rf-3.png)![](Step3_TemporalModelR_files/figure-html/assess-rf-4.png)![](Step3_TemporalModelR_files/figure-html/assess-rf-5.png)![](Step3_TemporalModelR_files/figure-html/assess-rf-6.png)
+
+``` r
+
+plot_model_assessment(
+  predictions  = hv_preds,
+  time_column  = "year",
+  model_result = hv_res
+)
+```
+
+![](Step3_TemporalModelR_files/figure-html/assess-hv-1.png)![](Step3_TemporalModelR_files/figure-html/assess-hv-2.png)![](Step3_TemporalModelR_files/figure-html/assess-hv-3.png)![](Step3_TemporalModelR_files/figure-html/assess-hv-4.png)
+
+The hypervolume diagnostics show only the sensitivity, percent-suitable,
+and CBP panels — specificity is undefined for a presence-only model.
+
+## Postprocessing
+
+Every model produced its own folder of per-fold per-year prediction
+rasters during projection (`outputs/glm_predictions/`,
+`outputs/gam_predictions/`, `outputs/rf_predictions/`,
+`outputs/hv_predictions/`). The three post-processing functions below —
+[`summarize_raster_outputs()`](https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html),
+[`analyze_temporal_patterns()`](https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html),
+and
+[`analyze_trends_by_spatial_unit()`](https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html)
+— are model-agnostic: they read a prediction folder and operate on
+whatever the prediction rasters contain. We therefore run **one call per
+model** in each step so the consensus surfaces, trajectory
+classifications, and provincial summaries are directly comparable across
+GLM / GAM / RF / Hypervolume.
+
+### Consensus surfaces across folds
+
+[`summarize_raster_outputs()`](https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html)
+reads the per-time-step prediction rasters from `predictions_dir` and
+applies a **consensus rule** across folds to flag pixels that *at least
+`consensus` folds* agreed were suitable. Setting `consensus = 2` is a
+majority rule for a 4-fold partition. It returns a binary
+`consensus_stack` (one layer per year) plus a `frequency_raster` (the
+proportion of years each pixel was suitable).
+
+Key arguments:
+
+- **`predictions_dir`** — folder of fold/year prediction rasters from
+  [`generate_spatiotemporal_predictions()`](https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html).
+- **`output_dir`** — where to write the binary stack and frequency
+  raster.
+- **`consensus`** — minimum number of folds that must agree before a
+  pixel is called suitable; here, `2` of `4`.
+
+``` r
+
+glm_consensus <- summarize_raster_outputs(
+  predictions_dir = "outputs/glm_predictions",
+  output_dir      = "outputs/glm_consensus",
+  consensus       = 2,
+  overwrite       = TRUE,
+  verbose         = FALSE
+)
+```
+
+``` r
+
+gam_consensus <- summarize_raster_outputs(
+  predictions_dir = "outputs/gam_predictions",
+  output_dir      = "outputs/gam_consensus",
+  consensus       = 2,
+  overwrite       = TRUE,
+  verbose         = FALSE
+)
+```
+
+``` r
+
+rf_consensus <- summarize_raster_outputs(
+  predictions_dir = "outputs/rf_predictions",
+  output_dir      = "outputs/rf_consensus",
+  consensus       = 2,
+  overwrite       = TRUE,
+  verbose         = FALSE
+)
+```
+
+``` r
+
+hv_consensus <- summarize_raster_outputs(
+  predictions_dir = "outputs/hv_predictions",
+  output_dir      = "outputs/hv_consensus",
+  consensus       = 2,
+  overwrite       = TRUE,
+  verbose         = FALSE
+)
+```
+
+#### Per-year binary suitability — the `consensus_stack`
+
+Each `consensus_stack` is a multi-layer `SpatRaster` carrying **one
+binary layer per year** (yellow = suitable, purple = unsuitable). Plot
+it the same way we plotted the prediction stacks earlier — a 3 × 4 grid
+of the 11 modelled years for the model in question.
+
+``` r
+
+terra::plot(glm_consensus$consensus_stack, nr = 3, nc = 4,
+            mar    = c(1.0, 1.0, 1.5, 3.0),
+            legend = FALSE)
+```
+
+![](Step3_TemporalModelR_files/figure-html/consensus-stack-glm-1.png)
+
+``` r
+
+terra::plot(gam_consensus$consensus_stack, nr = 3, nc = 4,
+            mar    = c(1.0, 1.0, 1.5, 3.0),
+            legend = FALSE)
+```
+
+![](Step3_TemporalModelR_files/figure-html/consensus-stack-gam-1.png)
+
+``` r
+
+terra::plot(rf_consensus$consensus_stack, nr = 3, nc = 4,
+            mar    = c(1.0, 1.0, 1.5, 3.0),
+            legend = FALSE)
+```
+
+![](Step3_TemporalModelR_files/figure-html/consensus-stack-rf-1.png)
+
+``` r
+
+terra::plot(hv_consensus$consensus_stack, nr = 3, nc = 4,
+            mar    = c(1.0, 1.0, 1.5, 3.0),
+            legend = FALSE)
+```
+
+![](Step3_TemporalModelR_files/figure-html/consensus-stack-hv-1.png)
+
+Reading these grids: yellow pixels were called suitable by **at least 2
+of the 4 folds** (the `consensus = 2` majority rule), purple pixels were
+not. Compared to the raw fold-vote maps shown earlier under *Visualise
+the consensus maps*, these are the **binary** version after the
+consensus threshold has been applied.
+
+#### Frequency across years
+
+The frequency raster collapses each consensus stack across years into a
+single 0–1 surface — the proportion of years a pixel was called
+suitable. Drawn per model as a 2 × 2 panel for easy side-by-side
+comparison.
+
+``` r
+
+par(mfrow = c(2, 2))
+
+plot(glm_consensus$frequency_raster,
+     main = "GLM — proportion of years suitable")
+
+plot(gam_consensus$frequency_raster,
+     main = "GAM — proportion of years suitable")
+
+plot(rf_consensus$frequency_raster,
+     main = "RF — proportion of years suitable")
+
+plot(hv_consensus$frequency_raster,
+     main = "Hypervolume — proportion of years suitable")
+```
+
+![](Step3_TemporalModelR_files/figure-html/consensus-plot-1.png)
 
 ``` r
 
 par(mfrow = c(1, 1))
 ```
 
-Reading the panels: each map is the modelled suitability surface for one
-year (yellow = high suitability, dark = low). Panels are arranged left
-to right in chronological order, so any *shift* in the bright patches
-across panels is the model’s view of how Sambar deer habitat changed
-during 2010–2025.
-
-## Postprocessing
-
-### Consensus surfaces across folds
-
-[`summarize_raster_outputs()`](https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html)
-reads the per-time-step prediction rasters from the prediction directory
-and applies a consensus rule across folds to flag pixels that *most*
-folds agree are suitable.
-
-``` r
-
-consensus <- summarize_raster_outputs(
-  predictions_dir = "outputs/rf_predictions",   # folder of per-fold per-year predictions
-  output_dir      = "outputs/rf_consensus",     # folder where the consensus rasters go
-  overwrite       = TRUE
-)
-
-plot(consensus$frequency_raster,
-     main = "Proportion of time steps each pixel was suitable (RF)")
-```
-
-![](Step3_TemporalModelR_files/figure-html/consensus-1.png)
-
-The frequency raster runs from 0 (never suitable) to 1 (suitable in
-every year). Patches in the dark-yellow / cream range mark pixels that
-the RF model labels suitable in every single year — the persistent core
-of the niche.
+Reading the panels: pixels close to 1 (bright) were predicted suitable
+in every modelled year — the *persistent core* of the niche for that
+model. Pixels close to 0 (dark) were never suitable. Intermediate values
+mark areas that gained or lost suitability across 2015–2025. Differences
+between the four panels show where the algorithms disagree on long-term
+suitability.
 
 ### Pixel-level temporal trajectories (changepoint analysis)
 
@@ -769,42 +1170,134 @@ of the niche.
 runs `fastcpd` per pixel and classifies each pixel’s trajectory across
 years into one of six categories: never-suitable, always-suitable,
 no-pattern (statistically flat), increasing, decreasing, or fluctuating.
-The result is a categorical map of *how* habitat is changing rather than
-just *whether* it is suitable.
+The result is a categorical map of **how** habitat is changing rather
+than just *whether* it is suitable.
+
+Key arguments:
+
+- **`binary_stack`** — the per-time-step binary `consensus_stack`
+  produced above.
+- **`summary_raster`** — the matching 0–1 frequency raster; used to
+  short-circuit pixels that are always or never suitable.
+- **`time_steps`** — the same `data.frame` of time-step labels used
+  during projection.
+- **`spatial_autocorrelation` / `estimate_time`** — both `FALSE` here to
+  keep the workshop fast; enable on real analyses if you need them.
 
 ``` r
 
-patterns_out <- analyze_temporal_patterns(
-  binary_stack            = consensus$consensus_stack,   # one binary layer per time step
-  summary_raster          = consensus$frequency_raster,  # the 0-1 frequency surface from above
+glm_patterns <- analyze_temporal_patterns(
+  binary_stack            = glm_consensus$consensus_stack,
+  summary_raster          = glm_consensus$frequency_raster,
   time_steps              = time_steps,
-  output_dir              = "outputs/rf_patterns",
-  spatial_autocorrelation = FALSE,                       # skip the spatial autocorrelation correction
-  estimate_time           = FALSE,                       # skip the runtime estimator
-  overwrite               = TRUE
+  output_dir              = "outputs/glm_patterns",
+  spatial_autocorrelation = FALSE,
+  estimate_time           = FALSE,
+  overwrite               = TRUE,
+  verbose                 = FALSE
 )
 ```
 
-    ##   |                                                          |                                                  |   0%  |                                                          |                                                  |   1%  |                                                          |=                                                 |   1%  |                                                          |=                                                 |   2%  |                                                          |=                                                 |   3%  |                                                          |==                                                |   3%  |                                                          |==                                                |   4%  |                                                          |==                                                |   5%  |                                                          |===                                               |   5%  |                                                          |===                                               |   6%  |                                                          |===                                               |   7%  |                                                          |====                                              |   7%  |                                                          |====                                              |   8%  |                                                          |====                                              |   9%  |                                                          |=====                                             |   9%  |                                                          |=====                                             |  10%  |                                                          |=====                                             |  11%  |                                                          |======                                            |  11%  |                                                          |======                                            |  12%  |                                                          |======                                            |  13%  |                                                          |=======                                           |  13%  |                                                          |=======                                           |  14%  |                                                          |=======                                           |  15%  |                                                          |========                                          |  15%  |                                                          |========                                          |  16%  |                                                          |========                                          |  17%  |                                                          |=========                                         |  17%  |                                                          |=========                                         |  18%  |                                                          |=========                                         |  19%  |                                                          |==========                                        |  19%  |                                                          |==========                                        |  20%  |                                                          |==========                                        |  21%  |                                                          |===========                                       |  21%  |                                                          |===========                                       |  22%  |                                                          |===========                                       |  23%  |                                                          |============                                      |  23%  |                                                          |============                                      |  24%  |                                                          |============                                      |  25%  |                                                          |=============                                     |  25%  |                                                          |=============                                     |  26%  |                                                          |=============                                     |  27%  |                                                          |==============                                    |  27%  |                                                          |==============                                    |  28%  |                                                          |==============                                    |  29%  |                                                          |===============                                   |  29%  |                                                          |===============                                   |  30%  |                                                          |===============                                   |  31%  |                                                          |================                                  |  31%  |                                                          |================                                  |  32%  |                                                          |================                                  |  33%  |                                                          |=================                                 |  33%  |                                                          |=================                                 |  34%  |                                                          |=================                                 |  35%  |                                                          |==================                                |  35%  |                                                          |==================                                |  36%  |                                                          |==================                                |  37%  |                                                          |===================                               |  37%  |                                                          |===================                               |  38%  |                                                          |===================                               |  39%  |                                                          |====================                              |  39%  |                                                          |====================                              |  40%  |                                                          |====================                              |  41%  |                                                          |=====================                             |  41%  |                                                          |=====================                             |  42%  |                                                          |=====================                             |  43%  |                                                          |======================                            |  43%  |                                                          |======================                            |  44%  |                                                          |======================                            |  45%  |                                                          |=======================                           |  45%  |                                                          |=======================                           |  46%  |                                                          |=======================                           |  47%  |                                                          |========================                          |  47%  |                                                          |========================                          |  48%  |                                                          |========================                          |  49%  |                                                          |=========================                         |  49%  |                                                          |=========================                         |  50%  |                                                          |=========================                         |  51%  |                                                          |==========================                        |  51%  |                                                          |==========================                        |  52%  |                                                          |==========================                        |  53%  |                                                          |===========================                       |  53%  |                                                          |===========================                       |  54%  |                                                          |===========================                       |  55%  |                                                          |============================                      |  55%  |                                                          |============================                      |  56%  |                                                          |============================                      |  57%  |                                                          |=============================                     |  57%  |                                                          |=============================                     |  58%  |                                                          |=============================                     |  59%  |                                                          |==============================                    |  59%  |                                                          |==============================                    |  60%  |                                                          |==============================                    |  61%  |                                                          |===============================                   |  61%  |                                                          |===============================                   |  62%  |                                                          |===============================                   |  63%  |                                                          |================================                  |  63%  |                                                          |================================                  |  64%  |                                                          |================================                  |  65%  |                                                          |=================================                 |  65%  |                                                          |=================================                 |  66%  |                                                          |=================================                 |  67%  |                                                          |==================================                |  67%  |                                                          |==================================                |  68%  |                                                          |==================================                |  69%  |                                                          |===================================               |  69%  |                                                          |===================================               |  70%  |                                                          |===================================               |  71%  |                                                          |====================================              |  71%  |                                                          |====================================              |  72%  |                                                          |====================================              |  73%  |                                                          |=====================================             |  73%  |                                                          |=====================================             |  74%  |                                                          |=====================================             |  75%  |                                                          |======================================            |  75%  |                                                          |======================================            |  76%  |                                                          |======================================            |  77%  |                                                          |=======================================           |  77%  |                                                          |=======================================           |  78%  |                                                          |=======================================           |  79%  |                                                          |========================================          |  79%  |                                                          |========================================          |  80%  |                                                          |========================================          |  81%  |                                                          |=========================================         |  81%  |                                                          |=========================================         |  82%  |                                                          |=========================================         |  83%  |                                                          |==========================================        |  83%  |                                                          |==========================================        |  84%  |                                                          |==========================================        |  85%  |                                                          |===========================================       |  85%  |                                                          |===========================================       |  86%  |                                                          |===========================================       |  87%  |                                                          |============================================      |  87%  |                                                          |============================================      |  88%  |                                                          |============================================      |  89%  |                                                          |=============================================     |  89%  |                                                          |=============================================     |  90%  |                                                          |=============================================     |  91%  |                                                          |==============================================    |  91%  |                                                          |==============================================    |  92%  |                                                          |==============================================    |  93%  |                                                          |===============================================   |  93%  |                                                          |===============================================   |  94%  |                                                          |===============================================   |  95%  |                                                          |================================================  |  95%  |                                                          |================================================  |  96%  |                                                          |================================================  |  97%  |                                                          |================================================= |  97%  |                                                          |================================================= |  98%  |                                                          |================================================= |  99%  |                                                          |==================================================|  99%  |                                                          |==================================================| 100%
-
-![](Step3_TemporalModelR_files/figure-html/changepoints-1.png)![](Step3_TemporalModelR_files/figure-html/changepoints-2.png)![](Step3_TemporalModelR_files/figure-html/changepoints-3.png)
+![](Step3_TemporalModelR_files/figure-html/changepoints-glm-1.png)
 
 ``` r
 
-plot(patterns_out$pattern,
-     main = "Temporal trajectory class per pixel",
-     type = "classes")
+gam_patterns <- analyze_temporal_patterns(
+  binary_stack            = gam_consensus$consensus_stack,
+  summary_raster          = gam_consensus$frequency_raster,
+  time_steps              = time_steps,
+  output_dir              = "outputs/gam_patterns",
+  spatial_autocorrelation = FALSE,
+  estimate_time           = FALSE,
+  overwrite               = TRUE,
+  verbose                 = FALSE
+)
 ```
 
-![](Step3_TemporalModelR_files/figure-html/changepoints-4.png)
+![](Step3_TemporalModelR_files/figure-html/changepoints-gam-1.png)
+
+``` r
+
+rf_patterns <- analyze_temporal_patterns(
+  binary_stack            = rf_consensus$consensus_stack,
+  summary_raster          = rf_consensus$frequency_raster,
+  time_steps              = time_steps,
+  output_dir              = "outputs/rf_patterns",
+  spatial_autocorrelation = FALSE,
+  estimate_time           = FALSE,
+  overwrite               = TRUE,
+  verbose                 = FALSE
+)
+```
+
+![](Step3_TemporalModelR_files/figure-html/changepoints-rf-1.png)
+
+``` r
+
+hv_patterns <- analyze_temporal_patterns(
+  binary_stack            = hv_consensus$consensus_stack,
+  summary_raster          = hv_consensus$frequency_raster,
+  time_steps              = time_steps,
+  output_dir              = "outputs/hv_patterns",
+  spatial_autocorrelation = FALSE,
+  estimate_time           = FALSE,
+  overwrite               = TRUE,
+  verbose                 = FALSE
+)
+```
+
+![](Step3_TemporalModelR_files/figure-html/changepoints-hv-1.png)
+
+The four trajectory-class maps, side-by-side:
+
+``` r
+
+par(mfrow = c(2, 2))
+
+plot(glm_patterns$pattern,
+     main = "GLM — temporal trajectory class",
+     legend = FALSE)
+
+plot(gam_patterns$pattern,
+     main = "GAM — temporal trajectory class",
+     legend = FALSE)
+
+plot(rf_patterns$pattern,
+     main = "RF — temporal trajectory class",
+     legend = FALSE)
+
+plot(hv_patterns$pattern,
+     main = "Hypervolume — temporal trajectory class",
+     legend = FALSE)
+```
+
+![](Step3_TemporalModelR_files/figure-html/changepoints-plot-1.png)
+
+``` r
+
+par(mfrow = c(1, 1))
+```
+
+Reading the panels: each colour is a categorical trajectory class.
+Comparing the four maps shows how much each algorithm agrees on the
+*shape* of change (increasing / decreasing / fluctuating), not just its
+location.
 
 ### Aggregate by spatial unit (Thailand provinces)
 
-Pixel-level maps are powerful but hard to summarise verbally.
 [`analyze_trends_by_spatial_unit()`](https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html)
-aggregates the pixel trajectories to a province polygon set (here, GADM
-level 1 — Thailand’s provinces) so we can talk about results region by
-region.
+aggregates the pixel trajectories to a province polygon set (GADM level
+1 — Thailand’s provinces) so trends can be discussed region-by-region
+rather than pixel-by-pixel.
+
+Key arguments:
+
+- **`shapefile_path`** — the polygon set to aggregate against.
+- **`name_field`** — column carrying the human-readable unit name; we
+  use `NAME_1` (province name in GADM).
+- **`binary_stack` / `pattern_raster` / `time_decrease_raster` /
+  `time_increase_raster`** — outputs from the consensus and pattern
+  steps for the model in question.
 
 ``` r
 
@@ -812,90 +1305,227 @@ region.
 # so analyze_trends_by_spatial_unit() can read it.
 provinces <- geodata::gadm(country = "THA", level = 1, path = "data/raw") |>
   st_as_sf()
+```
 
-regional <- analyze_trends_by_spatial_unit(
-  shapefile_path       = provinces,                       # the polygons to aggregate by
-  name_field           = "NAME_1",                        # province-name column
-  binary_stack         = consensus$consensus_stack,       # per-time-step binary suitability
-  pattern_raster       = patterns_out$pattern,            # trajectory class per pixel
-  time_decrease_raster = patterns_out$time_decrease,      # estimated time-of-decrease per pixel
-  time_increase_raster = patterns_out$time_increase,      # estimated time-of-increase per pixel
+``` r
+
+glm_regional <- analyze_trends_by_spatial_unit(
+  shapefile_path       = provinces,
+  name_field           = "NAME_1",
+  binary_stack         = glm_consensus$consensus_stack,
+  pattern_raster       = glm_patterns$pattern,
+  time_decrease_raster = glm_patterns$time_decrease,
+  time_increase_raster = glm_patterns$time_increase,
   time_steps           = time_steps,
-  output_dir           = "outputs/rf_regional",
+  output_dir           = "outputs/glm_regional",
   overwrite            = TRUE,
-  create_plot          = TRUE                             # produce the three diagnostic plots below
+  create_plot          = TRUE,
+  verbose              = FALSE
 )
 ```
 
-    ##   |                                                          |                                                  |   0%  |                                                          |===                                               |   6%  |                                                          |======                                            |  12%  |                                                          |=========                                         |  19%  |                                                          |============                                      |  25%  |                                                          |================                                  |  31%  |                                                          |===================                               |  38%  |                                                          |======================                            |  44%  |                                                          |=========================                         |  50%  |                                                          |============================                      |  56%  |                                                          |===============================                   |  62%  |                                                          |==================================                |  69%  |                                                          |======================================            |  75%  |                                                          |=========================================         |  81%  |                                                          |============================================      |  88%  |                                                          |===============================================   |  94%  |                                                          |==================================================| 100%
-
-    ##   |                                                          |                                                  |   0%  |                                                          |===                                               |   6%  |                                                          |======                                            |  12%  |                                                          |=========                                         |  19%  |                                                          |============                                      |  25%  |                                                          |================                                  |  31%  |                                                          |===================                               |  38%  |                                                          |======================                            |  44%  |                                                          |=========================                         |  50%  |                                                          |============================                      |  56%  |                                                          |===============================                   |  62%  |                                                          |==================================                |  69%  |                                                          |======================================            |  75%  |                                                          |=========================================         |  81%  |                                                          |============================================      |  88%  |                                                          |===============================================   |  94%  |                                                          |==================================================| 100%
-
-![](Step3_TemporalModelR_files/figure-html/provinces-1.png)![](Step3_TemporalModelR_files/figure-html/provinces-2.png)![](Step3_TemporalModelR_files/figure-html/provinces-3.png)![](Step3_TemporalModelR_files/figure-html/provinces-4.png)
+![](Step3_TemporalModelR_files/figure-html/regional-glm-1.png)![](Step3_TemporalModelR_files/figure-html/regional-glm-2.png)
 
 ``` r
 
-head(regional$overall_summary)
+glm_regional$plots
+```
+
+    ## $pattern_map
+
+![](Step3_TemporalModelR_files/figure-html/regional-glm-data-1.png)
+
+    ## 
+    ## $time_series
+
+``` r
+
+head(glm_regional$overall_summary, 3)
 ```
 
     ##         Spatial_Unit Always_Absent Always_Present No_Pattern Increasing
-    ## 1      Amnat Charoen             8              0         44          0
-    ## 2          Ang Thong             0              0         16          0
-    ## 3 Bangkok Metropolis             2              0         30          0
-    ## 4          Bueng Kan            13              0         41          2
-    ## 5           Buri Ram            29              8        102          1
-    ## 6       Chachoengsao             6              8         62          3
+    ## 1      Amnat Charoen            52              0          0          0
+    ## 2          Ang Thong            17              0          0          0
+    ## 3 Bangkok Metropolis            32              0          0          0
     ##   Decreasing Fluctuating Failed Total_Pixels Pct_Always_Absent
-    ## 1          0           0      0           52             15.38
-    ## 2          1           0      0           17              0.00
-    ## 3          0           0      0           32              6.25
-    ## 4          0           0      0           56             23.21
-    ## 5          1           0      0          141             20.57
-    ## 6          0           0      0           79              7.59
+    ## 1          0           0      0           52               100
+    ## 2          0           0      0           17               100
+    ## 3          0           0      0           32               100
     ##   Pct_Always_Present Pct_No_Pattern Pct_Increasing Pct_Decreasing
-    ## 1               0.00          84.62           0.00           0.00
-    ## 2               0.00          94.12           0.00           5.88
-    ## 3               0.00          93.75           0.00           0.00
-    ## 4               0.00          73.21           3.57           0.00
-    ## 5               5.67          72.34           0.71           0.71
-    ## 6              10.13          78.48           3.80           0.00
+    ## 1                  0              0              0              0
+    ## 2                  0              0              0              0
+    ## 3                  0              0              0              0
     ##   Pct_Fluctuating Prop_Increasing Prop_Stable_Suitable Prop_Decreasing
-    ## 1               0            0.00                 0.00            0.00
-    ## 2               0            0.00                 0.00            5.88
-    ## 3               0            0.00                 0.00            0.00
-    ## 4               0            4.65                 0.00            0.00
-    ## 5               0            0.89                 7.14            0.75
-    ## 6               0            4.11                10.96            0.00
+    ## 1               0              NA                   NA               0
+    ## 2               0              NA                   NA               0
+    ## 3               0              NA                   NA               0
     ##   Prop_Stable_Unsuitable
-    ## 1                  15.38
+    ## 1                    100
+    ## 2                    100
+    ## 3                    100
+
+``` r
+
+gam_regional <- analyze_trends_by_spatial_unit(
+  shapefile_path       = provinces,
+  name_field           = "NAME_1",
+  binary_stack         = gam_consensus$consensus_stack,
+  pattern_raster       = gam_patterns$pattern,
+  time_decrease_raster = gam_patterns$time_decrease,
+  time_increase_raster = gam_patterns$time_increase,
+  time_steps           = time_steps,
+  output_dir           = "outputs/gam_regional",
+  overwrite            = TRUE,
+  create_plot          = TRUE,
+  verbose              = FALSE
+)
+```
+
+![](Step3_TemporalModelR_files/figure-html/regional-gam-1.png)![](Step3_TemporalModelR_files/figure-html/regional-gam-2.png)
+
+``` r
+
+gam_regional$plots
+```
+
+    ## $pattern_map
+
+![](Step3_TemporalModelR_files/figure-html/regional-gam-data-1.png)
+
+    ## 
+    ## $time_series
+
+``` r
+
+head(gam_regional$overall_summary, 3)
+```
+
+    ##         Spatial_Unit Always_Absent Always_Present No_Pattern Increasing
+    ## 1      Amnat Charoen            52              0          0          0
+    ## 2          Ang Thong            17              0          0          0
+    ## 3 Bangkok Metropolis            30              1          0          0
+    ##   Decreasing Fluctuating Failed Total_Pixels Pct_Always_Absent
+    ## 1          0           0      0           52            100.00
+    ## 2          0           0      0           17            100.00
+    ## 3          0           0      1           32             93.75
+    ##   Pct_Always_Present Pct_No_Pattern Pct_Increasing Pct_Decreasing
+    ## 1               0.00              0              0              0
+    ## 2               0.00              0              0              0
+    ## 3               3.12              0              0              0
+    ##   Pct_Fluctuating Prop_Increasing Prop_Stable_Suitable Prop_Decreasing
+    ## 1               0              NA                   NA               0
+    ## 2               0              NA                   NA               0
+    ## 3               0               0                   50               0
+    ##   Prop_Stable_Unsuitable
+    ## 1                 100.00
+    ## 2                 100.00
+    ## 3                  96.77
+
+``` r
+
+rf_regional <- analyze_trends_by_spatial_unit(
+  shapefile_path       = provinces,
+  name_field           = "NAME_1",
+  binary_stack         = rf_consensus$consensus_stack,
+  pattern_raster       = rf_patterns$pattern,
+  time_decrease_raster = rf_patterns$time_decrease,
+  time_increase_raster = rf_patterns$time_increase,
+  time_steps           = time_steps,
+  output_dir           = "outputs/rf_regional",
+  overwrite            = TRUE,
+  create_plot          = TRUE,
+  verbose              = FALSE
+)
+```
+
+![](Step3_TemporalModelR_files/figure-html/regional-rf-1.png)![](Step3_TemporalModelR_files/figure-html/regional-rf-2.png)
+
+``` r
+
+rf_regional$plots
+```
+
+    ## $pattern_map
+
+![](Step3_TemporalModelR_files/figure-html/regional-rf-data-1.png)
+
+    ## 
+    ## $time_series
+
+``` r
+
+head(rf_regional$overall_summary, 3)
+```
+
+    ##         Spatial_Unit Always_Absent Always_Present No_Pattern Increasing
+    ## 1      Amnat Charoen            20              0          0          0
+    ## 2          Ang Thong            14              0          0          0
+    ## 3 Bangkok Metropolis             4              0          0          0
+    ##   Decreasing Fluctuating Failed Total_Pixels Pct_Always_Absent
+    ## 1          0           0     32           52             38.46
+    ## 2          0           0      3           17             82.35
+    ## 3          0           0     28           32             12.50
+    ##   Pct_Always_Present Pct_No_Pattern Pct_Increasing Pct_Decreasing
+    ## 1                  0              0              0              0
+    ## 2                  0              0              0              0
+    ## 3                  0              0              0              0
+    ##   Pct_Fluctuating Prop_Increasing Prop_Stable_Suitable Prop_Decreasing
+    ## 1               0               0                    0               0
+    ## 2               0               0                    0               0
+    ## 3               0               0                    0               0
+    ##   Prop_Stable_Unsuitable
+    ## 1                  38.46
+    ## 2                  82.35
+    ## 3                  12.50
+
+``` r
+
+hv_regional <- analyze_trends_by_spatial_unit(
+  shapefile_path       = provinces,
+  name_field           = "NAME_1",
+  binary_stack         = hv_consensus$consensus_stack,
+  pattern_raster       = hv_patterns$pattern,
+  time_decrease_raster = hv_patterns$time_decrease,
+  time_increase_raster = hv_patterns$time_increase,
+  time_steps           = time_steps,
+  output_dir           = "outputs/hv_regional",
+  overwrite            = TRUE,
+  create_plot          = TRUE,
+  verbose              = FALSE
+)
+```
+
+![](Step3_TemporalModelR_files/figure-html/regional-hv-1.png)![](Step3_TemporalModelR_files/figure-html/regional-hv-2.png)
+
+``` r
+
+head(hv_regional$overall_summary, 3)
+```
+
+    ##         Spatial_Unit Always_Absent Always_Present No_Pattern Increasing
+    ## 1      Amnat Charoen             0              8          0          0
+    ## 2          Ang Thong             0              0          0          0
+    ## 3 Bangkok Metropolis             6              0          0          0
+    ##   Decreasing Fluctuating Failed Total_Pixels Pct_Always_Absent
+    ## 1          0           0     44           52              0.00
+    ## 2          0           0     17           17              0.00
+    ## 3          0           0     27           33             18.18
+    ##   Pct_Always_Present Pct_No_Pattern Pct_Increasing Pct_Decreasing
+    ## 1              15.38              0              0              0
+    ## 2               0.00              0              0              0
+    ## 3               0.00              0              0              0
+    ##   Pct_Fluctuating Prop_Increasing Prop_Stable_Suitable Prop_Decreasing
+    ## 1               0               0                15.38               0
+    ## 2               0               0                 0.00               0
+    ## 3               0               0                 0.00               0
+    ##   Prop_Stable_Unsuitable
+    ## 1                   0.00
     ## 2                   0.00
-    ## 3                   6.25
-    ## 4                  23.21
-    ## 5                  21.80
-    ## 6                   8.45
+    ## 3                  18.18
 
-``` r
-
-# Diagnostic plots: a per-province time-series, an annual-change view,
-# and a province-level total-change bar chart.
-regional$plots$time_series
-```
-
-![](Step3_TemporalModelR_files/figure-html/provinces-5.png)
-
-``` r
-
-regional$plots$annual_change
-```
-
-![](Step3_TemporalModelR_files/figure-html/provinces-6.png)
-
-``` r
-
-regional$plots$total_change_by_unit
-```
-
-![](Step3_TemporalModelR_files/figure-html/provinces-7.png)
+The per-province `overall_summary` tables let you rank provinces by the
+magnitude or sign of change and quickly spot regions where the four
+models tell different stories.
 
 ## Wrap-up
 
@@ -915,17 +1545,41 @@ What we covered:
   [`temporally_explicit_extraction()`](https://cjhughes926.github.io/TemporalModelR/reference/temporally_explicit_extraction.html).
 - Used spatio-temporal cross-validation folds and fold-stratified
   pseudoabsences for an honest evaluation.
-- Fitted GLM and RF temporal models and projected them across 2010–2025.
-- Classified pixel-level temporal trajectories with changepoint analysis
-  and aggregated the results by Thai province.
+- Fitted **all four `TemporalModelR` algorithms** — GLM, GAM, random
+  forest, and hypervolume — against the same fold structure and compared
+  them on the same held-out test sets.
+- Projected every model across 2015–2025 with
+  [`generate_spatiotemporal_predictions()`](https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html)
+  and visualised the resulting fold-vote consensus rasters using the
+  package’s default
+  [`terra::plot()`](https://rspatial.github.io/terra/reference/plot.html)
+  styling (3 × 4 grid per model).
+- Inspected per-fold E-space and per-time-step G-space performance with
+  the package’s default
+  [`plot_model_assessment()`](https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html)
+  diagnostic for each of the four models.
+- Ran the full post-processing pipeline —
+  [`summarize_raster_outputs()`](https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html),
+  [`analyze_temporal_patterns()`](https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html),
+  [`analyze_trends_by_spatial_unit()`](https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html)
+  — **once per model** so consensus frequency rasters, pixel-level
+  trajectory classes, and per-province summary tables are directly
+  comparable across GLM / GAM / RF / Hypervolume.
 
 ## References
 
 - Castaneda-Guzman M, Hughes C, Paansri P, Cobos M (2026). *nicheR:
   Ellipsoid-Based Virtual Niches and Visualization*. R package version
   0.1.0, <https://github.com/castanedaM/nicheR>.
+- Chamberlain S, Barve V, Mcglinn D, Oldoni D, Desmet P, Geffert L, Ram
+  K (2026). *rgbif: Interface to the Global Biodiversity Information
+  Facility API*. R package version 3.8.5.2,
+  <https://CRAN.R-project.org/package=rgbif>.
 - Hijmans R (2026). *geodata: Access Geographic Data*. R package version
   0.6-10, <https://rspatial.github.io/geodata/>.
 - Hughes C, Castaneda-Guzman M, E. Escobar L (2026). *TemporalModelR:
   Temporally Explicit Species Distribution Modelling in R*. R package
   version 0.2.0, <https://github.com/CJHughes926/TemporalModelR>.
+- Paansri P, Escobar L (2026). *bean: Data Thinning of Species
+  Occurrences in Environmental Space*. R package version 0.2.1,
+  <https://github.com/paanwaris/bean>.
