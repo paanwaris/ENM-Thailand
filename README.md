@@ -1,6 +1,6 @@
 <p align="center">
 
-<img src="man/figures/logo.png" width="240"/>
+<img src="man/figures/logo.png" width="200"/>
 
 </p>
 
@@ -35,7 +35,7 @@ The full content is available at <https://paanwaris.github.io/ENM-Thailand/>.
 The workshop is delivered as four articles on the pkgdown site (Pre-workshop, nicheR, bean, and TemporalModelR). Each article is also a standalone R Markdown notebook in the repository.
 
 | Step | Read on the site | Source notebook | Package(s) | Description |
-|----|----|----|----|----|
+|---------------|---------------|---------------|---------------|---------------|
 | **Pre-workshop** | [Downloading the workshop data](https://paanwaris.github.io/ENM-Thailand/articles/Pre-workshop.html) | [`Pre-workshop.Rmd`](Pre-workshop.Rmd) | [**geodata**](https://github.com/rspatial/geodata) · [**rgbif**](https://github.com/ropensci/rgbif) | **Pre-workshop prep.** Download and prepare the shared inputs: Thailand boundary from GADM, WorldClim v2.1 bioclim layers, and GBIF occurrence records for *Rusa unicolor*, strictly filtered to field-observation `basisOfRecord`. |
 | **Step 1** | [Virtual species with nicheR](https://paanwaris.github.io/ENM-Thailand/articles/Step1_nicheR.html) | [`Step1_nicheR.Rmd`](Step1_nicheR.Rmd) | [**nicheR**](https://github.com/castanedaM/nicheR) | Build an ellipsoid-based **virtual species** in environmental space, project it to Thailand, explore E-space in 3D (BIO1 × BIO12 × BIO15), and sample virtual occurrences under three strategies (`centroid`, `random`, `edge`). |
 | **Step 2** | [Environmental thinning with bean](https://paanwaris.github.io/ENM-Thailand/articles/Step2_bean.html) | [`Step2_bean.Rmd`](Step2_bean.Rmd) | [**bean**](https://github.com/paanwaris/bean) | Reduce **environmental sampling bias** in real Sambar occurrence data by thinning points that cluster in E-space, fit an ellipsoid niche, and project suitability back to G-space. |
@@ -125,7 +125,7 @@ These packages are installed automatically the first time you knit each notebook
 ## Authors
 
 |   | Role | ORCID |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | **Paanwaris Paansri** | Main author / Maintainer · `paanwaris@vt.edu` | <https://orcid.org/0000-0001-9992-098X> |
 | **Luis E. Escobar** | Co-author · `escobar1@vt.edu` | <https://orcid.org/0000-0001-5735-2750> |
 
