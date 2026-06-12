@@ -9,6 +9,7 @@ license](https://img.shields.io/badge/license-MIT-F2B705)](https://github.com/pa
 
 Organized by:
 ![](reference/figures/logo_vt_deby.png)![](reference/figures/logo_ku_forestry.jpg)
+
 Supported by:
 ![](reference/figures/logo_kuias.jpg)![](reference/figures/logo_wcs.png)![](reference/figures/logo_nsf.png)![](reference/figures/logo_nih.png)
 
