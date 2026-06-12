@@ -12,7 +12,12 @@ ENM-Thailand workshop 2026
 
 <p align="center">
 
-Organized by: <img src="man/figures/logo_vt_deby.png" style="height: 50px; width: auto; margin: 0 10px;"/> <img src="man/figures/logo_ku_forestry.jpg" style="height: 50px; width: auto; margin: 0 10px;"/> 
+Organized by: <img src="man/figures/logo_vt_deby.png" style="height: 50px; width: auto; margin: 0 10px;"/> <img src="man/figures/logo_ku_forestry.jpg" style="height: 50px; width: auto; margin: 0 10px;"/>
+
+</p>
+
+<p align="center">
+
 Supported by: <img src="man/figures/logo_kuias.jpg" style="height: 50px; width: auto; margin: 0 10px;"/> <img src="man/figures/logo_wcs.png" style="height: 50px; width: auto; margin: 0 10px;"/> <img src="man/figures/logo_nsf.png" style="height: 50px; width: auto; margin: 0 10px;"/> <img src="man/figures/logo_nih.png" style="height: 50px; width: auto; margin: 0 10px;"/>
 
 </p>
