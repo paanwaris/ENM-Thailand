@@ -1,6 +1,6 @@
 "Spatial_Unit","Always_Absent","Always_Present","No_Pattern","Increasing","Decreasing","Fluctuating","Failed","Total_Pixels","Pct_Always_Absent","Pct_Always_Present","Pct_No_Pattern","Pct_Increasing","Pct_Decreasing","Pct_Fluctuating","Prop_Increasing","Prop_Stable_Suitable","Prop_Decreasing","Prop_Stable_Unsuitable"
-"ตาพระยา",0,12,6,0,0,0,0,18,0,66.67,33.33,0,0,0,0,66.67,0,0
 "ทับลาน",2,30,9,0,0,0,0,41,4.88,73.17,21.95,0,0,0,0,76.92,0,18.18
-"ปางสีดา",0,14,3,3,0,0,0,20,0,70,15,15,0,0,15,70,0,0
 "เขาใหญ่",1,34,9,0,0,0,0,44,2.27,77.27,20.45,0,0,0,0,79.07,0,10
-"0",0,12,0,0,0,0,0,12,0,100,0,0,0,0,0,100,NA,NA
+"ตาพระยา",0,12,6,0,0,0,0,18,0,66.67,33.33,0,0,0,0,66.67,0,0
+"ปางสีดา",0,14,3,3,0,0,0,20,0,70,15,15,0,0,15,70,0,0
+"ดงใหญ่",0,12,0,0,0,0,0,12,0,100,0,0,0,0,0,100,NA,NA

@@ -127,7 +127,7 @@ plot(thailand[2])
 dpky <- st_read("data/processed/DPKY/DPKY.shp", quiet = TRUE) |>
   st_transform(4326)
 
-plot(dpky[11])
+plot(dpky)
 
 # Clean GBIF Sambar deer table from the Pre-workshop. We:
 #   * restrict to 2010-2025 (the full 16-year range covered by every
@@ -1012,8 +1012,6 @@ Reading the panels: each colour is a categorical trajectory class. Comparing the
 
 `analyze_trends_by_spatial_unit()` aggregates the pixel trajectories produced by the changepoint analysis to a polygon set of our choosing. Up to this point everything in the workflow has been **Thailand-wide** — the models were fit on the country boundary, the cross-validation folds and pseudoabsences were drawn inside Thailand, and the trajectory rasters cover the whole country. For the final regional summary we narrow the spotlight to the **Dong Phayayen–Khao Yai Forest Complex (DPKY)** and break it down by its **five constituent protected areas**, so the per-unit numbers describe what happened inside each park or sanctuary individually rather than averaging across the whole complex.
 
-The DPKY shapefile we loaded earlier ships with six polygon features, but only five distinct protected areas — two of the features both belong to *Dong Yai Wildlife Sanctuary* (`ดงใหญ่`). We dissolve those two features into a single multi-polygon so the regional aggregation returns exactly **five rows**, one per protected area:
-
 1. **ทับลาน** — Thap Lan National Park.
 2. **เขาใหญ่** — Khao Yai National Park (the first Thai national park established 1962, and the namesake of the complex).
 3. **ตาพระยา** — Ta Phraya National Park.
@@ -1027,31 +1025,6 @@ Key arguments to `analyze_trends_by_spatial_unit()`:
 - **`shapefile_path`** — the cleaned DPKY polygon set (5 features after the merge). The function reprojects it internally to match the raster CRS if needed.
 - **`name_field`** — the polygon attribute column carrying the human-readable unit name. We use **`Name_th`**, which holds the Thai-language name of each constituent protected area.
 - **`binary_stack` / `pattern_raster` / `time_decrease_raster` / `time_increase_raster`** — outputs from the consensus and pattern steps for the model in question.
-
-```{r dpky-unit-field}
-# Two small clean-up steps make the DPKY polygon ready for the regional
-# aggregation that follows:
-#
-# 1. sf::st_zm() drops the Z (elevation) dimension from every geometry.
-#    The DPKY shapefile is XYZ on disk, but analyze_trends_by_spatial_unit()
-#    and the underlying terra calls expect plain 2-D polygons; stripping
-#    Z here prevents confusing errors later. `st_zm()` takes the sf object
-#    as its only argument and returns an sf object whose CRS, attribute
-#    columns, and polygon shapes are otherwise unchanged.
-#
-# 2. dplyr::group_by(Name_th) followed by dplyr::summarise() with
-#    sf::st_union() dissolves any features that share the same Name_th
-#    label into a single (multi-)polygon. The DPKY shapefile carries six
-#    rows but only five distinct protected-area names, so this collapses
-#    the two Dong Yai (ดงใหญ่) features into one row and leaves the
-#    other four parks untouched. The argument `.groups = "drop"` removes
-#    the leftover grouping metadata so the result is a plain ungrouped
-#    sf object the next chunk can use directly.
-dpky <- sf::st_zm(dpky) |>
-  dplyr::group_by(Name_th) |>
-  dplyr::summarise(geometry = sf::st_union(geometry),
-                   .groups  = "drop")
-```
 
 ```{r regional-glm, results = 'hide'}
 # Aggregate the GLM's pixel-level trajectories to the DPKY polygon.
