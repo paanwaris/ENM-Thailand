@@ -101,15 +101,15 @@ library(readr) # fast, friendly CSV reading and writing
 # Everything we download lives under `data/`. We split it into two top-level
 # folders so the raw downloads stay separate from the clean, analysis-ready
 # outputs the workshop notebooks will read.
-raw_dir       <- "data/raw"                          # untouched downloads
+raw_dir <- "data/raw"                          # untouched downloads
 processed_dir <- "data/processed"                    # cleaned, analysis-ready
 
 # `data/processed/` is organised into role-based sub-folders so each workshop
 # Step knows where to find its inputs.
 boundary_dir <- file.path(processed_dir, "boundary") # Thailand polygon
-bioclim_dir  <- file.path(processed_dir, "bioclim")  # WorldClim layers
-bias_dir     <- file.path(processed_dir, "bias")     # sampling-bias proxies (Step 1)
-gbif_dir     <- file.path(processed_dir, "gbif")     # GBIF Sambar records
+bioclim_dir <- file.path(processed_dir, "bioclim") # WorldClim layers
+bias_dir <- file.path(processed_dir, "bias") # sampling-bias proxies (Step 1)
+gbif_dir <- file.path(processed_dir, "gbif") # GBIF Sambar records
 
 # Create every folder if it does not already exist (safe to re-run).
 for (d in c(raw_dir, processed_dir,
@@ -125,7 +125,7 @@ We download the Thailand national outline from GADM and save it as a GeoPackage 
 ```{r tha-boundary}
 # Download Thailand at `level = 0` (= national outline only).
 # `geodata::gadm()` caches the raw download under `raw_dir`.
-tha    <- gadm(country = "THA", level = 0, path = raw_dir)
+tha <- gadm(country = "THA", level = 0, path = raw_dir)
 
 # Convert the SpatVector to an `sf` object — sf is the modern tidy class for
 # vector spatial data and plays nicely with dplyr.
@@ -161,7 +161,7 @@ names(bio_tha) <- paste0("bio", seq_len(terra::nlyr(bio_tha)))
 # Save the 19-band raster as a single multi-band GeoTIFF.
 writeRaster(
   bio_tha,
-  filename  = file.path(bioclim_dir, "bioclim_thailand.tif"),
+  filename = file.path(bioclim_dir, "bioclim_thailand.tif"),
   overwrite = TRUE
 )
 
@@ -203,9 +203,9 @@ Then open the chunk below and replace the three bracketed placeholders (`[YOUR_G
 
 ```{r gbif-creds}
 # ---- Fill in your gbif.org credentials -----------------------------------
-options(gbif_user  = "[YOUR_GBIF_USERNAME]")
+options(gbif_user = "[YOUR_GBIF_USERNAME]")
 options(gbif_email = "[YOUR_EMAIL]")
-options(gbif_pwd   = "[YOUR_GBIF_PASSWORD]")
+options(gbif_pwd = "[YOUR_GBIF_PASSWORD]")
 
 # Safety check: do all three values look like real credentials, not the
 # bracketed placeholders? If any value still starts with "[", we treat the
@@ -238,12 +238,12 @@ allowed_basis <- c("HUMAN_OBSERVATION", "OCCURRENCE", "OBSERVATION")
 # data frames, one per category, which we then row-bind into a single table.
 raw_list <- lapply(allowed_basis, function(b) {
   rgbif::occ_search(
-    taxonKey           = key,         # unique taxon identifier from Sub-step 2
-    country            = "TH",        # ISO-2 country code for Thailand
-    basisOfRecord      = b,           # this category only
-    hasCoordinate      = TRUE,        # drop records without lon/lat
-    hasGeospatialIssue = FALSE,       # drop records with known coord problems
-    limit              = 5000         # generous upper bound per category
+    taxonKey = key, # unique taxon identifier from Sub-step 2
+    country = "TH", # ISO-2 country code for Thailand
+    basisOfRecord = b, # this category only
+    hasCoordinate = TRUE, # drop records without lon/lat
+    hasGeospatialIssue = FALSE, # drop records with known coord problems
+    limit = 5000 # generous upper bound per category
   )$data
 })
 
@@ -284,7 +284,7 @@ sambar <- raw %>%
 # `remove = FALSE` keeps the numeric lon/lat columns alongside the geometry.
 sambar_sf <- st_as_sf(sambar,
                       coords = c("decimalLongitude", "decimalLatitude"),
-                      crs    = 4326,
+                      crs = 4326,
                       remove = FALSE)
 
 # Test which records actually fall inside the Thailand polygon. `st_within()`
@@ -356,4 +356,3 @@ After running the code above, `data/processed/{boundary, bioclim, bias, gbif, te
 - Hijmans R (2026). *geodata: Access Geographic Data*. R package version 0.6-10, <https://rspatial.github.io/geodata/>.
 - Hughes C, Castaneda-Guzman M, E. Escobar L (2026). *TemporalModelR: Temporally Explicit Species Distribution Modelling in R*. R package version 0.2.0, <https://github.com/CJHughes926/TemporalModelR>.
 - Paansri P, Escobar L (2026). *bean: Data Thinning of Species Occurrences in Environmental Space*. R package version 0.2.1, <https://github.com/paanwaris/bean>.
-                           
