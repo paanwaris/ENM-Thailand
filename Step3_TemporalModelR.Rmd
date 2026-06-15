@@ -93,26 +93,57 @@ set.seed(2026)
 
 # Inputs
 
+For Step 3 we **fit and project the four models on the whole of Thailand** so the niche estimate sees the full range of climates Sambar deer actually use in the country. The 16-year modelling window runs from 2010 to 2025. Only the final, *regional* post-processing step is restricted to the **Dong Phayayen–Khao Yai Forest Complex (DPKY)** — a UNESCO World Heritage Site spanning roughly 6,150 km² of contiguous protected forest across five provinces in eastern Thailand and one of the most important refuges for wild Sambar deer in Thailand. Modelling Thailand-wide and reporting at DPKY-level gives us the best of both worlds: the model has enough data to estimate a credible niche, and the conservation-relevant interpretation focuses on the protected complex where management decisions are actually made.
+
+We therefore load **two** polygons in this chunk: the country boundary `thailand` (used as the study-area reference for cross-validation folds and pseudoabsences below), and the DPKY polygon (held in reserve for the *Aggregate by spatial unit* step at the end of the document). The DPKY shapefile lives at `data/processed/DPKY/DPKY.shp` together with its sibling `.dbf`, `.prj`, `.shx`, and `.cpg` files, which together make up a complete ESRI shapefile.
+
 ```{r load-base}
-# Thailand polygon (from the Pre-workshop). `quiet = TRUE` suppresses the
-# usual GDAL chatter so the rendered page stays clean.
+# Load the country boundary polygon prepared in the Pre-workshop. This is
+# the study-area reference used by spatiotemporal_partition() and
+# generate_absences() further down — i.e. the polygon the modelling
+# pipeline treats as the universe of possible locations.
+# Arguments to st_read():
+#   - First positional argument: path to the GeoPackage file.
+#   - quiet = TRUE: suppresses the usual GDAL chatter so the rendered
+#     HTML stays clean.
 thailand <- st_read("data/processed/boundary/thailand_boundary.gpkg",
                     quiet = TRUE)
 
+plot(thailand[2])
+
+# Load the Dong Phayayen-Khao Yai Forest Complex polygon. We do not use
+# DPKY for fitting or projecting — only for the final regional
+# aggregation step, where we want pixel-level trajectories summarised at
+# the level of the protected forest complex rather than at the level of
+# every Thai province.
+# Arguments to st_read():
+#   - First positional argument: path to the .shp file. sf automatically
+#     picks up the sibling .dbf / .prj / .shx files in the same folder.
+#   - quiet = TRUE: same chatter-suppression as above.
+# We pipe the result through st_transform() so the polygon shares the
+# WGS84 (EPSG:4326) longitude/latitude CRS used by the GBIF records and
+# every raster in the pipeline, guaranteeing no CRS-mismatch error when
+# we later overlay it on the trajectory rasters.
+dpky <- st_read("data/processed/DPKY/DPKY.shp", quiet = TRUE) |>
+  st_transform(4326)
+
+plot(dpky[11])
+
 # Clean GBIF Sambar deer table from the Pre-workshop. We:
-#   * restrict to 2015-2025 (the range covered by every per-year raster);
+#   * restrict to 2010-2025 (the full 16-year range covered by every
+#     per-year raster, and the window we will model below);
 #   * rename the GBIF coordinate columns to the conventional `longitude` /
 #     `latitude` so they match the names bean and TemporalModelR expect;
 #   * add a `presence = 1L` column so the table is ready to be combined
 #     with pseudoabsences (presence = 0) later on.
 sambar <- read_csv("data/processed/gbif/sambar_thailand.csv",
                    show_col_types = FALSE) %>%
-  filter(year >= 2015, year <= 2025) %>% # keep modelled years only
-  rename(longitude = decimalLongitude, # GBIF -> conventional name
-         latitude = decimalLatitude) %>% # GBIF -> conventional name
-  mutate(presence = 1L) # every GBIF record is a presence
+  filter(year >= 2010, year <= 2025) %>% # keep the 16-year modelled window
+  rename(longitude = decimalLongitude,    # GBIF -> conventional name
+         latitude  = decimalLatitude) %>% # GBIF -> conventional name
+  mutate(presence = 1L)                   # every GBIF record is a presence
 
-# How many records per year survive that filter?
+# How many records per year survive the 16-year temporal filter?
 table(sambar$year)
 ```
 
@@ -132,7 +163,7 @@ par(mfrow = c(1, 3))
 plot(prec_ex, main = "Precipitation 2025")
 plot(temp_ex, main = "Temperature 2025")
 plot(NDVI_ex, main = "NDVI 2025")
-par(mfrow = c(1, 1))     # reset the plot region back to a single panel
+par(mfrow = c(1, 1)) # reset the plot region back to a single panel
 
 # Source directory of the per-variable per-year split rasters, and target
 # directory where the aligned copies will be written.
@@ -154,7 +185,7 @@ raster_align(
 
 ## Build a temporal-mean E-space for thinning
 
-Before any thinning, we build a single **temporal-mean** reference E-space that summarises the environment Sambar deer experienced across the entire 2010–2025 window. We compute the per-pixel mean across years for each of the three aligned variables, then stack the three mean surfaces into one 3-layer `SpatRaster`.
+Before any thinning, we build a single **temporal-mean** reference E-space that summarises the environment Sambar deer experienced across the entire 16-year **2010–2025** window. We compute the per-pixel mean across years for each of the three aligned, DPKY-masked variables, then stack the three mean surfaces into one 3-layer `SpatRaster`.
 
 This temporal-mean stack will be the **reference environmental space** that `bean` uses to thin every year. Using a single, period-wide E-space (rather than the year-specific raster of each occurrence) keeps the thinning grid *consistent across years*: a 2014 record and a 2020 record that fall in the same temporal-mean pod are treated as environmentally redundant, even though their individual years' rasters may differ slightly.
 
@@ -193,51 +224,89 @@ Reading the panels: each map is the per-pixel average of the corresponding varia
 
 ## Environmental thinning with `bean`
 
-We reduce **environmental sampling bias** in the Sambar deer occurrences using `bean`, with the temporal-mean stack `env_ref` from the previous section as the reference E-space. Because the reference E-space is a single, period-wide summary (not year-specific), we run `bean` **once on the full occurrence table** rather than year by year — every record is judged against the same environmental landscape, so two records that fall in the same pod are environmentally redundant regardless of which year they were collected in.
+We reduce **environmental sampling bias** in the Sambar deer occurrences using `bean`, with the temporal-mean stack `env_ref` from the previous section as the reference E-space.
 
-We use the **`"sheather-jones"`** bandwidth selector inside `find_env_resolution()`. Sheather–Jones is a data-adaptive, plug-in selector (Sheather & Jones, 1991) that is robust to the non-Gaussian shapes typical of real occurrence data — it is the modern recommended default and is what the workshop uses everywhere bean appears. We pair it with the stochastic `thin_env_nd()` so each pod retains one of the original GBIF coordinates rather than a synthetic centroid.
+Because Step 3 treats every year as an independent observation along the time axis, we run `bean` **once per year** rather than once over the pooled occurrence table. Each year is thinned against only its own subset of records, so a heavily-sampled year cannot drag the thinning grid away from sparsely-sampled ones. The reference E-space `env_ref` stays *constant* across iterations: it is the period-wide environmental landscape every record is judged against, so the same env value means the same thing in 2018 as in 2024. Two records from *different* years that happen to fall in the same `env_ref` pod are both kept, because they carry independent information about the niche at two different points in time; only records that cluster *within the same year* are treated as environmentally redundant and thinned away.
 
-Every column of the original `sambar` table is preserved on the output. After thinning bean returns only the longitude/latitude pair, so we recover the full original attributes (including the `year` column the temporal modelling needs) by matching on the coordinate pair.
+We use the **`"sheather-jones"`** bandwidth selector inside `find_env_resolution()`. Sheather–Jones is a data-adaptive, plug-in selector (Sheather & Jones, 1991) that is robust to the non-Gaussian shapes typical of real occurrence data — it is the modern recommended default and is what the workshop uses everywhere `bean` appears. We pair it with the stochastic `thin_env_nd()` so each pod retains one of the original GBIF coordinates rather than a synthetic centroid, preserving the link back to the source record.
+
+The loop below follows the same five steps inside every iteration:
+
+1. **Pull the year's rows** out of `sambar`.
+2. **Slim them to (longitude, latitude)** for bean — bean's pipeline only needs the coordinate pair.
+3. **Run the bean pipeline** — `prepare_bean()` extracts the env values at each occurrence and z-scores them, `find_env_resolution()` picks per-variable Sheather–Jones bandwidths as the grid cell widths, and `thin_env_nd()` randomly retains one occurrence per occupied pod.
+4. **Recover every original column** of the year's subset (`year`, `presence`, `gbifID`, `basisOfRecord`, …) by matching the thinned (longitude, latitude) pair back onto the year's rows.
+5. **Stash the result** in a pre-allocated, year-keyed list slot so the per-year tables can be row-bound into a single data frame at the end.
+
+`find_env_resolution()` needs at least four complete cases to estimate a bandwidth, so any year with fewer than five records is passed through unchanged by the safety guard — there is nothing meaningful to thin away in a year with only a handful of records. We pre-allocate the list of results outside the loop (`vector("list", length(years))`) rather than growing it one element at a time, which is the idiomatic R pattern for inside-a-loop accumulation. At the end, `do.call(rbind, thinned_list)` row-binds every year's table into one data frame whose columns are identical to the original `sambar`.
+
 
 ```{r thin-once}
-# Pass only the coordinate pair into bean; the full attribute table is
-# recovered below by joining the thinned coordinates back onto `sambar`.
-sambar_xy <- sambar[, c("longitude", "latitude")]
+# Build the list of years to iterate over, in chronological order.
+years <- sort(unique(sambar$year))
 
-# Extract the three temporal-mean env values at every occurrence, and
-# z-score them so all three axes share the same numeric scale.
-prepped <- prepare_bean(
-  data = sambar_xy,
-  env_rasters = env_ref, # temporal-mean 3-layer stack
-  longitude = "longitude",
-  latitude = "latitude",
-  transform = "scale"
-)
+# Pre-allocate a year-named list to hold each year's thinned table.
+thinned_list <- vector("list", length(years))
+names(thinned_list) <- as.character(years)
 
-# Sheather-Jones plug-in bandwidth as the cell width (one width per
-# variable, in z-score units because prepare_bean() scaled the data).
-res <- find_env_resolution(
-  data = prepped,
-  env_vars = c("mean_prec", "mean_temp", "mean_NDVI"),
-  method = "sheather-jones"
-)
+for (yr in years) {
 
-# Build the environmental grid using `res$suggested_resolution` and
-# randomly retain one of the original occurrences in every occupied pod.
-thin_out <- thin_env_nd(
-  data = prepped,
-  env_vars = c("mean_prec", "mean_temp", "mean_NDVI"),
-  grid_resolution = res$suggested_resolution
-)
+  # ---- 1. Pull this year's rows out of the full sambar table -------------
+  yr_df <- sambar[sambar$year == yr, ]
 
-# Recover every original column by matching on the coordinate pair.
-keep_key <- paste(thin_out$thinned_data$longitude,
-                  thin_out$thinned_data$latitude)
-sambar_thinned <- sambar[
-  paste(sambar$longitude, sambar$latitude) %in% keep_key, , drop = FALSE
-]
+  # ---- 2. Coordinate-only slice for bean ---------------------------------
+  yr_xy <- yr_df[, c("longitude", "latitude")]
 
-# Before / after counts per year — verifies that the year column survived.
+  # ---- Safety guard: skip thinning when there is nothing to thin ---------
+  # find_env_resolution() needs at least four complete cases; for smaller
+  # years we keep the original rows unchanged and move on.
+  if (nrow(yr_xy) < 5) {
+    thinned_list[[as.character(yr)]] <- yr_df
+    next
+  }
+
+  # ---- 3a. prepare_bean(): extract env values + z-score them -------------
+  prepped <- prepare_bean(
+    data        = yr_xy,                        # this year's coord-only table
+    env_rasters = env_ref,                      # the constant period-wide E-space
+    longitude   = "longitude",                  # name of the x coordinate column
+    latitude    = "latitude",                   # name of the y coordinate column
+    transform   = "scale"                       # z-score every env variable
+  )
+
+  # ---- 3b. find_env_resolution(): pick a per-variable cell width ---------
+  res <- find_env_resolution(
+    data     = prepped,                                          # the prepped, scaled table
+    env_vars = c("mean_prec", "mean_temp", "mean_NDVI"),         # columns that define the grid axes
+    method   = "sheather-jones"                                  # Sheather-Jones plug-in bandwidth
+  )
+
+  # ---- 3c. thin_env_nd(): keep one occurrence per occupied pod -----------
+  thin_out <- thin_env_nd(
+    data            = prepped,                                   # same prepped table
+    env_vars        = c("mean_prec", "mean_temp", "mean_NDVI"),  # same three axes
+    grid_resolution = res$suggested_resolution                   # per-variable cell widths from 3b
+  )
+
+  # ---- 4. Recover the original columns by matching on (lon, lat) ---------
+  # paste() joins each row's two coordinates into a single string so we can
+  # check membership in one step with %in%.
+  keep_key <- paste(thin_out$thinned_data$longitude,
+                    thin_out$thinned_data$latitude)
+  yr_thinned <- yr_df[paste(yr_df$longitude, yr_df$latitude) %in% keep_key, ]
+
+  # ---- 5. Stash this year's thinned table into the year-keyed slot ------
+  thinned_list[[as.character(yr)]] <- yr_thinned
+}
+
+# Combine the per-year tables into one data frame, then clear the rbind
+# row names (they are meaningless "year.position" composites).
+sambar_thinned <- do.call(rbind, thinned_list)
+rownames(sambar_thinned) <- NULL
+
+# Before / after counts per year — verifies the year column survived.
+# factor(..., levels = ...) on `after` forces table() to include a zero
+# for any year where every record was thinned away.
 data.frame(
   year   = sort(unique(sambar$year)),
   before = as.integer(table(sambar$year)),
@@ -245,11 +314,11 @@ data.frame(
                                    levels = sort(unique(sambar$year)))))
 )
 
-# Use the thinned table for everything that follows.
+# Use the thinned table for everything that follows in Step 3.
 sambar <- sambar_thinned
 ```
 
-Every pod of the temporal-mean E-space now contributes at most one Sambar deer occurrence, so the modelling table no longer over-represents the heavily-surveyed parts of the environment.
+The before/after table reports, for each modelled year, how many records went into the thinning step and how many survived its own pod-by-pod sampling. Years where `after` is much smaller than `before` are the years that carried the most environmental redundancy; years where the two columns are equal are either too small to thin (the safety guard skipped them) or already environmentally well-spread within that single year.
 
 ## Spatio-temporal rarefaction
 
@@ -358,7 +427,7 @@ scale_rasters(
 par(mfrow = c(1, 3))
 
 partition <- spatiotemporal_partition(
-  reference_shapefile_path = thailand, # study-area polygon (Thailand)
+  reference_shapefile_path = thailand, # study-area polygon (Thailand-wide)
   points_file_path = ext_out$files_created$scaled, # presence table with extracted env
   xcol = "x", # scaled table uses lower-case x / y
   ycol = "y",
@@ -384,7 +453,7 @@ A binary GLM or RF needs *absences* as well as presences. We generate **fold-str
 ```{r absences}
 absences <- generate_absences(
   partition_result = partition, # fold structure built above
-  reference_shapefile_path = thailand, # absences are drawn inside this polygon
+  reference_shapefile_path = thailand, # absences are drawn inside the Thailand polygon
   raster_dir = scaled_dir, # env values are extracted at each absence
   variable_patterns = c(
     "prec" = "prec_YEAR",
@@ -513,12 +582,12 @@ The call signature is identical for all four model types; `model_type` inside `m
 Key arguments shared by every call below:
 
 - **`raster_dir`** — the folder of *scaled* per-year predictor rasters written by `scale_rasters()`. Predictions must use the same transformation as the training points.
-- **`variable_patterns`** — a named vector mapping each predictor name (left) to its filename pattern (right) with the `YEAR` placeholder, so `temp_YEAR` resolves to `temp_2015.tif` for year 2015.
-- **`time_steps`** — a `data.frame` giving every (year, …) combination to project. We use 2015–2025 to match the `sambar` filter and the 3 × 4 plot grid below.
+- **`variable_patterns`** — a named vector mapping each predictor name (left) to its filename pattern (right) with the `YEAR` placeholder, so `temp_YEAR` resolves to `temp_2010.tif` for year 2010 (the first year in our 2010–2025 window).
+- **`time_steps`** — a `data.frame` giving every (year, …) combination to project. We use 2010–2025 (16 years) to match the `sambar` filter and the 4 × 4 plot grid below.
 - **`output_dir`** — where the per-fold per-time-step prediction rasters get written. Each model writes to its own folder so the post-processing later can address them separately.
 
 ```{r predict}
-time_steps <- data.frame(year = 2015:2025) # 11 years -> fits a 3 x 4 plot grid
+time_steps <- data.frame(year = 2010:2025) # 16 years -> fits a 4 x 4 plot grid
 
 # A single named vector used by every projection call.
 var_patterns <- c("prec" = "prec_YEAR",
@@ -535,7 +604,7 @@ glm_preds <- generate_spatiotemporal_predictions(
   raster_dir = scaled_dir, # folder of z-scored per-year predictor rasters
   variable_patterns = var_patterns, # maps predictor name -> filename pattern (with YEAR)
   time_cols = "year", # name of the time column on the points
-  time_steps = time_steps, # the data.frame of years (2015:2025) to project
+  time_steps = time_steps, # the data.frame of years (2010:2025) to project
   output_dir = "outputs/glm_predictions", # per-fold per-year rasters land here
   overwrite = TRUE, # replace any rasters left from a prior run
   verbose = FALSE # silence the per-fold progress messages
@@ -590,7 +659,7 @@ hv_preds <- generate_spatiotemporal_predictions(
 
 ## Visualise the consensus maps
 
-For each model we stack the per-time-step prediction rasters straight from `preds$prediction_files` and pass them to `terra::plot()` — the package's default visualisation. Every raster cell is a **fold-vote count** (0 to *N*) of how many folds agreed the pixel was suitable in that year. With 11 modelled years (2015–2025), each stack lays out as a 3 × 4 grid.
+For each model we stack the per-time-step prediction rasters straight from `preds$prediction_files` and pass them to `terra::plot()` — the package's default visualisation. Every raster cell is a **fold-vote count** (0 to *N*) of how many folds agreed the pixel was suitable in that year. With 16 modelled years (2010–2025), each stack lays out as a 4 × 4 grid; the spatial extent is Thailand-wide, so every panel shows the country outline filled with per-pixel vote counts.
 
 ```{r plot-glm, fig.width = 9, fig.height = 9}
 # Load all per-year GLM prediction rasters into a single multi-layer
@@ -598,21 +667,21 @@ For each model we stack the per-time-step prediction rasters straight from `pred
 # and stacks them in the order given.
 glm_pred_stack <- terra::rast(glm_preds$prediction_files)
 
-# Set human-readable layer names (e.g. "Prediction_..._2015") by stripping
+# Set human-readable layer names (e.g. "Prediction_..._2010") by stripping
 # the `.tif` extension from each filename. These names become the panel
 # titles in the plot below.
 names(glm_pred_stack) <- sub("\\.tif$", "", basename(glm_preds$prediction_files))
 
-# Draw the 11 yearly fold-vote maps as a 3 x 4 grid.
+# Draw the 16 yearly fold-vote maps as a 4 x 4 grid.
 # Arguments:
 #   - First positional argument: the multi-layer SpatRaster to plot.
-#   - nr = 3, nc = 4: 3 rows by 4 columns of panels.
+#   - nr = 4, nc = 4: 4 rows by 4 columns of panels (one per modelled year).
 #   - mar = c(1.0, 1.0, 1.5, 3.0): inner margins for each panel
 #     (bottom, left, top, right) in lines of text; the wider right margin
 #     reserves room for the per-panel legend strip.
 #   - legend = FALSE: suppress per-panel legends so the grid stays tidy
 #     (we explain the colour scale in the prose below).
-terra::plot(glm_pred_stack, nr = 3, nc = 4,
+terra::plot(glm_pred_stack, nr = 4, nc = 4,
             mar    = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
@@ -620,10 +689,10 @@ terra::plot(glm_pred_stack, nr = 3, nc = 4,
 ```{r plot-gam, fig.width = 9, fig.height = 9}
 # Same three-step pattern as the GLM chunk above: build a multi-layer
 # SpatRaster from the GAM prediction files, label each layer, and draw a
-# 3 x 4 grid of yearly fold-vote maps.
+# 4 x 4 grid of yearly fold-vote maps.
 gam_pred_stack <- terra::rast(gam_preds$prediction_files)
 names(gam_pred_stack) <- sub("\\.tif$", "", basename(gam_preds$prediction_files))
-terra::plot(gam_pred_stack, nr = 3, nc = 4,
+terra::plot(gam_pred_stack, nr = 4, nc = 4,
             mar    = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
@@ -632,7 +701,7 @@ terra::plot(gam_pred_stack, nr = 3, nc = 4,
 # Same pattern, but for the random forest prediction files.
 rf_pred_stack <- terra::rast(rf_preds$prediction_files)
 names(rf_pred_stack) <- sub("\\.tif$", "", basename(rf_preds$prediction_files))
-terra::plot(rf_pred_stack, nr = 3, nc = 4,
+terra::plot(rf_pred_stack, nr = 4, nc = 4,
             mar    = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
@@ -641,12 +710,12 @@ terra::plot(rf_pred_stack, nr = 3, nc = 4,
 # Same pattern, but for the hypervolume prediction files.
 hv_pred_stack <- terra::rast(hv_preds$prediction_files)
 names(hv_pred_stack) <- sub("\\.tif$", "", basename(hv_preds$prediction_files))
-terra::plot(hv_pred_stack, nr = 3, nc = 4,
+terra::plot(hv_pred_stack, nr = 4, nc = 4,
             mar    = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
 
-Reading these grids: each panel is one year (2015 in the top-left, 2025 in the bottom-right of each 3 × 4 grid). Brighter pixels mean more folds agreed the pixel was suitable in that year; darker pixels mean fewer or no folds did. Any *shift* in the bright patches across panels is the model's view of how Sambar deer habitat changed during 2015–2025. Comparing the four model grids side-by-side highlights where the algorithms agree on the niche and where they disagree.
+Reading these grids: each panel is one year (2010 in the top-left, 2025 in the bottom-right of each 4 × 4 grid). Brighter pixels mean more folds agreed the pixel was suitable in that year; darker pixels mean fewer or no folds did. Any *shift* in the bright patches across panels is the model's view of how Sambar deer habitat changed across Thailand during 2010–2025. Comparing the four model grids side-by-side highlights where the algorithms agree on the niche and where they disagree.
 
 ## Per-model performance diagnostics
 
@@ -766,10 +835,10 @@ hv_consensus <- summarize_raster_outputs(
 
 ### Per-year binary suitability — the `consensus_stack`
 
-Each `consensus_stack` is a multi-layer `SpatRaster` carrying **one binary layer per year** (yellow = suitable, purple = unsuitable). Plot it the same way we plotted the prediction stacks earlier — a 3 × 4 grid of the 11 modelled years for the model in question.
+Each `consensus_stack` is a multi-layer `SpatRaster` carrying **one binary layer per year** (yellow = suitable, purple = unsuitable). Plot it the same way we plotted the prediction stacks earlier — a 4 × 4 grid of the 16 modelled years for the model in question.
 
 ```{r consensus-stack-glm, fig.width = 9, fig.height = 9}
-# Draw the GLM's per-year binary suitability surfaces as a 3 x 4 grid.
+# Draw the GLM's per-year binary suitability surfaces as a 4 x 4 grid.
 # Arguments mirror the prediction-stack plot above:
 #   - First positional argument: the binary multi-layer SpatRaster.
 #   - nr / nc: 3 rows by 4 columns of yearly panels.
@@ -777,28 +846,28 @@ Each `consensus_stack` is a multi-layer `SpatRaster` carrying **one binary layer
 #   - legend = FALSE: drop per-panel legends because the values are binary
 #     (0 = unsuitable, 1 = suitable) and the prose below covers the
 #     interpretation.
-terra::plot(glm_consensus$consensus_stack, nr = 3, nc = 4,
+terra::plot(glm_consensus$consensus_stack, nr = 4, nc = 4,
             mar = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
 
 ```{r consensus-stack-gam, fig.width = 9, fig.height = 9}
 # Same plotting recipe applied to the GAM's binary consensus stack.
-terra::plot(gam_consensus$consensus_stack, nr = 3, nc = 4,
+terra::plot(gam_consensus$consensus_stack, nr = 4, nc = 4,
             mar = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
 
 ```{r consensus-stack-rf, fig.width = 9, fig.height = 9}
 # Same plotting recipe applied to the random forest's binary consensus stack.
-terra::plot(rf_consensus$consensus_stack, nr = 3, nc = 4,
+terra::plot(rf_consensus$consensus_stack, nr = 4, nc = 4,
             mar = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
 
 ```{r consensus-stack-hv, fig.width = 9, fig.height = 9}
 # Same plotting recipe applied to the hypervolume's binary consensus stack.
-terra::plot(hv_consensus$consensus_stack, nr = 3, nc = 4,
+terra::plot(hv_consensus$consensus_stack, nr = 4, nc = 4,
             mar = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
@@ -833,7 +902,7 @@ plot(hv_consensus$frequency_raster,
 par(mfrow = c(1, 1))
 ```
 
-Reading the panels: pixels close to 1 (bright) were predicted suitable in every modelled year — the *persistent core* of the niche for that model. Pixels close to 0 (dark) were never suitable. Intermediate values mark areas that gained or lost suitability across 2015–2025. Differences between the four panels show where the algorithms disagree on long-term suitability.
+Reading the panels: pixels close to 1 (bright) were predicted suitable in every modelled year — the *persistent core* of the niche for that model. Pixels close to 0 (dark) were never suitable. Intermediate values mark areas that gained or lost suitability across 2010–2025. Differences between the four panels show where the algorithms disagree on long-term suitability.
 
 ## Pixel-level temporal trajectories (changepoint analysis)
 
@@ -939,124 +1008,165 @@ par(mfrow = c(1, 1))
 
 Reading the panels: each colour is a categorical trajectory class. Comparing the four maps shows how much each algorithm agrees on the *shape* of change (increasing / decreasing / fluctuating), not just its location.
 
-## Aggregate by spatial unit (Thailand provinces)
+## Aggregate by spatial unit (DPKY forest complex)
 
-`analyze_trends_by_spatial_unit()` aggregates the pixel trajectories to a province polygon set (GADM level 1 — Thailand's provinces) so trends can be discussed region-by-region rather than pixel-by-pixel.
+`analyze_trends_by_spatial_unit()` aggregates the pixel trajectories produced by the changepoint analysis to a polygon set of our choosing. Up to this point everything in the workflow has been **Thailand-wide** — the models were fit on the country boundary, the cross-validation folds and pseudoabsences were drawn inside Thailand, and the trajectory rasters cover the whole country. For the final regional summary we narrow the spotlight to the **Dong Phayayen–Khao Yai Forest Complex (DPKY)** and break it down by its **five constituent protected areas**, so the per-unit numbers describe what happened inside each park or sanctuary individually rather than averaging across the whole complex.
 
-Key arguments:
+The DPKY shapefile we loaded earlier ships with six polygon features, but only five distinct protected areas — two of the features both belong to *Dong Yai Wildlife Sanctuary* (`ดงใหญ่`). We dissolve those two features into a single multi-polygon so the regional aggregation returns exactly **five rows**, one per protected area:
 
-- **`shapefile_path`** — the polygon set to aggregate against.
-- **`name_field`** — column carrying the human-readable unit name; we use `NAME_1` (province name in GADM).
+1. **ทับลาน** — Thap Lan National Park.
+2. **เขาใหญ่** — Khao Yai National Park (the first Thai national park established 1962, and the namesake of the complex).
+3. **ตาพระยา** — Ta Phraya National Park.
+4. **ปางสีดา** — Pang Sida National Park.
+5. **ดงใหญ่** — Dong Yai Wildlife Sanctuary.
+
+We also drop the Z (elevation) dimension from the geometry, because the shapefile ships as XYZ but the spatial-aggregation function expects plain 2-D geometry. Both clean-ups happen in a single short chunk below.
+
+Key arguments to `analyze_trends_by_spatial_unit()`:
+
+- **`shapefile_path`** — the cleaned DPKY polygon set (5 features after the merge). The function reprojects it internally to match the raster CRS if needed.
+- **`name_field`** — the polygon attribute column carrying the human-readable unit name. We use **`Name_th`**, which holds the Thai-language name of each constituent protected area.
 - **`binary_stack` / `pattern_raster` / `time_decrease_raster` / `time_increase_raster`** — outputs from the consensus and pattern steps for the model in question.
 
-```{r provinces-download}
-# Download Thailand provinces (GADM level 1) and convert SpatVector -> sf
-# so analyze_trends_by_spatial_unit() can read it.
-provinces <- geodata::gadm(country = "THA", level = 1, path = "data/raw") |>
-  st_as_sf()
+```{r dpky-unit-field}
+# Two small clean-up steps make the DPKY polygon ready for the regional
+# aggregation that follows:
+#
+# 1. sf::st_zm() drops the Z (elevation) dimension from every geometry.
+#    The DPKY shapefile is XYZ on disk, but analyze_trends_by_spatial_unit()
+#    and the underlying terra calls expect plain 2-D polygons; stripping
+#    Z here prevents confusing errors later. `st_zm()` takes the sf object
+#    as its only argument and returns an sf object whose CRS, attribute
+#    columns, and polygon shapes are otherwise unchanged.
+#
+# 2. dplyr::group_by(Name_th) followed by dplyr::summarise() with
+#    sf::st_union() dissolves any features that share the same Name_th
+#    label into a single (multi-)polygon. The DPKY shapefile carries six
+#    rows but only five distinct protected-area names, so this collapses
+#    the two Dong Yai (ดงใหญ่) features into one row and leaves the
+#    other four parks untouched. The argument `.groups = "drop"` removes
+#    the leftover grouping metadata so the result is a plain ungrouped
+#    sf object the next chunk can use directly.
+dpky <- sf::st_zm(dpky) |>
+  dplyr::group_by(Name_th) |>
+  dplyr::summarise(geometry = sf::st_union(geometry),
+                   .groups  = "drop")
 ```
 
 ```{r regional-glm, results = 'hide'}
-# Aggregate the GLM's pixel-level trajectories to Thailand's provinces.
-# The function overlays the polygons on the rasters, counts pixels in
-# each trajectory class per province, and writes summary CSVs.
+# Aggregate the GLM's pixel-level trajectories to the DPKY polygon.
+# The function overlays the polygon on the trajectory rasters, counts
+# the pixels falling in each of the seven trajectory classes, and writes
+# the result to a CSV inside `output_dir`.
+#
+# Arguments:
+#   - shapefile_path:       the cleaned DPKY sf object (5 features, one
+#                           row per constituent protected area).
+#   - name_field:           "Name_th" — the polygon attribute column
+#                           carrying the Thai-language park name.
+#   - binary_stack:         per-year binary suitability stack from
+#                           summarize_raster_outputs() for this model.
+#   - pattern_raster:       categorical trajectory class per pixel.
+#   - time_decrease_raster: year of first detected decrease per pixel
+#                           (NaN where no decrease was detected).
+#   - time_increase_raster: year of first detected increase per pixel
+#                           (NaN where no increase was detected).
+#   - time_steps:           same data.frame of modelled years (2010-2025)
+#                           used for projection and changepoint detection.
+#   - output_dir:           folder for the per-model summary CSVs and plots.
+#   - overwrite:            TRUE replaces previous-run outputs in that folder.
+#   - create_plot:          TRUE returns the diagnostic plots in `$plots`.
+#   - verbose:              FALSE silences per-polygon progress messages.
 glm_regional <- analyze_trends_by_spatial_unit(
-  shapefile_path = provinces, # sf object: Thailand provinces
-  name_field = "NAME_1", # column carrying the province name
-  binary_stack = glm_consensus$consensus_stack, # per-year binary suitability stack
-  pattern_raster = glm_patterns$pattern, # trajectory class per pixel
-  time_decrease_raster = glm_patterns$time_decrease, # year of first detected decrease (per pixel)
-  time_increase_raster = glm_patterns$time_increase, # year of first detected increase (per pixel)
-  time_steps = time_steps, # same data.frame of modelled years
-  output_dir = "outputs/glm_regional", # GLM-specific output folder
-  overwrite = TRUE, # replace previous-run outputs
-  create_plot = TRUE, # produce the diagnostic plots returned in `$plots`
-  verbose = FALSE # silence per-province progress
+  shapefile_path       = dpky,
+  name_field           = "Name_th",
+  binary_stack         = glm_consensus$consensus_stack,
+  pattern_raster       = glm_patterns$pattern,
+  time_decrease_raster = glm_patterns$time_decrease,
+  time_increase_raster = glm_patterns$time_increase,
+  time_steps           = time_steps,
+  output_dir           = "outputs/glm_regional",
+  overwrite            = TRUE,
+  create_plot          = TRUE,
+  verbose              = FALSE
 )
 ```
 
 ```{r regional-glm-data}
-# Show the diagnostic plot(s) attached to the result object: e.g.
-# scatterpie map of pattern composition, per-province time series, etc.
-glm_regional$plots
-
-# First three rows of the per-province summary table (one row per province,
-# columns for pixel counts in each trajectory class plus percentages).
-head(glm_regional$overall_summary, 3)
+# Pattern composition summary: counts and percentages of pixels in each
+# of the seven trajectory classes inside DPKY.
+glm_regional$overall_summary
 ```
 
 ```{r regional-gam, results = 'hide'}
 # Same aggregation applied to the GAM outputs. Only the input rasters and
-# the output folder differ from the GLM call above.
+# the output folder change from the GLM call above; all other arguments
+# are identical.
 gam_regional <- analyze_trends_by_spatial_unit(
-  shapefile_path = provinces,
-  name_field = "NAME_1",
-  binary_stack = gam_consensus$consensus_stack,
-  pattern_raster = gam_patterns$pattern,
+  shapefile_path       = dpky,
+  name_field           = "Name_th",
+  binary_stack         = gam_consensus$consensus_stack,
+  pattern_raster       = gam_patterns$pattern,
   time_decrease_raster = gam_patterns$time_decrease,
   time_increase_raster = gam_patterns$time_increase,
-  time_steps = time_steps,
-  output_dir = "outputs/gam_regional",
-  overwrite = TRUE,
-  create_plot = TRUE,
-  verbose = FALSE
+  time_steps           = time_steps,
+  output_dir           = "outputs/gam_regional",
+  overwrite            = TRUE,
+  create_plot          = TRUE,
+  verbose              = FALSE
 )
 ```
 
 ```{r regional-gam-data}
-# Diagnostic plots and the first three rows of the per-province summary
-# for the GAM (same layout as the GLM results above).
-gam_regional$plots
-head(gam_regional$overall_summary, 3)
+# Diagnostic DPKY-level pattern composition summary for the GAM.
+gam_regional$overall_summary
 ```
 
 ```{r regional-rf, results = 'hide'}
 # Same aggregation applied to the random forest outputs.
 rf_regional <- analyze_trends_by_spatial_unit(
-  shapefile_path = provinces,
-  name_field = "NAME_1",
-  binary_stack = rf_consensus$consensus_stack,
-  pattern_raster = rf_patterns$pattern,
+  shapefile_path       = dpky,
+  name_field           = "Name_th",
+  binary_stack         = rf_consensus$consensus_stack,
+  pattern_raster       = rf_patterns$pattern,
   time_decrease_raster = rf_patterns$time_decrease,
   time_increase_raster = rf_patterns$time_increase,
-  time_steps = time_steps,
-  output_dir = "outputs/rf_regional",
-  overwrite = TRUE,
-  create_plot = TRUE,
-  verbose = FALSE
+  time_steps           = time_steps,
+  output_dir           = "outputs/rf_regional",
+  overwrite            = TRUE,
+  create_plot          = TRUE,
+  verbose              = FALSE
 )
 ```
 
 ```{r regional-rf-data}
-# Diagnostic plots and the first three rows of the per-province summary
-# for the random forest.
-rf_regional$plots
-head(rf_regional$overall_summary, 3)
+# Diagnostic DPKY-level pattern composition summary for the RF.
+rf_regional$overall_summary
 ```
 
 ```{r regional-hv, results = 'hide'}
 # Same aggregation applied to the hypervolume outputs.
 hv_regional <- analyze_trends_by_spatial_unit(
-  shapefile_path = provinces,
-  name_field = "NAME_1",
-  binary_stack = hv_consensus$consensus_stack,
-  pattern_raster = hv_patterns$pattern,
+  shapefile_path       = dpky,
+  name_field           = "Name_th",
+  binary_stack         = hv_consensus$consensus_stack,
+  pattern_raster       = hv_patterns$pattern,
   time_decrease_raster = hv_patterns$time_decrease,
   time_increase_raster = hv_patterns$time_increase,
-  time_steps = time_steps,
-  output_dir = "outputs/hv_regional",
-  overwrite = TRUE,
-  create_plot = TRUE,
-  verbose = FALSE
+  time_steps           = time_steps,
+  output_dir           = "outputs/hv_regional",
+  overwrite            = TRUE,
+  create_plot          = TRUE,
+  verbose              = FALSE
 )
 ```
 
 ```{r regional-hv-data}
-# First three rows of the per-province summary for the hypervolume.
-head(hv_regional$overall_summary, 3)
+# Diagnostic DPKY-level pattern composition summary for the hypervolume.
+hv_regional$overall_summary
 ```
 
-The per-province `overall_summary` tables let you rank provinces by the magnitude or sign of change and quickly spot regions where the four models tell different stories.
+Putting the four `overall_summary` tables side by side tells you, *for each of the five protected areas*, what fraction of pixels each model labels as *always suitable* / *always absent* / *no pattern* / *increasing* / *decreasing* / *fluctuating* / *failed*. Where the four models agree on a park's composition, the algorithms are telling the same conservation story for that protected area; where they disagree — for instance, if GLM and GAM call Khao Yai mostly stable but the random forest detects substantial decreasing pixels there — that is exactly where additional ecological knowledge or field validation is needed before acting on the model.
 
 # Wrap-up
 
@@ -1068,9 +1178,10 @@ What we covered:
 - Built a fully temporally-explicit pipeline: time-stamped occurrences ↔ time-stamped rasters via `temporally_explicit_extraction()`.
 - Used spatio-temporal cross-validation folds and fold-stratified pseudoabsences for an honest evaluation.
 - Fitted **all four `TemporalModelR` algorithms** — GLM, GAM, random forest, and hypervolume — against the same fold structure and compared them on the same held-out test sets.
-- Projected every model across 2015–2025 with `generate_spatiotemporal_predictions()` and visualised the resulting fold-vote consensus rasters using the package's default `terra::plot()` styling (3 × 4 grid per model).
+- Projected every model across 2010–2025 with `generate_spatiotemporal_predictions()` and visualised the resulting Thailand-wide fold-vote consensus rasters using the package's default `terra::plot()` styling (4 × 4 grid per model, one panel per year).
 - Inspected per-fold E-space and per-time-step G-space performance with the package's default `plot_model_assessment()` diagnostic for each of the four models.
-- Ran the full post-processing pipeline — `summarize_raster_outputs()`, `analyze_temporal_patterns()`, `analyze_trends_by_spatial_unit()` — **once per model** so consensus frequency rasters, pixel-level trajectory classes, and per-province summary tables are directly comparable across GLM / GAM / RF / Hypervolume.
+- Ran `summarize_raster_outputs()` and `analyze_temporal_patterns()` **once per model** on the Thailand-wide rasters so the consensus frequency surfaces and pixel-level trajectory classifications are directly comparable across GLM / GAM / RF / Hypervolume.
+- Restricted only the *final* `analyze_trends_by_spatial_unit()` summary to the DPKY polygon, so the per-model pattern-composition tables describe what happened inside the Dong Phayayen–Khao Yai Forest Complex — the conservation-relevant management unit — without throwing away the country-wide niche estimate the four models were built on.
 
 # References
 
