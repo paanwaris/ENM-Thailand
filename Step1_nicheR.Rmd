@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 
 > **Workshop navigation**
 >
-> - [Pre-workshop — Downloading the workshop data.](https://paanwaris.github.io/ENM-Thailand/articles/Pre-workshop.html) Get the Thailand boundary, WorldClim climate layers, and GBIF Sambar records before the workshop starts.
+> - [**Pre-workshop** — Downloading the workshop data.](https://paanwaris.github.io/ENM-Thailand/articles/Pre-workshop.html) Get the Thailand boundary, WorldClim climate layers, and GBIF Sambar records before the workshop starts.
 > - **Step 1: nicheR — Virtual species with nicheR.** Build a virtual species niche and map it.
 > - [**Step 2: bean** — Environmental thinning with bean.](https://paanwaris.github.io/ENM-Thailand/articles/Step2_bean.html) Reduce environmental sampling bias before fitting a real niche.
 > - [**Step 3: TemporalModelR** — Temporally-explicit models with TemporalModelR.](https://paanwaris.github.io/ENM-Thailand/articles/Step3_TemporalModelR.html) Link species occurrences with environmental data through time.
