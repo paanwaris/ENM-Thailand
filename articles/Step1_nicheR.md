@@ -4,7 +4,7 @@
 
 > **Workshop navigation**
 >
-> - [Pre-workshop — Downloading the workshop
+> - [**Pre-workshop** — Downloading the workshop
 >   data.](https://paanwaris.github.io/ENM-Thailand/articles/Pre-workshop.html)
 >   Get the Thailand boundary, WorldClim climate layers, and GBIF Sambar
 >   records before the workshop starts.

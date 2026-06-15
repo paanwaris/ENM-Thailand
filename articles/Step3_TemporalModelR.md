@@ -124,10 +124,10 @@ thailand <- st_read("data/processed/boundary/thailand_boundary.gpkg",
 #     with pseudoabsences (presence = 0) later on.
 sambar <- read_csv("data/processed/gbif/sambar_thailand.csv",
                    show_col_types = FALSE) %>%
-  filter(year >= 2015, year <= 2025) %>%       # keep modelled years only
-  rename(longitude = decimalLongitude,         # GBIF -> conventional name
-         latitude  = decimalLatitude) %>%      # GBIF -> conventional name
-  mutate(presence = 1L)                        # every GBIF record is a presence
+  filter(year >= 2015, year <= 2025) %>% # keep modelled years only
+  rename(longitude = decimalLongitude, # GBIF -> conventional name
+         latitude = decimalLatitude) %>% # GBIF -> conventional name
+  mutate(presence = 1L) # every GBIF record is a presence
 
 # How many records per year survive that filter?
 table(sambar$year)
@@ -169,7 +169,7 @@ par(mfrow = c(1, 1))     # reset the plot region back to a single panel
 
 # Source directory of the per-variable per-year split rasters, and target
 # directory where the aligned copies will be written.
-split_dir   <- "data/processed/temporal_split"
+split_dir <- "data/processed/temporal_split"
 aligned_dir <- "data/processed/rasters_aligned"
 dir.create(aligned_dir, showWarnings = FALSE, recursive = TRUE)
 
@@ -178,10 +178,10 @@ dir.create(aligned_dir, showWarnings = FALSE, recursive = TRUE)
 ref_raster <- NDVI_ex
 
 raster_align(
-  input_dir        = split_dir,    # where the per-year rasters currently live
-  output_dir       = aligned_dir,  # where the aligned copies will be written
-  reference_raster = ref_raster,   # target grid (extent + resolution + CRS)
-  overwrite        = TRUE          # replace any aligned files left from a prior run
+  input_dir = split_dir, # where the per-year rasters currently live
+  output_dir = aligned_dir, # where the aligned copies will be written
+  reference_raster = ref_raster, # target grid (extent + resolution + CRS)
+  overwrite = TRUE # replace any aligned files left from a prior run
 )
 ```
 
@@ -209,11 +209,11 @@ aligned_files <- list.files(aligned_dir, pattern = "\\.tif$", full.names = TRUE)
 # Group the file list by variable name (prec_ / temp_ / NDVI_) so each
 # group becomes a multi-layer SpatRaster spanning every year.
 prec_files <- file.path(aligned_dir,
-                        grep("prec_",  basename(aligned_files), value = TRUE))
+                        grep("prec_", basename(aligned_files), value = TRUE))
 temp_files <- file.path(aligned_dir,
-                        grep("temp_",  basename(aligned_files), value = TRUE))
+                        grep("temp_", basename(aligned_files), value = TRUE))
 NDVI_files <- file.path(aligned_dir,
-                        grep("NDVI_",  basename(aligned_files), value = TRUE))
+                        grep("NDVI_", basename(aligned_files), value = TRUE))
 
 # Per-pixel mean across years for each variable — terra::mean() over a
 # multi-layer SpatRaster collapses the time dimension into a single layer.
@@ -236,7 +236,7 @@ plot(mean_NDVI, main = "Mean NDVI (2010–2025)")
 
 ``` r
 
-par(mfrow = c(1, 1))     # reset the plot region back to a single panel
+par(mfrow = c(1, 1)) # reset the plot region back to a single panel
 ```
 
 Reading the panels: each map is the per-pixel average of the
@@ -283,26 +283,26 @@ sambar_xy <- sambar[, c("longitude", "latitude")]
 # Extract the three temporal-mean env values at every occurrence, and
 # z-score them so all three axes share the same numeric scale.
 prepped <- prepare_bean(
-  data        = sambar_xy,
-  env_rasters = env_ref,        # temporal-mean 3-layer stack
-  longitude   = "longitude",
-  latitude    = "latitude",
-  transform   = "scale"
+  data = sambar_xy,
+  env_rasters = env_ref, # temporal-mean 3-layer stack
+  longitude = "longitude",
+  latitude = "latitude",
+  transform = "scale"
 )
 
 # Sheather-Jones plug-in bandwidth as the cell width (one width per
 # variable, in z-score units because prepare_bean() scaled the data).
 res <- find_env_resolution(
-  data     = prepped,
+  data = prepped,
   env_vars = c("mean_prec", "mean_temp", "mean_NDVI"),
-  method   = "sheather-jones"
+  method = "sheather-jones"
 )
 
 # Build the environmental grid using `res$suggested_resolution` and
 # randomly retain one of the original occurrences in every occupied pod.
 thin_out <- thin_env_nd(
-  data            = prepped,
-  env_vars        = c("mean_prec", "mean_temp", "mean_NDVI"),
+  data = prepped,
+  env_vars = c("mean_prec", "mean_temp", "mean_NDVI"),
   grid_resolution = res$suggested_resolution
 )
 
@@ -368,15 +368,15 @@ write_csv(sambar, points_csv)
 study_crs <- st_crs(rast(ref_raster))
 
 rare_out <- spatiotemporal_rarefaction(
-  points_sp        = points_csv,                        # input CSV of presences
-  output_dir       = file.path(points_dir, "rarefied"), # where rarefied tables are written
-  reference_raster = ref_raster,                        # defines the pixel grid for rarefaction
-  time_cols        = "year",                            # column carrying the time stamp
-  xcol             = "longitude",                       # column with x coordinate
-  ycol             = "latitude",                        # column with y coordinate
-  points_crs       = study_crs,                         # CRS of the input points
-  output_prefix    = "Sambar_annual",                   # prefix for the written files
-  verbose          = FALSE                              # silence per-record progress messages
+  points_sp = points_csv, # input CSV of presences
+  output_dir = file.path(points_dir, "rarefied"), # where rarefied tables are written
+  reference_raster = ref_raster, # defines the pixel grid for rarefaction
+  time_cols = "year", # column carrying the time stamp
+  xcol = "longitude", # column with x coordinate
+  ycol = "latitude", # column with y coordinate
+  points_crs = study_crs, # CRS of the input points
+  output_prefix = "Sambar_annual", # prefix for the written files
+  verbose = FALSE # silence per-record progress messages
 )
 
 # The three counts below show how aggressive rarefaction was: how many
@@ -418,23 +418,23 @@ the long-term average.
 ext_dir <- file.path(points_dir, "extracted")
 
 ext_out <- temporally_explicit_extraction(
-  points_sp           = rare_out$files_created$spatiotemporal, # rarefied points to extract at
-  raster_dir          = aligned_dir,                           # raster source folder
-  variable_patterns   = c(                                     # variable -> filename pattern map
+  points_sp = rare_out$files_created$spatiotemporal, # rarefied points to extract at
+  raster_dir = aligned_dir, # raster source folder
+  variable_patterns = c( # variable -> filename pattern map
     "prec" = "prec_YEAR",
     "temp" = "temp_YEAR",
     "NDVI" = "NDVI_YEAR"
   ),
-  time_cols           = "year",                # time-stamp column on the points
-  xcol                = "X",                   # rarefied table uses upper-case X / Y
-  ycol                = "Y",
-  points_crs          = study_crs,             # CRS shared by points and rasters
-  output_dir          = ext_dir,
-  output_prefix       = "sambar_extracted",
-  save_raw            = TRUE,                  # write the raw (un-scaled) extracted table
-  save_scaled         = TRUE,                  # also write a z-scored copy
-  save_scaling_params = TRUE,                  # write the per-variable means + SDs we'll reuse
-  verbose             = FALSE                  # silence per-record extraction progress
+  time_cols = "year", # time-stamp column on the points
+  xcol = "X", # rarefied table uses upper-case X / Y
+  ycol = "Y",
+  points_crs = study_crs, # CRS shared by points and rasters
+  output_dir = ext_dir,
+  output_prefix = "sambar_extracted",
+  save_raw = TRUE, # write the raw (un-scaled) extracted table
+  save_scaled = TRUE, # also write a z-scored copy
+  save_scaling_params = TRUE, # write the per-variable means + SDs we'll reuse
+  verbose = FALSE # silence per-record extraction progress
 )
 
 # Inspect the first few rows of the raw (un-scaled) extracted table.
@@ -477,17 +477,17 @@ scaled_dir <- "data/processed/rasters_scaled"
 dir.create(scaled_dir, showWarnings = FALSE, recursive = TRUE)
 
 scale_rasters(
-  input_dir           = aligned_dir,                              # raw aligned rasters
-  output_dir          = scaled_dir,                               # write the z-scored copies here
-  scaling_params_file = ext_out$files_created$scaling_params,     # reuse the means + SDs from extraction
-  variable_patterns   = c(
+  input_dir = aligned_dir, # raw aligned rasters
+  output_dir = scaled_dir, # write the z-scored copies here
+  scaling_params_file = ext_out$files_created$scaling_params, # reuse the means + SDs from extraction
+  variable_patterns = c(
     "prec" = "prec_YEAR",
     "temp" = "temp_YEAR",
     "NDVI" = "NDVI_YEAR"
   ),
   time_cols = "year",
-  overwrite = TRUE,       # replace any scaled files left from a previous run
-  verbose   = FALSE       # silence per-raster scaling progress
+  overwrite = TRUE, # replace any scaled files left from a previous run
+  verbose = FALSE # silence per-raster scaling progress
 )
 ```
 
@@ -504,17 +504,17 @@ k-fold CV.
 par(mfrow = c(1, 3))
 
 partition <- spatiotemporal_partition(
-  reference_shapefile_path = thailand,                       # study-area polygon (Thailand)
-  points_file_path         = ext_out$files_created$scaled,   # presence table with extracted env
-  xcol                     = "x",                            # scaled table uses lower-case x / y
-  ycol                     = "y",
-  points_crs               = study_crs,
-  time_cols                = "year",
-  n_spatial_folds          = 2,         # how many blocks to split the country into
-  n_temporal_folds         = 2,         # how many blocks to split the years into
-  max_imbalance            = 0.15,      # max allowed presence imbalance between folds
-  create_plot              = TRUE,      # produce the fold-map diagnostic
-  verbose                  = FALSE      # silence per-fold construction messages
+  reference_shapefile_path = thailand, # study-area polygon (Thailand)
+  points_file_path = ext_out$files_created$scaled, # presence table with extracted env
+  xcol = "x", # scaled table uses lower-case x / y
+  ycol = "y",
+  points_crs = study_crs,
+  time_cols = "year",
+  n_spatial_folds = 2, # how many blocks to split the country into
+  n_temporal_folds = 2, # how many blocks to split the years into
+  max_imbalance = 0.15, # max allowed presence imbalance between folds
+  create_plot = TRUE, # produce the fold-map diagnostic
+  verbose = FALSE # silence per-fold construction messages
 )
 ```
 
@@ -541,7 +541,7 @@ partition$summary
 
 ``` r
 
-par(mfrow = c(1, 1))     # reset the plot region back to a single panel
+par(mfrow = c(1, 1)) # reset the plot region back to a single panel
 ```
 
 ### Generate pseudoabsences
@@ -554,21 +554,21 @@ around the presences in the same fold.
 ``` r
 
 absences <- generate_absences(
-  partition_result         = partition,        # fold structure built above
-  reference_shapefile_path = thailand,         # absences are drawn inside this polygon
-  raster_dir               = scaled_dir,       # env values are extracted at each absence
-  variable_patterns        = c(
+  partition_result = partition, # fold structure built above
+  reference_shapefile_path = thailand, # absences are drawn inside this polygon
+  raster_dir = scaled_dir, # env values are extracted at each absence
+  variable_patterns = c(
     "prec" = "prec_YEAR",
     "temp" = "temp_YEAR",
     "NDVI" = "NDVI_YEAR"
   ),
-  method                   = "buffer",         # draw absences outside a buffer around presences
-  buffer_distance          = 50000,            # 50 km buffer around each presence
-  ratio                    = 2,                # 2 absences per presence
-  time_cols                = "year",
-  create_plot              = TRUE,             # produce a diagnostic absence map
-  plot_by_fold             = TRUE,             # one panel per fold
-  verbose                  = FALSE             # silence per-fold progress messages
+  method = "buffer", # draw absences outside a buffer around presences
+  buffer_distance = 50000, # 50 km buffer around each presence
+  ratio = 2, # 2 absences per presence
+  time_cols = "year",
+  create_plot = TRUE, # produce a diagnostic absence map
+  plot_by_fold = TRUE, # one panel per fold
+  verbose = FALSE # silence per-fold progress messages
 )
 ```
 
@@ -619,16 +619,16 @@ maximises the True Skill Statistic on each fold’s test set.
 ``` r
 
 glm_res <- build_temporal_glm(
-  partition_result     = partition,                        # CV folds in space + time
-  pseudoabsence_result = absences,                         # presences + absences per fold
-  model_formula        = ~ temp + I(temp^2) + prec + NDVI, # quadratic on temp, linear on prec / NDVI
-  link                 = "logit",                          # binary GLM with logit link
-  threshold_method     = "tss",                            # pick threshold maximising True Skill Statistic
-  output_dir           = "outputs/GLM_Models",
-  create_plot          = FALSE,
-  overwrite            = TRUE,
-  time_cols            = "year",
-  verbose              = FALSE
+  partition_result = partition, # CV folds in space + time
+  pseudoabsence_result = absences, # presences + absences per fold
+  model_formula = ~ temp + I(temp^2) + prec + NDVI, # quadratic on temp, linear on prec / NDVI
+  link = "logit", # binary GLM with logit link
+  threshold_method = "tss", # pick threshold maximising True Skill Statistic
+  output_dir = "outputs/GLM_Models",
+  create_plot = FALSE,
+  overwrite = TRUE,
+  time_cols = "year",
+  verbose = FALSE
 )
 
 # Out-of-fold E-space test metrics — one row per fold.
@@ -657,17 +657,17 @@ same as the GLM, so the two are directly comparable.
 ``` r
 
 gam_res <- build_temporal_gam(
-  partition_result     = partition,                        # CV folds in space + time
-  pseudoabsence_result = absences,                         # presences + absences per fold
-  model_formula        = ~ s(temp) + s(prec) + s(NDVI),    # `s()` = univariate smooth (mgcv thin-plate spline)
-  link                 = "logit",                          # binary GAM with logit link
-  gam_params           = list(method = "REML"),            # smoothing-parameter selection rule (mgcv default REML)
-  threshold_method     = "tss",                            # pick threshold maximising True Skill Statistic
-  output_dir           = "outputs/GAM_Models",
-  create_plot          = FALSE,                            # skip the smooth-response curves to keep output compact
-  overwrite            = TRUE,
-  time_cols            = "year",
-  verbose              = FALSE                             # silence per-fold smoothing progress
+  partition_result = partition, # CV folds in space + time
+  pseudoabsence_result = absences, # presences + absences per fold
+  model_formula = ~ s(temp) + s(prec) + s(NDVI), # `s()` = univariate smooth (mgcv thin-plate spline)
+  link = "logit", # binary GAM with logit link
+  gam_params = list(method = "REML"), # smoothing-parameter selection rule (mgcv default REML)
+  threshold_method = "tss", # pick threshold maximising True Skill Statistic
+  output_dir = "outputs/GAM_Models",
+  create_plot = FALSE, # skip the smooth-response curves to keep output compact
+  overwrite = TRUE,
+  time_cols = "year",
+  verbose = FALSE # silence per-fold smoothing progress
 )
 
 # Out-of-fold E-space test metrics — one row per fold.
@@ -694,16 +694,16 @@ interpretable model.
 ``` r
 
 rf_res <- build_temporal_rf(
-  partition_result     = partition,                  # CV folds in space + time
-  pseudoabsence_result = absences,                   # presences + absences per fold
-  model_vars           = c("temp", "prec", "NDVI"),  # RF needs predictor names, not a formula
-  rf_params            = list(ntree = 500),          # number of decision trees grown per fold
-  threshold_method     = "tss",                      # pick threshold maximising True Skill Statistic
-  output_dir           = "outputs/RF_Models",
-  create_plot          = FALSE,                      # skip variable-importance plot
-  overwrite            = TRUE,
-  time_cols            = "year",
-  verbose              = FALSE                       # silence per-fold tree-growth progress
+  partition_result = partition, # CV folds in space + time
+  pseudoabsence_result = absences, # presences + absences per fold
+  model_vars = c("temp", "prec", "NDVI"), # RF needs predictor names, not a formula
+  rf_params = list(ntree = 500), # number of decision trees grown per fold
+  threshold_method = "tss", # pick threshold maximising True Skill Statistic
+  output_dir = "outputs/RF_Models",
+  create_plot = FALSE, # skip variable-importance plot
+  overwrite = TRUE,
+  time_cols = "year",
+  verbose = FALSE # silence per-fold tree-growth progress
 )
 
 # Out-of-fold E-space test metrics — one row per fold.
@@ -737,13 +737,13 @@ produce a probability scale, so there is no `pseudoabsence_result` or
 ``` r
 
 hv_res <- build_temporal_hv(
-  partition_result   = partition,                 # CV folds in space + time (presences only)
-  model_vars         = c("temp", "prec", "NDVI"), # predictors defining the envelope axes
-  method             = "gaussian",                # Gaussian KDE envelope (alternative: "svm" = one-class SVM)
-  hypervolume_params = list(),                    # accept hypervolume::hypervolume_gaussian() defaults
-  output_dir         = "outputs/HV_Models",
-  create_plot        = FALSE,                     # skip the per-fold pairplots
-  verbose            = FALSE                      # silence per-fold KDE-construction progress
+  partition_result = partition, # CV folds in space + time (presences only)
+  model_vars = c("temp", "prec", "NDVI"), # predictors defining the envelope axes
+  method = "gaussian", # Gaussian KDE envelope (alternative: "svm" = one-class SVM)
+  hypervolume_params = list(), # accept hypervolume::hypervolume_gaussian() defaults
+  output_dir = "outputs/HV_Models",
+  create_plot = FALSE, # skip the per-fold pairplots
+  verbose = FALSE # silence per-fold KDE-construction progress
 )
 
 # Presence-only E-space metrics: sensitivity, envelope volume, per-fold overlap.
@@ -799,72 +799,73 @@ Key arguments shared by every call below:
 
 ``` r
 
-time_steps <- data.frame(year = 2015:2025)        # 11 years -> fits a 3 x 4 plot grid
+time_steps <- data.frame(year = 2015:2025) # 11 years -> fits a 3 x 4 plot grid
 
 # A single named vector used by every projection call.
 var_patterns <- c("prec" = "prec_YEAR",
                   "temp" = "temp_YEAR",
                   "NDVI" = "NDVI_YEAR")
 
-# Clear stale prediction files from any previous run so each model's folder
-# contains exactly one raster per modelled year. This matters because the
-# downstream post-processing functions match the number of layers in the
-# consensus stack to the number of rows in `time_steps`; an orphan raster
-# from an earlier 2010-2025 run would cause a mismatch error.
-unlink("outputs/glm_predictions", recursive = TRUE, force = TRUE)
-unlink("outputs/gam_predictions", recursive = TRUE, force = TRUE)
-unlink("outputs/rf_predictions",  recursive = TRUE, force = TRUE)
-unlink("outputs/hv_predictions",  recursive = TRUE, force = TRUE)
-
+# GLM projection: walk through every (year) time step and apply each fold's
+# fitted GLM to the matching scaled rasters, writing one fold-vote raster
+# per fold per year into output_dir.
 glm_preds <- generate_spatiotemporal_predictions(
-  partition_result     = partition,
-  model_result         = glm_res,
-  pseudoabsence_result = absences,
-  raster_dir           = scaled_dir,
-  variable_patterns    = var_patterns,
-  time_cols            = "year",
-  time_steps           = time_steps,
-  output_dir           = "outputs/glm_predictions",
-  overwrite            = TRUE,
-  verbose              = FALSE
+  partition_result = partition, # CV fold geometry built earlier
+  model_result = glm_res, # the fitted GLM (one model per fold)
+  pseudoabsence_result = absences, # tells the function which area each fold "owns"
+  raster_dir = scaled_dir, # folder of z-scored per-year predictor rasters
+  variable_patterns = var_patterns, # maps predictor name -> filename pattern (with YEAR)
+  time_cols = "year", # name of the time column on the points
+  time_steps = time_steps, # the data.frame of years (2015:2025) to project
+  output_dir = "outputs/glm_predictions", # per-fold per-year rasters land here
+  overwrite = TRUE, # replace any rasters left from a prior run
+  verbose = FALSE # silence the per-fold progress messages
 )
 
+# GAM projection: same inputs as the GLM call above, only `model_result`
+# and `output_dir` change. The function reads `model_type` inside `gam_res`
+# and automatically uses the correct projection logic for a GAM.
 gam_preds <- generate_spatiotemporal_predictions(
-  partition_result     = partition,
-  model_result         = gam_res,
-  pseudoabsence_result = absences,
-  raster_dir           = scaled_dir,
-  variable_patterns    = var_patterns,
-  time_cols            = "year",
-  time_steps           = time_steps,
-  output_dir           = "outputs/gam_predictions",
-  overwrite            = TRUE,
-  verbose              = FALSE
+  partition_result = partition, # same fold geometry
+  model_result = gam_res, # the fitted GAM (one per fold)
+  pseudoabsence_result = absences, # same fold-stratified absences
+  raster_dir = scaled_dir, # same scaled per-year predictor rasters
+  variable_patterns = var_patterns, # same name -> filename map
+  time_cols = "year", # same time-column name
+  time_steps = time_steps, # same 11-year grid
+  output_dir = "outputs/gam_predictions", # write into a *separate* folder per model
+  overwrite = TRUE, # replace previous-run rasters
+  verbose = FALSE # silence per-fold progress
 )
 
+# Random forest projection: identical interface; the function dispatches to
+# the RF projection logic via `model_type` stored inside `rf_res`.
 rf_preds <- generate_spatiotemporal_predictions(
-  partition_result     = partition,
-  model_result         = rf_res,
-  pseudoabsence_result = absences,
-  raster_dir           = scaled_dir,
-  variable_patterns    = var_patterns,
-  time_cols            = "year",
-  time_steps           = time_steps,
-  output_dir           = "outputs/rf_predictions",
-  overwrite            = TRUE,
-  verbose              = FALSE
+  partition_result = partition, # same fold geometry
+  model_result = rf_res, # the fitted RF (500 trees per fold)
+  pseudoabsence_result = absences, # same fold-stratified absences
+  raster_dir = scaled_dir, # same scaled per-year predictor rasters
+  variable_patterns = var_patterns, # same name -> filename map
+  time_cols = "year", # same time-column name
+  time_steps = time_steps, # same 11-year grid
+  output_dir = "outputs/rf_predictions", # separate output folder for RF
+  overwrite = TRUE, # replace previous-run rasters
+  verbose = FALSE # silence per-fold progress
 )
 
+# Hypervolume projection: NOTE the missing `pseudoabsence_result` argument.
+# Hypervolume is presence-only, so the function never needs absences when
+# projecting an HV model — passing them in is unnecessary.
 hv_preds <- generate_spatiotemporal_predictions(
-  partition_result     = partition,
-  model_result         = hv_res,
-  raster_dir           = scaled_dir,
-  variable_patterns    = var_patterns,
-  time_cols            = "year",
-  time_steps           = time_steps,
-  output_dir           = "outputs/hv_predictions",
-  overwrite            = TRUE,
-  verbose              = FALSE
+  partition_result = partition, # same fold geometry
+  model_result = hv_res, # the fitted hypervolume (Gaussian KDE per fold)
+  raster_dir = scaled_dir, # same scaled per-year predictor rasters
+  variable_patterns = var_patterns, # same name -> filename map
+  time_cols = "year", # same time-column name
+  time_steps = time_steps, # same 11-year grid
+  output_dir = "outputs/hv_predictions", # separate output folder for HV
+  overwrite = TRUE, # replace previous-run rasters
+  verbose = FALSE # silence per-fold progress
 )
 ```
 
@@ -880,8 +881,25 @@ lays out as a 3 × 4 grid.
 
 ``` r
 
+# Load all per-year GLM prediction rasters into a single multi-layer
+# SpatRaster. `terra::rast()` accepts a character vector of file paths
+# and stacks them in the order given.
 glm_pred_stack <- terra::rast(glm_preds$prediction_files)
+
+# Set human-readable layer names (e.g. "Prediction_..._2015") by stripping
+# the `.tif` extension from each filename. These names become the panel
+# titles in the plot below.
 names(glm_pred_stack) <- sub("\\.tif$", "", basename(glm_preds$prediction_files))
+
+# Draw the 11 yearly fold-vote maps as a 3 x 4 grid.
+# Arguments:
+#   - First positional argument: the multi-layer SpatRaster to plot.
+#   - nr = 3, nc = 4: 3 rows by 4 columns of panels.
+#   - mar = c(1.0, 1.0, 1.5, 3.0): inner margins for each panel
+#     (bottom, left, top, right) in lines of text; the wider right margin
+#     reserves room for the per-panel legend strip.
+#   - legend = FALSE: suppress per-panel legends so the grid stays tidy
+#     (we explain the colour scale in the prose below).
 terra::plot(glm_pred_stack, nr = 3, nc = 4,
             mar    = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
@@ -891,6 +909,9 @@ terra::plot(glm_pred_stack, nr = 3, nc = 4,
 
 ``` r
 
+# Same three-step pattern as the GLM chunk above: build a multi-layer
+# SpatRaster from the GAM prediction files, label each layer, and draw a
+# 3 x 4 grid of yearly fold-vote maps.
 gam_pred_stack <- terra::rast(gam_preds$prediction_files)
 names(gam_pred_stack) <- sub("\\.tif$", "", basename(gam_preds$prediction_files))
 terra::plot(gam_pred_stack, nr = 3, nc = 4,
@@ -902,6 +923,7 @@ terra::plot(gam_pred_stack, nr = 3, nc = 4,
 
 ``` r
 
+# Same pattern, but for the random forest prediction files.
 rf_pred_stack <- terra::rast(rf_preds$prediction_files)
 names(rf_pred_stack) <- sub("\\.tif$", "", basename(rf_preds$prediction_files))
 terra::plot(rf_pred_stack, nr = 3, nc = 4,
@@ -913,6 +935,7 @@ terra::plot(rf_pred_stack, nr = 3, nc = 4,
 
 ``` r
 
+# Same pattern, but for the hypervolume prediction files.
 hv_pred_stack <- terra::rast(hv_preds$prediction_files)
 names(hv_pred_stack) <- sub("\\.tif$", "", basename(hv_preds$prediction_files))
 terra::plot(hv_pred_stack, nr = 3, nc = 4,
@@ -953,9 +976,15 @@ Key arguments:
 
 ``` r
 
+# Draw the GLM's per-fold diagnostic time series.
+# - predictions:  the object returned by generate_spatiotemporal_predictions()
+#                 for this model; contains the per-time-step G-space metrics.
+# - time_column:  name of the time axis used for the x-axis of the panels.
+# - model_result: the fitted-model object; supplying it overlays the
+#                 overall E-space fold metrics as horizontal reference lines.
 plot_model_assessment(
-  predictions  = glm_preds,
-  time_column  = "year",
+  predictions = glm_preds,
+  time_column = "year",
   model_result = glm_res
 )
 ```
@@ -964,9 +993,11 @@ plot_model_assessment(
 
 ``` r
 
+# Same diagnostic for the GAM. Arguments behave identically to the GLM
+# call above, only the `predictions` and `model_result` objects differ.
 plot_model_assessment(
-  predictions  = gam_preds,
-  time_column  = "year",
+  predictions = gam_preds,
+  time_column = "year",
   model_result = gam_res
 )
 ```
@@ -975,9 +1006,10 @@ plot_model_assessment(
 
 ``` r
 
+# Same diagnostic for the random forest.
 plot_model_assessment(
-  predictions  = rf_preds,
-  time_column  = "year",
+  predictions = rf_preds,
+  time_column = "year",
   model_result = rf_res
 )
 ```
@@ -986,9 +1018,12 @@ plot_model_assessment(
 
 ``` r
 
+# Same diagnostic for the hypervolume. The function detects that the
+# model is presence-only and automatically drops the specificity panel
+# (no negative training data => no specificity).
 plot_model_assessment(
-  predictions  = hv_preds,
-  time_column  = "year",
+  predictions = hv_preds,
+  time_column = "year",
   model_result = hv_res
 )
 ```
@@ -1035,45 +1070,51 @@ Key arguments:
 
 ``` r
 
+# Collapse the GLM's per-fold per-year prediction rasters into two
+# products: a binary `consensus_stack` (one layer per year) and a single
+# 0-1 `frequency_raster` (proportion of years suitable).
 glm_consensus <- summarize_raster_outputs(
-  predictions_dir = "outputs/glm_predictions",
-  output_dir      = "outputs/glm_consensus",
-  consensus       = 2,
-  overwrite       = TRUE,
-  verbose         = FALSE
+  predictions_dir = "outputs/glm_predictions", # source folder of per-fold rasters
+  output_dir = "outputs/glm_consensus", # where to write the consensus/frequency outputs
+  consensus = 2, # majority rule: >=2 of the 4 folds must agree
+  overwrite = TRUE, # replace any outputs from a previous run
+  verbose = FALSE # silence progress messages
 )
 ```
 
 ``` r
 
+# Same consensus rule for the GAM. Only the source / target folders change.
 gam_consensus <- summarize_raster_outputs(
-  predictions_dir = "outputs/gam_predictions",
-  output_dir      = "outputs/gam_consensus",
-  consensus       = 2,
-  overwrite       = TRUE,
-  verbose         = FALSE
+  predictions_dir = "outputs/gam_predictions", # source folder of per-fold rasters
+  output_dir = "outputs/gam_consensus", # GAM-specific output folder
+  consensus = 2, # same majority rule
+  overwrite = TRUE,
+  verbose = FALSE
 )
 ```
 
 ``` r
 
+# Same consensus rule for the random forest.
 rf_consensus <- summarize_raster_outputs(
-  predictions_dir = "outputs/rf_predictions",
-  output_dir      = "outputs/rf_consensus",
-  consensus       = 2,
-  overwrite       = TRUE,
-  verbose         = FALSE
+  predictions_dir = "outputs/rf_predictions", # source folder of per-fold rasters
+  output_dir = "outputs/rf_consensus", # RF-specific output folder
+  consensus = 2, # same majority rule
+  overwrite = TRUE,
+  verbose = FALSE
 )
 ```
 
 ``` r
 
+# Same consensus rule for the hypervolume.
 hv_consensus <- summarize_raster_outputs(
-  predictions_dir = "outputs/hv_predictions",
-  output_dir      = "outputs/hv_consensus",
-  consensus       = 2,
-  overwrite       = TRUE,
-  verbose         = FALSE
+  predictions_dir = "outputs/hv_predictions", # source folder of per-fold rasters
+  output_dir = "outputs/hv_consensus", # HV-specific output folder
+  consensus = 2, # same majority rule
+  overwrite = TRUE,
+  verbose = FALSE
 )
 ```
 
@@ -1086,8 +1127,16 @@ of the 11 modelled years for the model in question.
 
 ``` r
 
+# Draw the GLM's per-year binary suitability surfaces as a 3 x 4 grid.
+# Arguments mirror the prediction-stack plot above:
+#   - First positional argument: the binary multi-layer SpatRaster.
+#   - nr / nc: 3 rows by 4 columns of yearly panels.
+#   - mar:     inner margins per panel (bottom, left, top, right).
+#   - legend = FALSE: drop per-panel legends because the values are binary
+#     (0 = unsuitable, 1 = suitable) and the prose below covers the
+#     interpretation.
 terra::plot(glm_consensus$consensus_stack, nr = 3, nc = 4,
-            mar    = c(1.0, 1.0, 1.5, 3.0),
+            mar = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
 
@@ -1095,8 +1144,9 @@ terra::plot(glm_consensus$consensus_stack, nr = 3, nc = 4,
 
 ``` r
 
+# Same plotting recipe applied to the GAM's binary consensus stack.
 terra::plot(gam_consensus$consensus_stack, nr = 3, nc = 4,
-            mar    = c(1.0, 1.0, 1.5, 3.0),
+            mar = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
 
@@ -1104,8 +1154,9 @@ terra::plot(gam_consensus$consensus_stack, nr = 3, nc = 4,
 
 ``` r
 
+# Same plotting recipe applied to the random forest's binary consensus stack.
 terra::plot(rf_consensus$consensus_stack, nr = 3, nc = 4,
-            mar    = c(1.0, 1.0, 1.5, 3.0),
+            mar = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
 
@@ -1113,8 +1164,9 @@ terra::plot(rf_consensus$consensus_stack, nr = 3, nc = 4,
 
 ``` r
 
+# Same plotting recipe applied to the hypervolume's binary consensus stack.
 terra::plot(hv_consensus$consensus_stack, nr = 3, nc = 4,
-            mar    = c(1.0, 1.0, 1.5, 3.0),
+            mar = c(1.0, 1.0, 1.5, 3.0),
             legend = FALSE)
 ```
 
@@ -1135,8 +1187,13 @@ comparison.
 
 ``` r
 
+# Set up a 2 x 2 plot grid so each model's frequency raster occupies one
+# panel, making side-by-side comparison straightforward.
 par(mfrow = c(2, 2))
 
+# Each $frequency_raster is a single 0-1 SpatRaster (proportion of years
+# suitable). plot() draws it with the default viridis palette and `main`
+# sets the panel title.
 plot(glm_consensus$frequency_raster,
      main = "GLM — proportion of years suitable")
 
@@ -1154,6 +1211,7 @@ plot(hv_consensus$frequency_raster,
 
 ``` r
 
+# Reset the plot region back to a single panel for anything that follows.
 par(mfrow = c(1, 1))
 ```
 
@@ -1186,15 +1244,18 @@ Key arguments:
 
 ``` r
 
+# Run changepoint detection on the GLM's binary consensus stack to
+# classify each pixel's trajectory across years (never-, always-,
+# increasing, decreasing, fluctuating, no-pattern).
 glm_patterns <- analyze_temporal_patterns(
-  binary_stack            = glm_consensus$consensus_stack,
-  summary_raster          = glm_consensus$frequency_raster,
-  time_steps              = time_steps,
-  output_dir              = "outputs/glm_patterns",
-  spatial_autocorrelation = FALSE,
-  estimate_time           = FALSE,
-  overwrite               = TRUE,
-  verbose                 = FALSE
+  binary_stack = glm_consensus$consensus_stack, # binary per-year stack from summarize_raster_outputs()
+  summary_raster = glm_consensus$frequency_raster, # 0-1 frequency raster, short-circuits always/never pixels
+  time_steps = time_steps, # same data.frame of years used everywhere else
+  output_dir = "outputs/glm_patterns", # where the pattern raster and CSV go
+  spatial_autocorrelation = FALSE, # do NOT add a neighbours covariate (faster)
+  estimate_time = FALSE, # skip the runtime-estimation pre-pass (faster)
+  overwrite = TRUE, # replace any patterns left from a prior run
+  verbose = FALSE # silence per-pixel progress messages
 )
 ```
 
@@ -1202,15 +1263,17 @@ glm_patterns <- analyze_temporal_patterns(
 
 ``` r
 
+# Same call, applied to the GAM's consensus stack. Only the input rasters
+# and the output folder change.
 gam_patterns <- analyze_temporal_patterns(
-  binary_stack            = gam_consensus$consensus_stack,
-  summary_raster          = gam_consensus$frequency_raster,
-  time_steps              = time_steps,
-  output_dir              = "outputs/gam_patterns",
+  binary_stack = gam_consensus$consensus_stack,
+  summary_raster = gam_consensus$frequency_raster,
+  time_steps = time_steps,
+  output_dir = "outputs/gam_patterns",
   spatial_autocorrelation = FALSE,
-  estimate_time           = FALSE,
-  overwrite               = TRUE,
-  verbose                 = FALSE
+  estimate_time = FALSE,
+  overwrite = TRUE,
+  verbose = FALSE
 )
 ```
 
@@ -1218,15 +1281,16 @@ gam_patterns <- analyze_temporal_patterns(
 
 ``` r
 
+# Same call, applied to the random forest's consensus stack.
 rf_patterns <- analyze_temporal_patterns(
-  binary_stack            = rf_consensus$consensus_stack,
-  summary_raster          = rf_consensus$frequency_raster,
-  time_steps              = time_steps,
-  output_dir              = "outputs/rf_patterns",
+  binary_stack = rf_consensus$consensus_stack,
+  summary_raster = rf_consensus$frequency_raster,
+  time_steps = time_steps,
+  output_dir = "outputs/rf_patterns",
   spatial_autocorrelation = FALSE,
-  estimate_time           = FALSE,
-  overwrite               = TRUE,
-  verbose                 = FALSE
+  estimate_time = FALSE,
+  overwrite = TRUE,
+  verbose = FALSE
 )
 ```
 
@@ -1234,15 +1298,16 @@ rf_patterns <- analyze_temporal_patterns(
 
 ``` r
 
+# Same call, applied to the hypervolume's consensus stack.
 hv_patterns <- analyze_temporal_patterns(
-  binary_stack            = hv_consensus$consensus_stack,
-  summary_raster          = hv_consensus$frequency_raster,
-  time_steps              = time_steps,
-  output_dir              = "outputs/hv_patterns",
+  binary_stack = hv_consensus$consensus_stack,
+  summary_raster = hv_consensus$frequency_raster,
+  time_steps = time_steps,
+  output_dir = "outputs/hv_patterns",
   spatial_autocorrelation = FALSE,
-  estimate_time           = FALSE,
-  overwrite               = TRUE,
-  verbose                 = FALSE
+  estimate_time = FALSE,
+  overwrite = TRUE,
+  verbose = FALSE
 )
 ```
 
@@ -1252,8 +1317,15 @@ The four trajectory-class maps, side-by-side:
 
 ``` r
 
+# Set up a 2 x 2 plot region so the four models' trajectory maps appear
+# side by side.
 par(mfrow = c(2, 2))
 
+# Each $pattern is a categorical SpatRaster whose pixel values encode the
+# trajectory class (1 = never-suitable, 2 = always, 3 = no pattern,
+# 4 = increasing, 5 = decreasing, 6 = fluctuating).
+# `main` titles each panel; `legend = FALSE` keeps the grid tidy and we
+# describe the categories in the prose below.
 plot(glm_patterns$pattern,
      main = "GLM — temporal trajectory class",
      legend = FALSE)
@@ -1275,6 +1347,7 @@ plot(hv_patterns$pattern,
 
 ``` r
 
+# Reset the plot region back to a single panel for anything that follows.
 par(mfrow = c(1, 1))
 ```
 
@@ -1309,18 +1382,21 @@ provinces <- geodata::gadm(country = "THA", level = 1, path = "data/raw") |>
 
 ``` r
 
+# Aggregate the GLM's pixel-level trajectories to Thailand's provinces.
+# The function overlays the polygons on the rasters, counts pixels in
+# each trajectory class per province, and writes summary CSVs.
 glm_regional <- analyze_trends_by_spatial_unit(
-  shapefile_path       = provinces,
-  name_field           = "NAME_1",
-  binary_stack         = glm_consensus$consensus_stack,
-  pattern_raster       = glm_patterns$pattern,
-  time_decrease_raster = glm_patterns$time_decrease,
-  time_increase_raster = glm_patterns$time_increase,
-  time_steps           = time_steps,
-  output_dir           = "outputs/glm_regional",
-  overwrite            = TRUE,
-  create_plot          = TRUE,
-  verbose              = FALSE
+  shapefile_path = provinces, # sf object: Thailand provinces
+  name_field = "NAME_1", # column carrying the province name
+  binary_stack = glm_consensus$consensus_stack, # per-year binary suitability stack
+  pattern_raster = glm_patterns$pattern, # trajectory class per pixel
+  time_decrease_raster = glm_patterns$time_decrease, # year of first detected decrease (per pixel)
+  time_increase_raster = glm_patterns$time_increase, # year of first detected increase (per pixel)
+  time_steps = time_steps, # same data.frame of modelled years
+  output_dir = "outputs/glm_regional", # GLM-specific output folder
+  overwrite = TRUE, # replace previous-run outputs
+  create_plot = TRUE, # produce the diagnostic plots returned in `$plots`
+  verbose = FALSE # silence per-province progress
 )
 ```
 
@@ -1328,6 +1404,8 @@ glm_regional <- analyze_trends_by_spatial_unit(
 
 ``` r
 
+# Show the diagnostic plot(s) attached to the result object: e.g.
+# scatterpie map of pattern composition, per-province time series, etc.
 glm_regional$plots
 ```
 
@@ -1340,6 +1418,8 @@ glm_regional$plots
 
 ``` r
 
+# First three rows of the per-province summary table (one row per province,
+# columns for pixel counts in each trajectory class plus percentages).
 head(glm_regional$overall_summary, 3)
 ```
 
@@ -1366,18 +1446,20 @@ head(glm_regional$overall_summary, 3)
 
 ``` r
 
+# Same aggregation applied to the GAM outputs. Only the input rasters and
+# the output folder differ from the GLM call above.
 gam_regional <- analyze_trends_by_spatial_unit(
-  shapefile_path       = provinces,
-  name_field           = "NAME_1",
-  binary_stack         = gam_consensus$consensus_stack,
-  pattern_raster       = gam_patterns$pattern,
+  shapefile_path = provinces,
+  name_field = "NAME_1",
+  binary_stack = gam_consensus$consensus_stack,
+  pattern_raster = gam_patterns$pattern,
   time_decrease_raster = gam_patterns$time_decrease,
   time_increase_raster = gam_patterns$time_increase,
-  time_steps           = time_steps,
-  output_dir           = "outputs/gam_regional",
-  overwrite            = TRUE,
-  create_plot          = TRUE,
-  verbose              = FALSE
+  time_steps = time_steps,
+  output_dir = "outputs/gam_regional",
+  overwrite = TRUE,
+  create_plot = TRUE,
+  verbose = FALSE
 )
 ```
 
@@ -1385,6 +1467,8 @@ gam_regional <- analyze_trends_by_spatial_unit(
 
 ``` r
 
+# Diagnostic plots and the first three rows of the per-province summary
+# for the GAM (same layout as the GLM results above).
 gam_regional$plots
 ```
 
@@ -1423,18 +1507,19 @@ head(gam_regional$overall_summary, 3)
 
 ``` r
 
+# Same aggregation applied to the random forest outputs.
 rf_regional <- analyze_trends_by_spatial_unit(
-  shapefile_path       = provinces,
-  name_field           = "NAME_1",
-  binary_stack         = rf_consensus$consensus_stack,
-  pattern_raster       = rf_patterns$pattern,
+  shapefile_path = provinces,
+  name_field = "NAME_1",
+  binary_stack = rf_consensus$consensus_stack,
+  pattern_raster = rf_patterns$pattern,
   time_decrease_raster = rf_patterns$time_decrease,
   time_increase_raster = rf_patterns$time_increase,
-  time_steps           = time_steps,
-  output_dir           = "outputs/rf_regional",
-  overwrite            = TRUE,
-  create_plot          = TRUE,
-  verbose              = FALSE
+  time_steps = time_steps,
+  output_dir = "outputs/rf_regional",
+  overwrite = TRUE,
+  create_plot = TRUE,
+  verbose = FALSE
 )
 ```
 
@@ -1442,6 +1527,8 @@ rf_regional <- analyze_trends_by_spatial_unit(
 
 ``` r
 
+# Diagnostic plots and the first three rows of the per-province summary
+# for the random forest.
 rf_regional$plots
 ```
 
@@ -1480,18 +1567,19 @@ head(rf_regional$overall_summary, 3)
 
 ``` r
 
+# Same aggregation applied to the hypervolume outputs.
 hv_regional <- analyze_trends_by_spatial_unit(
-  shapefile_path       = provinces,
-  name_field           = "NAME_1",
-  binary_stack         = hv_consensus$consensus_stack,
-  pattern_raster       = hv_patterns$pattern,
+  shapefile_path = provinces,
+  name_field = "NAME_1",
+  binary_stack = hv_consensus$consensus_stack,
+  pattern_raster = hv_patterns$pattern,
   time_decrease_raster = hv_patterns$time_decrease,
   time_increase_raster = hv_patterns$time_increase,
-  time_steps           = time_steps,
-  output_dir           = "outputs/hv_regional",
-  overwrite            = TRUE,
-  create_plot          = TRUE,
-  verbose              = FALSE
+  time_steps = time_steps,
+  output_dir = "outputs/hv_regional",
+  overwrite = TRUE,
+  create_plot = TRUE,
+  verbose = FALSE
 )
 ```
 
@@ -1499,6 +1587,7 @@ hv_regional <- analyze_trends_by_spatial_unit(
 
 ``` r
 
+# First three rows of the per-province summary for the hypervolume.
 head(hv_regional$overall_summary, 3)
 ```
 

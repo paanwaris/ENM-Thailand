@@ -196,10 +196,10 @@ documentation: <a href="https://cjhughes926.github.io/TemporalModelR/" class="ex
 <span><span class="co">#     with pseudoabsences (presence = 0) later on.</span></span>
 <span><span class="va">sambar</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://readr.tidyverse.org/reference/read_delim.html" class="external-link">read_csv</a></span><span class="op">(</span><span class="st">"data/processed/gbif/sambar_thailand.csv"</span>,</span>
 <span>                   show_col_types <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">&gt;=</span> <span class="fl">2015</span>, <span class="va">year</span> <span class="op">&lt;=</span> <span class="fl">2025</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>       <span class="co"># keep modelled years only</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>longitude <span class="op">=</span> <span class="va">decimalLongitude</span>,         <span class="co"># GBIF -&gt; conventional name</span></span>
-<span>         latitude  <span class="op">=</span> <span class="va">decimalLatitude</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>      <span class="co"># GBIF -&gt; conventional name</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>presence <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span>                        <span class="co"># every GBIF record is a presence</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">year</span> <span class="op">&gt;=</span> <span class="fl">2015</span>, <span class="va">year</span> <span class="op">&lt;=</span> <span class="fl">2025</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="co"># keep modelled years only</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>longitude <span class="op">=</span> <span class="va">decimalLongitude</span>, <span class="co"># GBIF -&gt; conventional name</span></span>
+<span>         latitude <span class="op">=</span> <span class="va">decimalLatitude</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="co"># GBIF -&gt; conventional name</span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>presence <span class="op">=</span> <span class="fl">1L</span><span class="op">)</span> <span class="co"># every GBIF record is a presence</span></span>
 <span></span>
 <span><span class="co"># How many records per year survive that filter?</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">sambar</span><span class="op">$</span><span class="va">year</span><span class="op">)</span></span></code></pre></div>
@@ -235,7 +235,7 @@ reference grid for everything.</p>
 <span></span>
 <span><span class="co"># Source directory of the per-variable per-year split rasters, and target</span></span>
 <span><span class="co"># directory where the aligned copies will be written.</span></span>
-<span><span class="va">split_dir</span>   <span class="op">&lt;-</span> <span class="st">"data/processed/temporal_split"</span></span>
+<span><span class="va">split_dir</span> <span class="op">&lt;-</span> <span class="st">"data/processed/temporal_split"</span></span>
 <span><span class="va">aligned_dir</span> <span class="op">&lt;-</span> <span class="st">"data/processed/rasters_aligned"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">aligned_dir</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -244,10 +244,10 @@ reference grid for everything.</p>
 <span><span class="va">ref_raster</span> <span class="op">&lt;-</span> <span class="va">NDVI_ex</span></span>
 <span></span>
 <span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/raster_align.html" class="external-link">raster_align</a></span><span class="op">(</span></span>
-<span>  input_dir        <span class="op">=</span> <span class="va">split_dir</span>,    <span class="co"># where the per-year rasters currently live</span></span>
-<span>  output_dir       <span class="op">=</span> <span class="va">aligned_dir</span>,  <span class="co"># where the aligned copies will be written</span></span>
-<span>  reference_raster <span class="op">=</span> <span class="va">ref_raster</span>,   <span class="co"># target grid (extent + resolution + CRS)</span></span>
-<span>  overwrite        <span class="op">=</span> <span class="cn">TRUE</span>          <span class="co"># replace any aligned files left from a prior run</span></span>
+<span>  input_dir <span class="op">=</span> <span class="va">split_dir</span>, <span class="co"># where the per-year rasters currently live</span></span>
+<span>  output_dir <span class="op">=</span> <span class="va">aligned_dir</span>, <span class="co"># where the aligned copies will be written</span></span>
+<span>  reference_raster <span class="op">=</span> <span class="va">ref_raster</span>, <span class="co"># target grid (extent + resolution + CRS)</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span> <span class="co"># replace any aligned files left from a prior run</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -272,11 +272,11 @@ their individual years’ rasters may differ slightly.</p>
 <span><span class="co"># Group the file list by variable name (prec_ / temp_ / NDVI_) so each</span></span>
 <span><span class="co"># group becomes a multi-layer SpatRaster spanning every year.</span></span>
 <span><span class="va">prec_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">aligned_dir</span>,</span>
-<span>                        <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"prec_"</span>,  <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">aligned_files</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>                        <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"prec_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">aligned_files</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">temp_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">aligned_dir</span>,</span>
-<span>                        <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"temp_"</span>,  <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">aligned_files</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>                        <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"temp_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">aligned_files</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">NDVI_files</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">aligned_dir</span>,</span>
-<span>                        <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"NDVI_"</span>,  <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">aligned_files</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
+<span>                        <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">grep</a></span><span class="op">(</span><span class="st">"NDVI_"</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">aligned_files</span><span class="op">)</span>, value <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Per-pixel mean across years for each variable — terra::mean() over a</span></span>
 <span><span class="co"># multi-layer SpatRaster collapses the time dimension into a single layer.</span></span>
@@ -295,7 +295,7 @@ their individual years’ rasters may differ slightly.</p>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">mean_NDVI</span>, main <span class="op">=</span> <span class="st">"Mean NDVI (2010–2025)"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/temporal-mean-env-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>     <span class="co"># reset the plot region back to a single panel</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="co"># reset the plot region back to a single panel</span></span></code></pre></div>
 <p>Reading the panels: each map is the per-pixel average of the
 corresponding variable across the 16 modelled years, in the variable’s
 natural units (mm for precipitation, °C-equivalent units for
@@ -339,26 +339,26 @@ the coordinate pair.</p>
 <span><span class="co"># Extract the three temporal-mean env values at every occurrence, and</span></span>
 <span><span class="co"># z-score them so all three axes share the same numeric scale.</span></span>
 <span><span class="va">prepped</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paanwaris.github.io/bean/reference/prepare_bean.html" class="external-link">prepare_bean</a></span><span class="op">(</span></span>
-<span>  data        <span class="op">=</span> <span class="va">sambar_xy</span>,</span>
-<span>  env_rasters <span class="op">=</span> <span class="va">env_ref</span>,        <span class="co"># temporal-mean 3-layer stack</span></span>
-<span>  longitude   <span class="op">=</span> <span class="st">"longitude"</span>,</span>
-<span>  latitude    <span class="op">=</span> <span class="st">"latitude"</span>,</span>
-<span>  transform   <span class="op">=</span> <span class="st">"scale"</span></span>
+<span>  data <span class="op">=</span> <span class="va">sambar_xy</span>,</span>
+<span>  env_rasters <span class="op">=</span> <span class="va">env_ref</span>, <span class="co"># temporal-mean 3-layer stack</span></span>
+<span>  longitude <span class="op">=</span> <span class="st">"longitude"</span>,</span>
+<span>  latitude <span class="op">=</span> <span class="st">"latitude"</span>,</span>
+<span>  transform <span class="op">=</span> <span class="st">"scale"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Sheather-Jones plug-in bandwidth as the cell width (one width per</span></span>
 <span><span class="co"># variable, in z-score units because prepare_bean() scaled the data).</span></span>
 <span><span class="va">res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paanwaris.github.io/bean/reference/find_env_resolution.html" class="external-link">find_env_resolution</a></span><span class="op">(</span></span>
-<span>  data     <span class="op">=</span> <span class="va">prepped</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">prepped</span>,</span>
 <span>  env_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean_prec"</span>, <span class="st">"mean_temp"</span>, <span class="st">"mean_NDVI"</span><span class="op">)</span>,</span>
-<span>  method   <span class="op">=</span> <span class="st">"sheather-jones"</span></span>
+<span>  method <span class="op">=</span> <span class="st">"sheather-jones"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Build the environmental grid using `res$suggested_resolution` and</span></span>
 <span><span class="co"># randomly retain one of the original occurrences in every occupied pod.</span></span>
 <span><span class="va">thin_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paanwaris.github.io/bean/reference/thin_env_nd.html" class="external-link">thin_env_nd</a></span><span class="op">(</span></span>
-<span>  data            <span class="op">=</span> <span class="va">prepped</span>,</span>
-<span>  env_vars        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean_prec"</span>, <span class="st">"mean_temp"</span>, <span class="st">"mean_NDVI"</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="va">prepped</span>,</span>
+<span>  env_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean_prec"</span>, <span class="st">"mean_temp"</span>, <span class="st">"mean_NDVI"</span><span class="op">)</span>,</span>
 <span>  grid_resolution <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">suggested_resolution</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -418,15 +418,15 @@ temporally-independent observation.</p>
 <span><span class="va">study_crs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_crs.html" class="external-link">st_crs</a></span><span class="op">(</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">ref_raster</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">rare_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/spatiotemporal_rarefaction.html" class="external-link">spatiotemporal_rarefaction</a></span><span class="op">(</span></span>
-<span>  points_sp        <span class="op">=</span> <span class="va">points_csv</span>,                        <span class="co"># input CSV of presences</span></span>
-<span>  output_dir       <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">points_dir</span>, <span class="st">"rarefied"</span><span class="op">)</span>, <span class="co"># where rarefied tables are written</span></span>
-<span>  reference_raster <span class="op">=</span> <span class="va">ref_raster</span>,                        <span class="co"># defines the pixel grid for rarefaction</span></span>
-<span>  time_cols        <span class="op">=</span> <span class="st">"year"</span>,                            <span class="co"># column carrying the time stamp</span></span>
-<span>  xcol             <span class="op">=</span> <span class="st">"longitude"</span>,                       <span class="co"># column with x coordinate</span></span>
-<span>  ycol             <span class="op">=</span> <span class="st">"latitude"</span>,                        <span class="co"># column with y coordinate</span></span>
-<span>  points_crs       <span class="op">=</span> <span class="va">study_crs</span>,                         <span class="co"># CRS of the input points</span></span>
-<span>  output_prefix    <span class="op">=</span> <span class="st">"Sambar_annual"</span>,                   <span class="co"># prefix for the written files</span></span>
-<span>  verbose          <span class="op">=</span> <span class="cn">FALSE</span>                              <span class="co"># silence per-record progress messages</span></span>
+<span>  points_sp <span class="op">=</span> <span class="va">points_csv</span>, <span class="co"># input CSV of presences</span></span>
+<span>  output_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">points_dir</span>, <span class="st">"rarefied"</span><span class="op">)</span>, <span class="co"># where rarefied tables are written</span></span>
+<span>  reference_raster <span class="op">=</span> <span class="va">ref_raster</span>, <span class="co"># defines the pixel grid for rarefaction</span></span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>, <span class="co"># column carrying the time stamp</span></span>
+<span>  xcol <span class="op">=</span> <span class="st">"longitude"</span>, <span class="co"># column with x coordinate</span></span>
+<span>  ycol <span class="op">=</span> <span class="st">"latitude"</span>, <span class="co"># column with y coordinate</span></span>
+<span>  points_crs <span class="op">=</span> <span class="va">study_crs</span>, <span class="co"># CRS of the input points</span></span>
+<span>  output_prefix <span class="op">=</span> <span class="st">"Sambar_annual"</span>, <span class="co"># prefix for the written files</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-record progress messages</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># The three counts below show how aggressive rarefaction was: how many</span></span>
@@ -457,23 +457,23 @@ not the long-term average.</p>
 <span><span class="va">ext_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="va">points_dir</span>, <span class="st">"extracted"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">ext_out</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/temporally_explicit_extraction.html" class="external-link">temporally_explicit_extraction</a></span><span class="op">(</span></span>
-<span>  points_sp           <span class="op">=</span> <span class="va">rare_out</span><span class="op">$</span><span class="va">files_created</span><span class="op">$</span><span class="va">spatiotemporal</span>, <span class="co"># rarefied points to extract at</span></span>
-<span>  raster_dir          <span class="op">=</span> <span class="va">aligned_dir</span>,                           <span class="co"># raster source folder</span></span>
-<span>  variable_patterns   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>                                     <span class="co"># variable -&gt; filename pattern map</span></span>
+<span>  points_sp <span class="op">=</span> <span class="va">rare_out</span><span class="op">$</span><span class="va">files_created</span><span class="op">$</span><span class="va">spatiotemporal</span>, <span class="co"># rarefied points to extract at</span></span>
+<span>  raster_dir <span class="op">=</span> <span class="va">aligned_dir</span>, <span class="co"># raster source folder</span></span>
+<span>  variable_patterns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span> <span class="co"># variable -&gt; filename pattern map</span></span>
 <span>    <span class="st">"prec"</span> <span class="op">=</span> <span class="st">"prec_YEAR"</span>,</span>
 <span>    <span class="st">"temp"</span> <span class="op">=</span> <span class="st">"temp_YEAR"</span>,</span>
 <span>    <span class="st">"NDVI"</span> <span class="op">=</span> <span class="st">"NDVI_YEAR"</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  time_cols           <span class="op">=</span> <span class="st">"year"</span>,                <span class="co"># time-stamp column on the points</span></span>
-<span>  xcol                <span class="op">=</span> <span class="st">"X"</span>,                   <span class="co"># rarefied table uses upper-case X / Y</span></span>
-<span>  ycol                <span class="op">=</span> <span class="st">"Y"</span>,</span>
-<span>  points_crs          <span class="op">=</span> <span class="va">study_crs</span>,             <span class="co"># CRS shared by points and rasters</span></span>
-<span>  output_dir          <span class="op">=</span> <span class="va">ext_dir</span>,</span>
-<span>  output_prefix       <span class="op">=</span> <span class="st">"sambar_extracted"</span>,</span>
-<span>  save_raw            <span class="op">=</span> <span class="cn">TRUE</span>,                  <span class="co"># write the raw (un-scaled) extracted table</span></span>
-<span>  save_scaled         <span class="op">=</span> <span class="cn">TRUE</span>,                  <span class="co"># also write a z-scored copy</span></span>
-<span>  save_scaling_params <span class="op">=</span> <span class="cn">TRUE</span>,                  <span class="co"># write the per-variable means + SDs we'll reuse</span></span>
-<span>  verbose             <span class="op">=</span> <span class="cn">FALSE</span>                  <span class="co"># silence per-record extraction progress</span></span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>, <span class="co"># time-stamp column on the points</span></span>
+<span>  xcol <span class="op">=</span> <span class="st">"X"</span>, <span class="co"># rarefied table uses upper-case X / Y</span></span>
+<span>  ycol <span class="op">=</span> <span class="st">"Y"</span>,</span>
+<span>  points_crs <span class="op">=</span> <span class="va">study_crs</span>, <span class="co"># CRS shared by points and rasters</span></span>
+<span>  output_dir <span class="op">=</span> <span class="va">ext_dir</span>,</span>
+<span>  output_prefix <span class="op">=</span> <span class="st">"sambar_extracted"</span>,</span>
+<span>  save_raw <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># write the raw (un-scaled) extracted table</span></span>
+<span>  save_scaled <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># also write a z-scored copy</span></span>
+<span>  save_scaling_params <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># write the per-variable means + SDs we'll reuse</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-record extraction progress</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Inspect the first few rows of the raw (un-scaled) extracted table.</span></span>
@@ -509,17 +509,17 @@ rasters.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/files2.html" class="external-link">dir.create</a></span><span class="op">(</span><span class="va">scaled_dir</span>, showWarnings <span class="op">=</span> <span class="cn">FALSE</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/scale_rasters.html" class="external-link">scale_rasters</a></span><span class="op">(</span></span>
-<span>  input_dir           <span class="op">=</span> <span class="va">aligned_dir</span>,                              <span class="co"># raw aligned rasters</span></span>
-<span>  output_dir          <span class="op">=</span> <span class="va">scaled_dir</span>,                               <span class="co"># write the z-scored copies here</span></span>
-<span>  scaling_params_file <span class="op">=</span> <span class="va">ext_out</span><span class="op">$</span><span class="va">files_created</span><span class="op">$</span><span class="va">scaling_params</span>,     <span class="co"># reuse the means + SDs from extraction</span></span>
-<span>  variable_patterns   <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  input_dir <span class="op">=</span> <span class="va">aligned_dir</span>, <span class="co"># raw aligned rasters</span></span>
+<span>  output_dir <span class="op">=</span> <span class="va">scaled_dir</span>, <span class="co"># write the z-scored copies here</span></span>
+<span>  scaling_params_file <span class="op">=</span> <span class="va">ext_out</span><span class="op">$</span><span class="va">files_created</span><span class="op">$</span><span class="va">scaling_params</span>, <span class="co"># reuse the means + SDs from extraction</span></span>
+<span>  variable_patterns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"prec"</span> <span class="op">=</span> <span class="st">"prec_YEAR"</span>,</span>
 <span>    <span class="st">"temp"</span> <span class="op">=</span> <span class="st">"temp_YEAR"</span>,</span>
 <span>    <span class="st">"NDVI"</span> <span class="op">=</span> <span class="st">"NDVI_YEAR"</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  time_cols <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,       <span class="co"># replace any scaled files left from a previous run</span></span>
-<span>  verbose   <span class="op">=</span> <span class="cn">FALSE</span>       <span class="co"># silence per-raster scaling progress</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># replace any scaled files left from a previous run</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-raster scaling progress</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -534,17 +534,17 @@ CV.</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">partition</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/spatiotemporal_partition.html" class="external-link">spatiotemporal_partition</a></span><span class="op">(</span></span>
-<span>  reference_shapefile_path <span class="op">=</span> <span class="va">thailand</span>,                       <span class="co"># study-area polygon (Thailand)</span></span>
-<span>  points_file_path         <span class="op">=</span> <span class="va">ext_out</span><span class="op">$</span><span class="va">files_created</span><span class="op">$</span><span class="va">scaled</span>,   <span class="co"># presence table with extracted env</span></span>
-<span>  xcol                     <span class="op">=</span> <span class="st">"x"</span>,                            <span class="co"># scaled table uses lower-case x / y</span></span>
-<span>  ycol                     <span class="op">=</span> <span class="st">"y"</span>,</span>
-<span>  points_crs               <span class="op">=</span> <span class="va">study_crs</span>,</span>
-<span>  time_cols                <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  n_spatial_folds          <span class="op">=</span> <span class="fl">2</span>,         <span class="co"># how many blocks to split the country into</span></span>
-<span>  n_temporal_folds         <span class="op">=</span> <span class="fl">2</span>,         <span class="co"># how many blocks to split the years into</span></span>
-<span>  max_imbalance            <span class="op">=</span> <span class="fl">0.15</span>,      <span class="co"># max allowed presence imbalance between folds</span></span>
-<span>  create_plot              <span class="op">=</span> <span class="cn">TRUE</span>,      <span class="co"># produce the fold-map diagnostic</span></span>
-<span>  verbose                  <span class="op">=</span> <span class="cn">FALSE</span>      <span class="co"># silence per-fold construction messages</span></span>
+<span>  reference_shapefile_path <span class="op">=</span> <span class="va">thailand</span>, <span class="co"># study-area polygon (Thailand)</span></span>
+<span>  points_file_path <span class="op">=</span> <span class="va">ext_out</span><span class="op">$</span><span class="va">files_created</span><span class="op">$</span><span class="va">scaled</span>, <span class="co"># presence table with extracted env</span></span>
+<span>  xcol <span class="op">=</span> <span class="st">"x"</span>, <span class="co"># scaled table uses lower-case x / y</span></span>
+<span>  ycol <span class="op">=</span> <span class="st">"y"</span>,</span>
+<span>  points_crs <span class="op">=</span> <span class="va">study_crs</span>,</span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>  n_spatial_folds <span class="op">=</span> <span class="fl">2</span>, <span class="co"># how many blocks to split the country into</span></span>
+<span>  n_temporal_folds <span class="op">=</span> <span class="fl">2</span>, <span class="co"># how many blocks to split the years into</span></span>
+<span>  max_imbalance <span class="op">=</span> <span class="fl">0.15</span>, <span class="co"># max allowed presence imbalance between folds</span></span>
+<span>  create_plot <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># produce the fold-map diagnostic</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-fold construction messages</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/partition-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb24"><pre class="downlit sourceCode r">
@@ -563,7 +563,7 @@ CV.</p>
 <span><span class="co">## 10           final_imbalance_pct          16.36</span></span>
 <span><span class="co">## 11 temporal_partitioning_enabled           TRUE</span></span></code></pre>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span>     <span class="co"># reset the plot region back to a single panel</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span> <span class="co"># reset the plot region back to a single panel</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="generate-pseudoabsences">Generate pseudoabsences<a class="anchor" aria-label="anchor" href="#generate-pseudoabsences"></a>
@@ -575,21 +575,21 @@ anywhere outside a 50 km buffer around the presences in the same
 fold.</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">absences</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/generate_absences.html" class="external-link">generate_absences</a></span><span class="op">(</span></span>
-<span>  partition_result         <span class="op">=</span> <span class="va">partition</span>,        <span class="co"># fold structure built above</span></span>
-<span>  reference_shapefile_path <span class="op">=</span> <span class="va">thailand</span>,         <span class="co"># absences are drawn inside this polygon</span></span>
-<span>  raster_dir               <span class="op">=</span> <span class="va">scaled_dir</span>,       <span class="co"># env values are extracted at each absence</span></span>
-<span>  variable_patterns        <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  partition_result <span class="op">=</span> <span class="va">partition</span>, <span class="co"># fold structure built above</span></span>
+<span>  reference_shapefile_path <span class="op">=</span> <span class="va">thailand</span>, <span class="co"># absences are drawn inside this polygon</span></span>
+<span>  raster_dir <span class="op">=</span> <span class="va">scaled_dir</span>, <span class="co"># env values are extracted at each absence</span></span>
+<span>  variable_patterns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
 <span>    <span class="st">"prec"</span> <span class="op">=</span> <span class="st">"prec_YEAR"</span>,</span>
 <span>    <span class="st">"temp"</span> <span class="op">=</span> <span class="st">"temp_YEAR"</span>,</span>
 <span>    <span class="st">"NDVI"</span> <span class="op">=</span> <span class="st">"NDVI_YEAR"</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  method                   <span class="op">=</span> <span class="st">"buffer"</span>,         <span class="co"># draw absences outside a buffer around presences</span></span>
-<span>  buffer_distance          <span class="op">=</span> <span class="fl">50000</span>,            <span class="co"># 50 km buffer around each presence</span></span>
-<span>  ratio                    <span class="op">=</span> <span class="fl">2</span>,                <span class="co"># 2 absences per presence</span></span>
-<span>  time_cols                <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  create_plot              <span class="op">=</span> <span class="cn">TRUE</span>,             <span class="co"># produce a diagnostic absence map</span></span>
-<span>  plot_by_fold             <span class="op">=</span> <span class="cn">TRUE</span>,             <span class="co"># one panel per fold</span></span>
-<span>  verbose                  <span class="op">=</span> <span class="cn">FALSE</span>             <span class="co"># silence per-fold progress messages</span></span>
+<span>  method <span class="op">=</span> <span class="st">"buffer"</span>, <span class="co"># draw absences outside a buffer around presences</span></span>
+<span>  buffer_distance <span class="op">=</span> <span class="fl">50000</span>, <span class="co"># 50 km buffer around each presence</span></span>
+<span>  ratio <span class="op">=</span> <span class="fl">2</span>, <span class="co"># 2 absences per presence</span></span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>  create_plot <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># produce a diagnostic absence map</span></span>
+<span>  plot_by_fold <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># one panel per fold</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-fold progress messages</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/absences-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/absences-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/absences-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/absences-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/absences-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
@@ -644,16 +644,16 @@ method picks the cutoff that maximises the True Skill Statistic on each
 fold’s test set.</p>
 <div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">glm_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_glm.html" class="external-link">build_temporal_glm</a></span><span class="op">(</span></span>
-<span>  partition_result     <span class="op">=</span> <span class="va">partition</span>,                        <span class="co"># CV folds in space + time</span></span>
-<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>,                         <span class="co"># presences + absences per fold</span></span>
-<span>  model_formula        <span class="op">=</span> <span class="op">~</span> <span class="va">temp</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">temp</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="va">prec</span> <span class="op">+</span> <span class="va">NDVI</span>, <span class="co"># quadratic on temp, linear on prec / NDVI</span></span>
-<span>  link                 <span class="op">=</span> <span class="st">"logit"</span>,                          <span class="co"># binary GLM with logit link</span></span>
-<span>  threshold_method     <span class="op">=</span> <span class="st">"tss"</span>,                            <span class="co"># pick threshold maximising True Skill Statistic</span></span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/GLM_Models"</span>,</span>
-<span>  create_plot          <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  time_cols            <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  partition_result <span class="op">=</span> <span class="va">partition</span>, <span class="co"># CV folds in space + time</span></span>
+<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>, <span class="co"># presences + absences per fold</span></span>
+<span>  model_formula <span class="op">=</span> <span class="op">~</span> <span class="va">temp</span> <span class="op">+</span> <span class="fu"><a href="https://rdrr.io/r/base/AsIs.html" class="external-link">I</a></span><span class="op">(</span><span class="va">temp</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span> <span class="op">+</span> <span class="va">prec</span> <span class="op">+</span> <span class="va">NDVI</span>, <span class="co"># quadratic on temp, linear on prec / NDVI</span></span>
+<span>  link <span class="op">=</span> <span class="st">"logit"</span>, <span class="co"># binary GLM with logit link</span></span>
+<span>  threshold_method <span class="op">=</span> <span class="st">"tss"</span>, <span class="co"># pick threshold maximising True Skill Statistic</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/GLM_Models"</span>,</span>
+<span>  create_plot <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Out-of-fold E-space test metrics — one row per fold.</span></span>
@@ -680,17 +680,17 @@ threshold rule, and fold structure are the same as the GLM, so the two
 are directly comparable.</p>
 <div class="sourceCode" id="cb32"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">gam_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_gam.html" class="external-link">build_temporal_gam</a></span><span class="op">(</span></span>
-<span>  partition_result     <span class="op">=</span> <span class="va">partition</span>,                        <span class="co"># CV folds in space + time</span></span>
-<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>,                         <span class="co"># presences + absences per fold</span></span>
-<span>  model_formula        <span class="op">=</span> <span class="op">~</span> <span class="fu">s</span><span class="op">(</span><span class="va">temp</span><span class="op">)</span> <span class="op">+</span> <span class="fu">s</span><span class="op">(</span><span class="va">prec</span><span class="op">)</span> <span class="op">+</span> <span class="fu">s</span><span class="op">(</span><span class="va">NDVI</span><span class="op">)</span>,    <span class="co"># `s()` = univariate smooth (mgcv thin-plate spline)</span></span>
-<span>  link                 <span class="op">=</span> <span class="st">"logit"</span>,                          <span class="co"># binary GAM with logit link</span></span>
-<span>  gam_params           <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"REML"</span><span class="op">)</span>,            <span class="co"># smoothing-parameter selection rule (mgcv default REML)</span></span>
-<span>  threshold_method     <span class="op">=</span> <span class="st">"tss"</span>,                            <span class="co"># pick threshold maximising True Skill Statistic</span></span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/GAM_Models"</span>,</span>
-<span>  create_plot          <span class="op">=</span> <span class="cn">FALSE</span>,                            <span class="co"># skip the smooth-response curves to keep output compact</span></span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  time_cols            <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span>                             <span class="co"># silence per-fold smoothing progress</span></span>
+<span>  partition_result <span class="op">=</span> <span class="va">partition</span>, <span class="co"># CV folds in space + time</span></span>
+<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>, <span class="co"># presences + absences per fold</span></span>
+<span>  model_formula <span class="op">=</span> <span class="op">~</span> <span class="fu">s</span><span class="op">(</span><span class="va">temp</span><span class="op">)</span> <span class="op">+</span> <span class="fu">s</span><span class="op">(</span><span class="va">prec</span><span class="op">)</span> <span class="op">+</span> <span class="fu">s</span><span class="op">(</span><span class="va">NDVI</span><span class="op">)</span>, <span class="co"># `s()` = univariate smooth (mgcv thin-plate spline)</span></span>
+<span>  link <span class="op">=</span> <span class="st">"logit"</span>, <span class="co"># binary GAM with logit link</span></span>
+<span>  gam_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"REML"</span><span class="op">)</span>, <span class="co"># smoothing-parameter selection rule (mgcv default REML)</span></span>
+<span>  threshold_method <span class="op">=</span> <span class="st">"tss"</span>, <span class="co"># pick threshold maximising True Skill Statistic</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/GAM_Models"</span>,</span>
+<span>  create_plot <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># skip the smooth-response curves to keep output compact</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-fold smoothing progress</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Out-of-fold E-space test metrics — one row per fold.</span></span>
@@ -714,16 +714,16 @@ automatically and usually outperform the GLM/GAM at the cost of a less
 interpretable model.</p>
 <div class="sourceCode" id="cb34"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">rf_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_rf.html" class="external-link">build_temporal_rf</a></span><span class="op">(</span></span>
-<span>  partition_result     <span class="op">=</span> <span class="va">partition</span>,                  <span class="co"># CV folds in space + time</span></span>
-<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>,                   <span class="co"># presences + absences per fold</span></span>
-<span>  model_vars           <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"temp"</span>, <span class="st">"prec"</span>, <span class="st">"NDVI"</span><span class="op">)</span>,  <span class="co"># RF needs predictor names, not a formula</span></span>
-<span>  rf_params            <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ntree <span class="op">=</span> <span class="fl">500</span><span class="op">)</span>,          <span class="co"># number of decision trees grown per fold</span></span>
-<span>  threshold_method     <span class="op">=</span> <span class="st">"tss"</span>,                      <span class="co"># pick threshold maximising True Skill Statistic</span></span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/RF_Models"</span>,</span>
-<span>  create_plot          <span class="op">=</span> <span class="cn">FALSE</span>,                      <span class="co"># skip variable-importance plot</span></span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  time_cols            <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span>                       <span class="co"># silence per-fold tree-growth progress</span></span>
+<span>  partition_result <span class="op">=</span> <span class="va">partition</span>, <span class="co"># CV folds in space + time</span></span>
+<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>, <span class="co"># presences + absences per fold</span></span>
+<span>  model_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"temp"</span>, <span class="st">"prec"</span>, <span class="st">"NDVI"</span><span class="op">)</span>, <span class="co"># RF needs predictor names, not a formula</span></span>
+<span>  rf_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ntree <span class="op">=</span> <span class="fl">500</span><span class="op">)</span>, <span class="co"># number of decision trees grown per fold</span></span>
+<span>  threshold_method <span class="op">=</span> <span class="st">"tss"</span>, <span class="co"># pick threshold maximising True Skill Statistic</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/RF_Models"</span>,</span>
+<span>  create_plot <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># skip variable-importance plot</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-fold tree-growth progress</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Out-of-fold E-space test metrics — one row per fold.</span></span>
@@ -757,13 +757,13 @@ below.</p>
 </blockquote>
 <div class="sourceCode" id="cb36"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hv_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/build_temporal_hv.html" class="external-link">build_temporal_hv</a></span><span class="op">(</span></span>
-<span>  partition_result   <span class="op">=</span> <span class="va">partition</span>,                 <span class="co"># CV folds in space + time (presences only)</span></span>
-<span>  model_vars         <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"temp"</span>, <span class="st">"prec"</span>, <span class="st">"NDVI"</span><span class="op">)</span>, <span class="co"># predictors defining the envelope axes</span></span>
-<span>  method             <span class="op">=</span> <span class="st">"gaussian"</span>,                <span class="co"># Gaussian KDE envelope (alternative: "svm" = one-class SVM)</span></span>
-<span>  hypervolume_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,                    <span class="co"># accept hypervolume::hypervolume_gaussian() defaults</span></span>
-<span>  output_dir         <span class="op">=</span> <span class="st">"outputs/HV_Models"</span>,</span>
-<span>  create_plot        <span class="op">=</span> <span class="cn">FALSE</span>,                     <span class="co"># skip the per-fold pairplots</span></span>
-<span>  verbose            <span class="op">=</span> <span class="cn">FALSE</span>                      <span class="co"># silence per-fold KDE-construction progress</span></span>
+<span>  partition_result <span class="op">=</span> <span class="va">partition</span>, <span class="co"># CV folds in space + time (presences only)</span></span>
+<span>  model_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"temp"</span>, <span class="st">"prec"</span>, <span class="st">"NDVI"</span><span class="op">)</span>, <span class="co"># predictors defining the envelope axes</span></span>
+<span>  method <span class="op">=</span> <span class="st">"gaussian"</span>, <span class="co"># Gaussian KDE envelope (alternative: "svm" = one-class SVM)</span></span>
+<span>  hypervolume_params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>, <span class="co"># accept hypervolume::hypervolume_gaussian() defaults</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/HV_Models"</span>,</span>
+<span>  create_plot <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># skip the per-fold pairplots</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-fold KDE-construction progress</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Presence-only E-space metrics: sensitivity, envelope volume, per-fold overlap.</span></span>
@@ -819,72 +819,73 @@ own folder so the post-processing later can address them
 separately.</li>
 </ul>
 <div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">time_steps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2015</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span>        <span class="co"># 11 years -&gt; fits a 3 x 4 plot grid</span></span>
+<code class="sourceCode R"><span><span class="va">time_steps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2015</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span> <span class="co"># 11 years -&gt; fits a 3 x 4 plot grid</span></span>
 <span></span>
 <span><span class="co"># A single named vector used by every projection call.</span></span>
 <span><span class="va">var_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"prec"</span> <span class="op">=</span> <span class="st">"prec_YEAR"</span>,</span>
 <span>                  <span class="st">"temp"</span> <span class="op">=</span> <span class="st">"temp_YEAR"</span>,</span>
 <span>                  <span class="st">"NDVI"</span> <span class="op">=</span> <span class="st">"NDVI_YEAR"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Clear stale prediction files from any previous run so each model's folder</span></span>
-<span><span class="co"># contains exactly one raster per modelled year. This matters because the</span></span>
-<span><span class="co"># downstream post-processing functions match the number of layers in the</span></span>
-<span><span class="co"># consensus stack to the number of rows in `time_steps`; an orphan raster</span></span>
-<span><span class="co"># from an earlier 2010-2025 run would cause a mismatch error.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="st">"outputs/glm_predictions"</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span>, force <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="st">"outputs/gam_predictions"</span>, recursive <span class="op">=</span> <span class="cn">TRUE</span>, force <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="st">"outputs/rf_predictions"</span>,  recursive <span class="op">=</span> <span class="cn">TRUE</span>, force <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/unlink.html" class="external-link">unlink</a></span><span class="op">(</span><span class="st">"outputs/hv_predictions"</span>,  recursive <span class="op">=</span> <span class="cn">TRUE</span>, force <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span></span>
+<span><span class="co"># GLM projection: walk through every (year) time step and apply each fold's</span></span>
+<span><span class="co"># fitted GLM to the matching scaled rasters, writing one fold-vote raster</span></span>
+<span><span class="co"># per fold per year into output_dir.</span></span>
 <span><span class="va">glm_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html" class="external-link">generate_spatiotemporal_predictions</a></span><span class="op">(</span></span>
-<span>  partition_result     <span class="op">=</span> <span class="va">partition</span>,</span>
-<span>  model_result         <span class="op">=</span> <span class="va">glm_res</span>,</span>
-<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>,</span>
-<span>  raster_dir           <span class="op">=</span> <span class="va">scaled_dir</span>,</span>
-<span>  variable_patterns    <span class="op">=</span> <span class="va">var_patterns</span>,</span>
-<span>  time_cols            <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  time_steps           <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/glm_predictions"</span>,</span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  partition_result <span class="op">=</span> <span class="va">partition</span>, <span class="co"># CV fold geometry built earlier</span></span>
+<span>  model_result <span class="op">=</span> <span class="va">glm_res</span>, <span class="co"># the fitted GLM (one model per fold)</span></span>
+<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>, <span class="co"># tells the function which area each fold "owns"</span></span>
+<span>  raster_dir <span class="op">=</span> <span class="va">scaled_dir</span>, <span class="co"># folder of z-scored per-year predictor rasters</span></span>
+<span>  variable_patterns <span class="op">=</span> <span class="va">var_patterns</span>, <span class="co"># maps predictor name -&gt; filename pattern (with YEAR)</span></span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>, <span class="co"># name of the time column on the points</span></span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>, <span class="co"># the data.frame of years (2015:2025) to project</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/glm_predictions"</span>, <span class="co"># per-fold per-year rasters land here</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># replace any rasters left from a prior run</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence the per-fold progress messages</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># GAM projection: same inputs as the GLM call above, only `model_result`</span></span>
+<span><span class="co"># and `output_dir` change. The function reads `model_type` inside `gam_res`</span></span>
+<span><span class="co"># and automatically uses the correct projection logic for a GAM.</span></span>
 <span><span class="va">gam_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html" class="external-link">generate_spatiotemporal_predictions</a></span><span class="op">(</span></span>
-<span>  partition_result     <span class="op">=</span> <span class="va">partition</span>,</span>
-<span>  model_result         <span class="op">=</span> <span class="va">gam_res</span>,</span>
-<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>,</span>
-<span>  raster_dir           <span class="op">=</span> <span class="va">scaled_dir</span>,</span>
-<span>  variable_patterns    <span class="op">=</span> <span class="va">var_patterns</span>,</span>
-<span>  time_cols            <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  time_steps           <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/gam_predictions"</span>,</span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  partition_result <span class="op">=</span> <span class="va">partition</span>, <span class="co"># same fold geometry</span></span>
+<span>  model_result <span class="op">=</span> <span class="va">gam_res</span>, <span class="co"># the fitted GAM (one per fold)</span></span>
+<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>, <span class="co"># same fold-stratified absences</span></span>
+<span>  raster_dir <span class="op">=</span> <span class="va">scaled_dir</span>, <span class="co"># same scaled per-year predictor rasters</span></span>
+<span>  variable_patterns <span class="op">=</span> <span class="va">var_patterns</span>, <span class="co"># same name -&gt; filename map</span></span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>, <span class="co"># same time-column name</span></span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>, <span class="co"># same 11-year grid</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/gam_predictions"</span>, <span class="co"># write into a *separate* folder per model</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># replace previous-run rasters</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-fold progress</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Random forest projection: identical interface; the function dispatches to</span></span>
+<span><span class="co"># the RF projection logic via `model_type` stored inside `rf_res`.</span></span>
 <span><span class="va">rf_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html" class="external-link">generate_spatiotemporal_predictions</a></span><span class="op">(</span></span>
-<span>  partition_result     <span class="op">=</span> <span class="va">partition</span>,</span>
-<span>  model_result         <span class="op">=</span> <span class="va">rf_res</span>,</span>
-<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>,</span>
-<span>  raster_dir           <span class="op">=</span> <span class="va">scaled_dir</span>,</span>
-<span>  variable_patterns    <span class="op">=</span> <span class="va">var_patterns</span>,</span>
-<span>  time_cols            <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  time_steps           <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/rf_predictions"</span>,</span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  partition_result <span class="op">=</span> <span class="va">partition</span>, <span class="co"># same fold geometry</span></span>
+<span>  model_result <span class="op">=</span> <span class="va">rf_res</span>, <span class="co"># the fitted RF (500 trees per fold)</span></span>
+<span>  pseudoabsence_result <span class="op">=</span> <span class="va">absences</span>, <span class="co"># same fold-stratified absences</span></span>
+<span>  raster_dir <span class="op">=</span> <span class="va">scaled_dir</span>, <span class="co"># same scaled per-year predictor rasters</span></span>
+<span>  variable_patterns <span class="op">=</span> <span class="va">var_patterns</span>, <span class="co"># same name -&gt; filename map</span></span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>, <span class="co"># same time-column name</span></span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>, <span class="co"># same 11-year grid</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/rf_predictions"</span>, <span class="co"># separate output folder for RF</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># replace previous-run rasters</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-fold progress</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Hypervolume projection: NOTE the missing `pseudoabsence_result` argument.</span></span>
+<span><span class="co"># Hypervolume is presence-only, so the function never needs absences when</span></span>
+<span><span class="co"># projecting an HV model — passing them in is unnecessary.</span></span>
 <span><span class="va">hv_preds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/generate_spatiotemporal_predictions.html" class="external-link">generate_spatiotemporal_predictions</a></span><span class="op">(</span></span>
-<span>  partition_result     <span class="op">=</span> <span class="va">partition</span>,</span>
-<span>  model_result         <span class="op">=</span> <span class="va">hv_res</span>,</span>
-<span>  raster_dir           <span class="op">=</span> <span class="va">scaled_dir</span>,</span>
-<span>  variable_patterns    <span class="op">=</span> <span class="va">var_patterns</span>,</span>
-<span>  time_cols            <span class="op">=</span> <span class="st">"year"</span>,</span>
-<span>  time_steps           <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/hv_predictions"</span>,</span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  partition_result <span class="op">=</span> <span class="va">partition</span>, <span class="co"># same fold geometry</span></span>
+<span>  model_result <span class="op">=</span> <span class="va">hv_res</span>, <span class="co"># the fitted hypervolume (Gaussian KDE per fold)</span></span>
+<span>  raster_dir <span class="op">=</span> <span class="va">scaled_dir</span>, <span class="co"># same scaled per-year predictor rasters</span></span>
+<span>  variable_patterns <span class="op">=</span> <span class="va">var_patterns</span>, <span class="co"># same name -&gt; filename map</span></span>
+<span>  time_cols <span class="op">=</span> <span class="st">"year"</span>, <span class="co"># same time-column name</span></span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>, <span class="co"># same 11-year grid</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/hv_predictions"</span>, <span class="co"># separate output folder for HV</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># replace previous-run rasters</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-fold progress</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="visualise-the-consensus-maps">Visualise the consensus maps<a class="anchor" aria-label="anchor" href="#visualise-the-consensus-maps"></a>
@@ -896,28 +897,50 @@ raster cell is a <strong>fold-vote count</strong> (0 to <em>N</em>) of
 how many folds agreed the pixel was suitable in that year. With 11
 modelled years (2015–2025), each stack lays out as a 3 × 4 grid.</p>
 <div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">glm_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">glm_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Load all per-year GLM prediction rasters into a single multi-layer</span></span>
+<span><span class="co"># SpatRaster. `terra::rast()` accepts a character vector of file paths</span></span>
+<span><span class="co"># and stacks them in the order given.</span></span>
+<span><span class="va">glm_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">glm_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Set human-readable layer names (e.g. "Prediction_..._2015") by stripping</span></span>
+<span><span class="co"># the `.tif` extension from each filename. These names become the panel</span></span>
+<span><span class="co"># titles in the plot below.</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">glm_pred_stack</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"\\.tif$"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">glm_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Draw the 11 yearly fold-vote maps as a 3 x 4 grid.</span></span>
+<span><span class="co"># Arguments:</span></span>
+<span><span class="co">#   - First positional argument: the multi-layer SpatRaster to plot.</span></span>
+<span><span class="co">#   - nr = 3, nc = 4: 3 rows by 4 columns of panels.</span></span>
+<span><span class="co">#   - mar = c(1.0, 1.0, 1.5, 3.0): inner margins for each panel</span></span>
+<span><span class="co">#     (bottom, left, top, right) in lines of text; the wider right margin</span></span>
+<span><span class="co">#     reserves room for the per-panel legend strip.</span></span>
+<span><span class="co">#   - legend = FALSE: suppress per-panel legends so the grid stays tidy</span></span>
+<span><span class="co">#     (we explain the colour scale in the prose below).</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">glm_pred_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/plot-glm-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gam_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">gam_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Same three-step pattern as the GLM chunk above: build a multi-layer</span></span>
+<span><span class="co"># SpatRaster from the GAM prediction files, label each layer, and draw a</span></span>
+<span><span class="co"># 3 x 4 grid of yearly fold-vote maps.</span></span>
+<span><span class="va">gam_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">gam_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">gam_pred_stack</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"\\.tif$"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">gam_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gam_pred_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/plot-gam-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rf_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">rf_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Same pattern, but for the random forest prediction files.</span></span>
+<span><span class="va">rf_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">rf_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">rf_pred_stack</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"\\.tif$"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">rf_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rf_pred_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/plot-rf-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hv_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">hv_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Same pattern, but for the hypervolume prediction files.</span></span>
+<span><span class="va">hv_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">hv_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">hv_pred_stack</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"\\.tif$"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">hv_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hv_pred_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
@@ -957,30 +980,42 @@ object; supplying it overlays the E-space
 series.</li>
 </ul>
 <div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
-<span>  predictions  <span class="op">=</span> <span class="va">glm_preds</span>,</span>
-<span>  time_column  <span class="op">=</span> <span class="st">"year"</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Draw the GLM's per-fold diagnostic time series.</span></span>
+<span><span class="co"># - predictions:  the object returned by generate_spatiotemporal_predictions()</span></span>
+<span><span class="co">#                 for this model; contains the per-time-step G-space metrics.</span></span>
+<span><span class="co"># - time_column:  name of the time axis used for the x-axis of the panels.</span></span>
+<span><span class="co"># - model_result: the fitted-model object; supplying it overlays the</span></span>
+<span><span class="co">#                 overall E-space fold metrics as horizontal reference lines.</span></span>
+<span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
+<span>  predictions <span class="op">=</span> <span class="va">glm_preds</span>,</span>
+<span>  time_column <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>  model_result <span class="op">=</span> <span class="va">glm_res</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/assess-glm-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-6.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
-<span>  predictions  <span class="op">=</span> <span class="va">gam_preds</span>,</span>
-<span>  time_column  <span class="op">=</span> <span class="st">"year"</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same diagnostic for the GAM. Arguments behave identically to the GLM</span></span>
+<span><span class="co"># call above, only the `predictions` and `model_result` objects differ.</span></span>
+<span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
+<span>  predictions <span class="op">=</span> <span class="va">gam_preds</span>,</span>
+<span>  time_column <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>  model_result <span class="op">=</span> <span class="va">gam_res</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/assess-gam-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-6.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
-<span>  predictions  <span class="op">=</span> <span class="va">rf_preds</span>,</span>
-<span>  time_column  <span class="op">=</span> <span class="st">"year"</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same diagnostic for the random forest.</span></span>
+<span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
+<span>  predictions <span class="op">=</span> <span class="va">rf_preds</span>,</span>
+<span>  time_column <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>  model_result <span class="op">=</span> <span class="va">rf_res</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/assess-rf-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-6.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
-<span>  predictions  <span class="op">=</span> <span class="va">hv_preds</span>,</span>
-<span>  time_column  <span class="op">=</span> <span class="st">"year"</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same diagnostic for the hypervolume. The function detects that the</span></span>
+<span><span class="co"># model is presence-only and automatically drops the specificity panel</span></span>
+<span><span class="co"># (no negative training data =&gt; no specificity).</span></span>
+<span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
+<span>  predictions <span class="op">=</span> <span class="va">hv_preds</span>,</span>
+<span>  time_column <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>  model_result <span class="op">=</span> <span class="va">hv_res</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/assess-hv-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-hv-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-hv-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-hv-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
@@ -1031,36 +1066,42 @@ that must agree before a pixel is called suitable; here, <code>2</code>
 of <code>4</code>.</li>
 </ul>
 <div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">glm_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
-<span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/glm_predictions"</span>,</span>
-<span>  output_dir      <span class="op">=</span> <span class="st">"outputs/glm_consensus"</span>,</span>
-<span>  consensus       <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  overwrite       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose         <span class="op">=</span> <span class="cn">FALSE</span></span>
+<code class="sourceCode R"><span><span class="co"># Collapse the GLM's per-fold per-year prediction rasters into two</span></span>
+<span><span class="co"># products: a binary `consensus_stack` (one layer per year) and a single</span></span>
+<span><span class="co"># 0-1 `frequency_raster` (proportion of years suitable).</span></span>
+<span><span class="va">glm_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
+<span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/glm_predictions"</span>, <span class="co"># source folder of per-fold rasters</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/glm_consensus"</span>, <span class="co"># where to write the consensus/frequency outputs</span></span>
+<span>  consensus <span class="op">=</span> <span class="fl">2</span>, <span class="co"># majority rule: &gt;=2 of the 4 folds must agree</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># replace any outputs from a previous run</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence progress messages</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gam_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
-<span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/gam_predictions"</span>,</span>
-<span>  output_dir      <span class="op">=</span> <span class="st">"outputs/gam_consensus"</span>,</span>
-<span>  consensus       <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  overwrite       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose         <span class="op">=</span> <span class="cn">FALSE</span></span>
+<code class="sourceCode R"><span><span class="co"># Same consensus rule for the GAM. Only the source / target folders change.</span></span>
+<span><span class="va">gam_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
+<span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/gam_predictions"</span>, <span class="co"># source folder of per-fold rasters</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/gam_consensus"</span>, <span class="co"># GAM-specific output folder</span></span>
+<span>  consensus <span class="op">=</span> <span class="fl">2</span>, <span class="co"># same majority rule</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rf_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
-<span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/rf_predictions"</span>,</span>
-<span>  output_dir      <span class="op">=</span> <span class="st">"outputs/rf_consensus"</span>,</span>
-<span>  consensus       <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  overwrite       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose         <span class="op">=</span> <span class="cn">FALSE</span></span>
+<code class="sourceCode R"><span><span class="co"># Same consensus rule for the random forest.</span></span>
+<span><span class="va">rf_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
+<span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/rf_predictions"</span>, <span class="co"># source folder of per-fold rasters</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/rf_consensus"</span>, <span class="co"># RF-specific output folder</span></span>
+<span>  consensus <span class="op">=</span> <span class="fl">2</span>, <span class="co"># same majority rule</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hv_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
-<span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/hv_predictions"</span>,</span>
-<span>  output_dir      <span class="op">=</span> <span class="st">"outputs/hv_consensus"</span>,</span>
-<span>  consensus       <span class="op">=</span> <span class="fl">2</span>,</span>
-<span>  overwrite       <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose         <span class="op">=</span> <span class="cn">FALSE</span></span>
+<code class="sourceCode R"><span><span class="co"># Same consensus rule for the hypervolume.</span></span>
+<span><span class="va">hv_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
+<span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/hv_predictions"</span>, <span class="co"># source folder of per-fold rasters</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/hv_consensus"</span>, <span class="co"># HV-specific output folder</span></span>
+<span>  consensus <span class="op">=</span> <span class="fl">2</span>, <span class="co"># same majority rule</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level4">
 <h4 id="per-year-binary-suitability-the-consensus_stack">Per-year binary suitability — the <code>consensus_stack</code><a class="anchor" aria-label="anchor" href="#per-year-binary-suitability-the-consensus_stack"></a>
@@ -1071,23 +1112,34 @@ year</strong> (yellow = suitable, purple = unsuitable). Plot it the same
 way we plotted the prediction stacks earlier — a 3 × 4 grid of the 11
 modelled years for the model in question.</p>
 <div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">glm_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Draw the GLM's per-year binary suitability surfaces as a 3 x 4 grid.</span></span>
+<span><span class="co"># Arguments mirror the prediction-stack plot above:</span></span>
+<span><span class="co">#   - First positional argument: the binary multi-layer SpatRaster.</span></span>
+<span><span class="co">#   - nr / nc: 3 rows by 4 columns of yearly panels.</span></span>
+<span><span class="co">#   - mar:     inner margins per panel (bottom, left, top, right).</span></span>
+<span><span class="co">#   - legend = FALSE: drop per-panel legends because the values are binary</span></span>
+<span><span class="co">#     (0 = unsuitable, 1 = suitable) and the prose below covers the</span></span>
+<span><span class="co">#     interpretation.</span></span>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">glm_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>            mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/consensus-stack-glm-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gam_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same plotting recipe applied to the GAM's binary consensus stack.</span></span>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gam_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>            mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/consensus-stack-gam-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rf_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same plotting recipe applied to the random forest's binary consensus stack.</span></span>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rf_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>            mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/consensus-stack-rf-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hv_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
-<span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same plotting recipe applied to the hypervolume's binary consensus stack.</span></span>
+<span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hv_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">3</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
+<span>            mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/consensus-stack-hv-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
 <p>Reading these grids: yellow pixels were called suitable by <strong>at
@@ -1105,8 +1157,13 @@ a single 0–1 surface — the proportion of years a pixel was called
 suitable. Drawn per model as a 2 × 2 panel for easy side-by-side
 comparison.</p>
 <div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Set up a 2 x 2 plot grid so each model's frequency raster occupies one</span></span>
+<span><span class="co"># panel, making side-by-side comparison straightforward.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Each $frequency_raster is a single 0-1 SpatRaster (proportion of years</span></span>
+<span><span class="co"># suitable). plot() draws it with the default viridis palette and `main`</span></span>
+<span><span class="co"># sets the panel title.</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">glm_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"GLM — proportion of years suitable"</span><span class="op">)</span></span>
 <span></span>
@@ -1120,7 +1177,8 @@ comparison.</p>
 <span>     main <span class="op">=</span> <span class="st">"Hypervolume — proportion of years suitable"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/consensus-plot-1.png" class="r-plt" alt="" width="1000" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Reset the plot region back to a single panel for anything that follows.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Reading the panels: pixels close to 1 (bright) were predicted
 suitable in every modelled year — the <em>persistent core</em> of the
 niche for that model. Pixels close to 0 (dark) were never suitable.
@@ -1156,57 +1214,71 @@ suitable.</li>
 keep the workshop fast; enable on real analyses if you need them.</li>
 </ul>
 <div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">glm_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
-<span>  binary_stack            <span class="op">=</span> <span class="va">glm_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
-<span>  summary_raster          <span class="op">=</span> <span class="va">glm_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
-<span>  time_steps              <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir              <span class="op">=</span> <span class="st">"outputs/glm_patterns"</span>,</span>
-<span>  spatial_autocorrelation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  estimate_time           <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  overwrite               <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose                 <span class="op">=</span> <span class="cn">FALSE</span></span>
+<code class="sourceCode R"><span><span class="co"># Run changepoint detection on the GLM's binary consensus stack to</span></span>
+<span><span class="co"># classify each pixel's trajectory across years (never-, always-,</span></span>
+<span><span class="co"># increasing, decreasing, fluctuating, no-pattern).</span></span>
+<span><span class="va">glm_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
+<span>  binary_stack <span class="op">=</span> <span class="va">glm_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, <span class="co"># binary per-year stack from summarize_raster_outputs()</span></span>
+<span>  summary_raster <span class="op">=</span> <span class="va">glm_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>, <span class="co"># 0-1 frequency raster, short-circuits always/never pixels</span></span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>, <span class="co"># same data.frame of years used everywhere else</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/glm_patterns"</span>, <span class="co"># where the pattern raster and CSV go</span></span>
+<span>  spatial_autocorrelation <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># do NOT add a neighbours covariate (faster)</span></span>
+<span>  estimate_time <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># skip the runtime-estimation pre-pass (faster)</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># replace any patterns left from a prior run</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-pixel progress messages</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-glm-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gam_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
-<span>  binary_stack            <span class="op">=</span> <span class="va">gam_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
-<span>  summary_raster          <span class="op">=</span> <span class="va">gam_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
-<span>  time_steps              <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir              <span class="op">=</span> <span class="st">"outputs/gam_patterns"</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same call, applied to the GAM's consensus stack. Only the input rasters</span></span>
+<span><span class="co"># and the output folder change.</span></span>
+<span><span class="va">gam_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
+<span>  binary_stack <span class="op">=</span> <span class="va">gam_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
+<span>  summary_raster <span class="op">=</span> <span class="va">gam_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/gam_patterns"</span>,</span>
 <span>  spatial_autocorrelation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  estimate_time           <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  overwrite               <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose                 <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  estimate_time <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-gam-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rf_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
-<span>  binary_stack            <span class="op">=</span> <span class="va">rf_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
-<span>  summary_raster          <span class="op">=</span> <span class="va">rf_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
-<span>  time_steps              <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir              <span class="op">=</span> <span class="st">"outputs/rf_patterns"</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same call, applied to the random forest's consensus stack.</span></span>
+<span><span class="va">rf_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
+<span>  binary_stack <span class="op">=</span> <span class="va">rf_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
+<span>  summary_raster <span class="op">=</span> <span class="va">rf_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/rf_patterns"</span>,</span>
 <span>  spatial_autocorrelation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  estimate_time           <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  overwrite               <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose                 <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  estimate_time <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-rf-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hv_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
-<span>  binary_stack            <span class="op">=</span> <span class="va">hv_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
-<span>  summary_raster          <span class="op">=</span> <span class="va">hv_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
-<span>  time_steps              <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir              <span class="op">=</span> <span class="st">"outputs/hv_patterns"</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same call, applied to the hypervolume's consensus stack.</span></span>
+<span><span class="va">hv_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
+<span>  binary_stack <span class="op">=</span> <span class="va">hv_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
+<span>  summary_raster <span class="op">=</span> <span class="va">hv_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/hv_patterns"</span>,</span>
 <span>  spatial_autocorrelation <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  estimate_time           <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  overwrite               <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose                 <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  estimate_time <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-hv-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <p>The four trajectory-class maps, side-by-side:</p>
 <div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Set up a 2 x 2 plot region so the four models' trajectory maps appear</span></span>
+<span><span class="co"># side by side.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
+<span><span class="co"># Each $pattern is a categorical SpatRaster whose pixel values encode the</span></span>
+<span><span class="co"># trajectory class (1 = never-suitable, 2 = always, 3 = no pattern,</span></span>
+<span><span class="co"># 4 = increasing, 5 = decreasing, 6 = fluctuating).</span></span>
+<span><span class="co"># `main` titles each panel; `legend = FALSE` keeps the grid tidy and we</span></span>
+<span><span class="co"># describe the categories in the prose below.</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">glm_patterns</span><span class="op">$</span><span class="va">pattern</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"GLM — temporal trajectory class"</span>,</span>
 <span>     legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
@@ -1224,7 +1296,8 @@ keep the workshop fast; enable on real analyses if you need them.</li>
 <span>     legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-plot-1.png" class="r-plt" alt="" width="1000" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Reset the plot region back to a single panel for anything that follows.</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Reading the panels: each colour is a categorical trajectory class.
 Comparing the four maps shows how much each algorithm agrees on the
 <em>shape</em> of change (increasing / decreasing / fluctuating), not
@@ -1258,28 +1331,35 @@ and pattern steps for the model in question.</li>
 <span><span class="va">provinces</span> <span class="op">&lt;-</span> <span class="fu">geodata</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/geodata/reference/gadm.html" class="external-link">gadm</a></span><span class="op">(</span>country <span class="op">=</span> <span class="st">"THA"</span>, level <span class="op">=</span> <span class="fl">1</span>, path <span class="op">=</span> <span class="st">"data/raw"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_as_sf.html" class="external-link">st_as_sf</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">glm_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
-<span>  shapefile_path       <span class="op">=</span> <span class="va">provinces</span>,</span>
-<span>  name_field           <span class="op">=</span> <span class="st">"NAME_1"</span>,</span>
-<span>  binary_stack         <span class="op">=</span> <span class="va">glm_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
-<span>  pattern_raster       <span class="op">=</span> <span class="va">glm_patterns</span><span class="op">$</span><span class="va">pattern</span>,</span>
-<span>  time_decrease_raster <span class="op">=</span> <span class="va">glm_patterns</span><span class="op">$</span><span class="va">time_decrease</span>,</span>
-<span>  time_increase_raster <span class="op">=</span> <span class="va">glm_patterns</span><span class="op">$</span><span class="va">time_increase</span>,</span>
-<span>  time_steps           <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/glm_regional"</span>,</span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  create_plot          <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
+<code class="sourceCode R"><span><span class="co"># Aggregate the GLM's pixel-level trajectories to Thailand's provinces.</span></span>
+<span><span class="co"># The function overlays the polygons on the rasters, counts pixels in</span></span>
+<span><span class="co"># each trajectory class per province, and writes summary CSVs.</span></span>
+<span><span class="va">glm_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
+<span>  shapefile_path <span class="op">=</span> <span class="va">provinces</span>, <span class="co"># sf object: Thailand provinces</span></span>
+<span>  name_field <span class="op">=</span> <span class="st">"NAME_1"</span>, <span class="co"># column carrying the province name</span></span>
+<span>  binary_stack <span class="op">=</span> <span class="va">glm_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, <span class="co"># per-year binary suitability stack</span></span>
+<span>  pattern_raster <span class="op">=</span> <span class="va">glm_patterns</span><span class="op">$</span><span class="va">pattern</span>, <span class="co"># trajectory class per pixel</span></span>
+<span>  time_decrease_raster <span class="op">=</span> <span class="va">glm_patterns</span><span class="op">$</span><span class="va">time_decrease</span>, <span class="co"># year of first detected decrease (per pixel)</span></span>
+<span>  time_increase_raster <span class="op">=</span> <span class="va">glm_patterns</span><span class="op">$</span><span class="va">time_increase</span>, <span class="co"># year of first detected increase (per pixel)</span></span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>, <span class="co"># same data.frame of modelled years</span></span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/glm_regional"</span>, <span class="co"># GLM-specific output folder</span></span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># replace previous-run outputs</span></span>
+<span>  create_plot <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># produce the diagnostic plots returned in `$plots`</span></span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-province progress</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/regional-glm-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-glm-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">glm_regional</span><span class="op">$</span><span class="va">plots</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Show the diagnostic plot(s) attached to the result object: e.g.</span></span>
+<span><span class="co"># scatterpie map of pattern composition, per-province time series, etc.</span></span>
+<span><span class="va">glm_regional</span><span class="op">$</span><span class="va">plots</span></span></code></pre></div>
 <pre><code><span><span class="co">## $pattern_map</span></span></code></pre>
 <p><img src="Step3_TemporalModelR_files/figure-html/regional-glm-data-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## </span></span>
 <span><span class="co">## $time_series</span></span></code></pre>
 <div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">glm_regional</span><span class="op">$</span><span class="va">overall_summary</span>, <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># First three rows of the per-province summary table (one row per province,</span></span>
+<span><span class="co"># columns for pixel counts in each trajectory class plus percentages).</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">glm_regional</span><span class="op">$</span><span class="va">overall_summary</span>, <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         Spatial_Unit Always_Absent Always_Present No_Pattern Increasing</span></span>
 <span><span class="co">## 1      Amnat Charoen            52              0          0          0</span></span>
 <span><span class="co">## 2          Ang Thong            17              0          0          0</span></span>
@@ -1301,22 +1381,26 @@ and pattern steps for the model in question.</li>
 <span><span class="co">## 2                    100</span></span>
 <span><span class="co">## 3                    100</span></span></code></pre>
 <div class="sourceCode" id="cb72"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gam_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
-<span>  shapefile_path       <span class="op">=</span> <span class="va">provinces</span>,</span>
-<span>  name_field           <span class="op">=</span> <span class="st">"NAME_1"</span>,</span>
-<span>  binary_stack         <span class="op">=</span> <span class="va">gam_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
-<span>  pattern_raster       <span class="op">=</span> <span class="va">gam_patterns</span><span class="op">$</span><span class="va">pattern</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same aggregation applied to the GAM outputs. Only the input rasters and</span></span>
+<span><span class="co"># the output folder differ from the GLM call above.</span></span>
+<span><span class="va">gam_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
+<span>  shapefile_path <span class="op">=</span> <span class="va">provinces</span>,</span>
+<span>  name_field <span class="op">=</span> <span class="st">"NAME_1"</span>,</span>
+<span>  binary_stack <span class="op">=</span> <span class="va">gam_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
+<span>  pattern_raster <span class="op">=</span> <span class="va">gam_patterns</span><span class="op">$</span><span class="va">pattern</span>,</span>
 <span>  time_decrease_raster <span class="op">=</span> <span class="va">gam_patterns</span><span class="op">$</span><span class="va">time_decrease</span>,</span>
 <span>  time_increase_raster <span class="op">=</span> <span class="va">gam_patterns</span><span class="op">$</span><span class="va">time_increase</span>,</span>
-<span>  time_steps           <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/gam_regional"</span>,</span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  create_plot          <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/gam_regional"</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  create_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/regional-gam-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-gam-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">gam_regional</span><span class="op">$</span><span class="va">plots</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Diagnostic plots and the first three rows of the per-province summary</span></span>
+<span><span class="co"># for the GAM (same layout as the GLM results above).</span></span>
+<span><span class="va">gam_regional</span><span class="op">$</span><span class="va">plots</span></span></code></pre></div>
 <pre><code><span><span class="co">## $pattern_map</span></span></code></pre>
 <p><img src="Step3_TemporalModelR_files/figure-html/regional-gam-data-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## </span></span>
@@ -1344,22 +1428,25 @@ and pattern steps for the model in question.</li>
 <span><span class="co">## 2                 100.00</span></span>
 <span><span class="co">## 3                  96.77</span></span></code></pre>
 <div class="sourceCode" id="cb78"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rf_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
-<span>  shapefile_path       <span class="op">=</span> <span class="va">provinces</span>,</span>
-<span>  name_field           <span class="op">=</span> <span class="st">"NAME_1"</span>,</span>
-<span>  binary_stack         <span class="op">=</span> <span class="va">rf_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
-<span>  pattern_raster       <span class="op">=</span> <span class="va">rf_patterns</span><span class="op">$</span><span class="va">pattern</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same aggregation applied to the random forest outputs.</span></span>
+<span><span class="va">rf_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
+<span>  shapefile_path <span class="op">=</span> <span class="va">provinces</span>,</span>
+<span>  name_field <span class="op">=</span> <span class="st">"NAME_1"</span>,</span>
+<span>  binary_stack <span class="op">=</span> <span class="va">rf_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
+<span>  pattern_raster <span class="op">=</span> <span class="va">rf_patterns</span><span class="op">$</span><span class="va">pattern</span>,</span>
 <span>  time_decrease_raster <span class="op">=</span> <span class="va">rf_patterns</span><span class="op">$</span><span class="va">time_decrease</span>,</span>
 <span>  time_increase_raster <span class="op">=</span> <span class="va">rf_patterns</span><span class="op">$</span><span class="va">time_increase</span>,</span>
-<span>  time_steps           <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/rf_regional"</span>,</span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  create_plot          <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/rf_regional"</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  create_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/regional-rf-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-rf-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">rf_regional</span><span class="op">$</span><span class="va">plots</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Diagnostic plots and the first three rows of the per-province summary</span></span>
+<span><span class="co"># for the random forest.</span></span>
+<span><span class="va">rf_regional</span><span class="op">$</span><span class="va">plots</span></span></code></pre></div>
 <pre><code><span><span class="co">## $pattern_map</span></span></code></pre>
 <p><img src="Step3_TemporalModelR_files/figure-html/regional-rf-data-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <pre><code><span><span class="co">## </span></span>
@@ -1387,22 +1474,24 @@ and pattern steps for the model in question.</li>
 <span><span class="co">## 2                  82.35</span></span>
 <span><span class="co">## 3                  12.50</span></span></code></pre>
 <div class="sourceCode" id="cb84"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">hv_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
-<span>  shapefile_path       <span class="op">=</span> <span class="va">provinces</span>,</span>
-<span>  name_field           <span class="op">=</span> <span class="st">"NAME_1"</span>,</span>
-<span>  binary_stack         <span class="op">=</span> <span class="va">hv_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
-<span>  pattern_raster       <span class="op">=</span> <span class="va">hv_patterns</span><span class="op">$</span><span class="va">pattern</span>,</span>
+<code class="sourceCode R"><span><span class="co"># Same aggregation applied to the hypervolume outputs.</span></span>
+<span><span class="va">hv_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
+<span>  shapefile_path <span class="op">=</span> <span class="va">provinces</span>,</span>
+<span>  name_field <span class="op">=</span> <span class="st">"NAME_1"</span>,</span>
+<span>  binary_stack <span class="op">=</span> <span class="va">hv_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
+<span>  pattern_raster <span class="op">=</span> <span class="va">hv_patterns</span><span class="op">$</span><span class="va">pattern</span>,</span>
 <span>  time_decrease_raster <span class="op">=</span> <span class="va">hv_patterns</span><span class="op">$</span><span class="va">time_decrease</span>,</span>
 <span>  time_increase_raster <span class="op">=</span> <span class="va">hv_patterns</span><span class="op">$</span><span class="va">time_increase</span>,</span>
-<span>  time_steps           <span class="op">=</span> <span class="va">time_steps</span>,</span>
-<span>  output_dir           <span class="op">=</span> <span class="st">"outputs/hv_regional"</span>,</span>
-<span>  overwrite            <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  create_plot          <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  time_steps <span class="op">=</span> <span class="va">time_steps</span>,</span>
+<span>  output_dir <span class="op">=</span> <span class="st">"outputs/hv_regional"</span>,</span>
+<span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  create_plot <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/regional-hv-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-hv-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb85"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">hv_regional</span><span class="op">$</span><span class="va">overall_summary</span>, <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># First three rows of the per-province summary for the hypervolume.</span></span>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/headtail.html" class="external-link">head</a></span><span class="op">(</span><span class="va">hv_regional</span><span class="op">$</span><span class="va">overall_summary</span>, <span class="fl">3</span><span class="op">)</span></span></code></pre></div>
 <pre><code><span><span class="co">##         Spatial_Unit Always_Absent Always_Present No_Pattern Increasing</span></span>
 <span><span class="co">## 1      Amnat Charoen             0              8          0          0</span></span>
 <span><span class="co">## 2          Ang Thong             0              0          0          0</span></span>

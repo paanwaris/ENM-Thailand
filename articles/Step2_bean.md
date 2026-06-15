@@ -87,10 +87,10 @@ set.seed(2026)
 ``` r
 
 # Inputs prepared by the Pre-workshop notebook.
-bioclim  <- rast("data/processed/bioclim/bioclim_thailand.tif")
+bioclim <- rast("data/processed/bioclim/bioclim_thailand.tif")
 thailand <- st_read("data/processed/boundary/thailand_boundary.gpkg",
                     quiet = TRUE)
-sambar   <- read_csv("data/processed/gbif/sambar_thailand.csv",
+sambar <- read_csv("data/processed/gbif/sambar_thailand.csv",
                      show_col_types = FALSE)
 
 head(sambar)
@@ -126,27 +126,35 @@ data frame that is ready for thinning.
 
 ``` r
 
-# Slim down the GBIF table to just longitude/latitude. We rename the GBIF
-# coordinate columns at the same time so they match prepare_bean()'s
-# expected argument names.
+# Slim the full GBIF table down to just the coordinate pair. The two
+# arguments to dplyr::select() are *renames*: `longitude = decimalLongitude`
+# reads as "create a new column called `longitude` whose values come from
+# GBIF's `decimalLongitude` column", and likewise for latitude. The renaming
+# step is important because prepare_bean() expects the columns to be called
+# exactly `longitude` and `latitude`.
 sambar_xy <- sambar %>%
   dplyr::select(longitude = decimalLongitude,
                 latitude  = decimalLatitude)
 
-# prepare_bean() returns one row per occurrence with the bioclim values
-# extracted at that pixel. With transform = "scale", every environmental
-# column is converted to a z-score (mean 0, sd 1) — this puts BIO1, BIO12,
-# and BIO15 on the same numerical scale so the thinning grid is fair.
+# prepare_bean() does three jobs in one call:
+#   1) drops any row whose longitude/latitude is missing;
+#   2) extracts the value of every environmental layer at each remaining
+#      occurrence pixel;
+#   3) optionally rescales those environmental values.
+# It returns a tidy data frame with one row per occurrence and one column
+# per environmental variable, ready to feed into the thinning step.
 prepped <- prepare_bean(
-  data        = sambar_xy,             # the table of coordinates
-  env_rasters = env,                   # the SpatRaster to extract from
-  longitude   = "longitude",           # name of the longitude column
-  latitude    = "latitude",            # name of the latitude column
-  transform   = "scale"                # z-score every env variable
+  data        = sambar_xy,    # the input table of (longitude, latitude) pairs
+  env_rasters = env,          # the SpatRaster stack we will extract values from
+  longitude   = "longitude",  # name of the column in `data` carrying x coords
+  latitude    = "latitude",   # name of the column in `data` carrying y coords
+  transform   = "scale"       # convert every env variable to a z-score
+                              # (mean 0, sd 1) so BIO1 (degrees), BIO12 (mm),
+                              # and BIO15 (CV) share a comparable numeric range
 )
 
-# Number of usable occurrences after dropping rows that fell outside the
-# raster mask or had missing coordinates.
+# Print the number of usable occurrences left after prepare_bean() dropped
+# rows that fell outside the Thailand raster mask or had missing coordinates.
 nrow(prepped)
 ```
 
@@ -158,13 +166,35 @@ the clustering in E-space, that is the environmental over-sampling
 
 ``` r
 
-# Two side-by-side panels in one row.
+# Set up a one-row, two-column plotting region so the next two plot() calls
+# appear side by side.
 par(mfrow = c(1, 2))
 
+# LEFT panel: the Thailand outline only.
+# `st_geometry(thailand)` strips the attribute table off the sf object so we
+# get just the polygon shape (no fill). `border = "grey20"` draws the outline
+# in dark grey, and `main` sets the panel title.
 plot(st_geometry(thailand), border = "grey20", main = "G-space")
+
+# Overlay the occurrence points on top of the polygon.
+# `prepped[, c("longitude", "latitude")]` selects just the coordinate columns.
+# `pch = 21` is a filled circle with a separate border colour; `bg = "tomato"`
+# fills the circle red-orange; `col = "white"` draws a thin white border
+# around each dot so individual points stay visible even where they overlap;
+# `cex = 0.7` shrinks the marker to 70% of the default size.
 points(prepped[, c("longitude", "latitude")],
        pch = 21, bg = "tomato", col = "white", cex = 0.7)
 
+# RIGHT panel: the same occurrences plotted in environmental space.
+# The first two arguments to plot() are the x and y vectors — here BIO1
+# (annual mean temperature) on the x-axis and BIO12 (annual precipitation)
+# on the y-axis, both already z-scored by prepare_bean().
+# `xlab` / `ylab` set readable axis labels.
+# `pch = 19` is a solid filled circle (no separate border).
+# `adjustcolor("tomato", alpha.f = 0.5)` takes the tomato red colour and
+# makes it 50% transparent so overlapping points show as darker patches —
+# a quick visual diagnostic of environmental over-sampling.
+# `main` sets the panel title.
 plot(prepped$bio1, prepped$bio12,
      xlab = "BIO1 — annual mean T (z-score)",
      ylab = "BIO12 — annual precip. (z-score)",
@@ -177,6 +207,7 @@ plot(prepped$bio1, prepped$bio12,
 
 ``` r
 
+# Reset the plotting region back to a single panel for any subsequent plot.
 par(mfrow = c(1, 1))
 ```
 
@@ -217,22 +248,36 @@ into the thinning step.
 
 ``` r
 
-res_sj       <- find_env_resolution(prepped,
-                                    env_vars = c("bio1", "bio12", "bio15"),
-                                    method   = "sheather-jones")
+# Call find_env_resolution() three times with the same input data and the
+# same set of environmental variables, varying only the bandwidth selector
+# (`method`). Each call returns a suggested cell width *per variable*
+# stored in `$suggested_resolution`.
+# Arguments shared by all three calls:
+#   - First positional argument (`prepped`): the data frame produced by
+#     prepare_bean() — bean reads the environmental columns from here.
+#   - `env_vars`: a character vector naming which columns of `prepped` to
+#     use as the environmental axes; here our three bioclim variables.
+#   - `method`: the bandwidth-selection rule (see prose above each).
+res_sj <- find_env_resolution(prepped,
+                              env_vars = c("bio1", "bio12", "bio15"),
+                              method = "sheather-jones")
 res_silverman <- find_env_resolution(prepped,
-                                    env_vars = c("bio1", "bio12", "bio15"),
-                                    method   = "silverman")
-res_scott    <- find_env_resolution(prepped,
-                                    env_vars = c("bio1", "bio12", "bio15"),
-                                    method   = "scott")
+                                     env_vars = c("bio1", "bio12", "bio15"),
+                                     method = "silverman")
+res_scott <- find_env_resolution(prepped,
+                                 env_vars = c("bio1", "bio12", "bio15"),
+                                 method = "scott")
 
-# Side-by-side comparison: one column per selector, one row per variable,
-# values in z-score units (we scaled the data in prepare_bean()).
+# Build a side-by-side comparison table.
+# Each `$suggested_resolution` is a named numeric vector (one entry per
+# variable). cbind() glues those three vectors together as columns, and
+# the `name = value` syntax inside cbind() labels each column with a clean
+# selector name. Read each row to compare what the three selectors picked
+# for the same bioclim variable, in z-score units.
 cbind(
   sheather_jones = res_sj$suggested_resolution,
-  silverman      = res_silverman$suggested_resolution,
-  scott          = res_scott$suggested_resolution
+  silverman = res_silverman$suggested_resolution,
+  scott = res_scott$suggested_resolution
 )
 ```
 
@@ -288,6 +333,10 @@ We will use Sheather–Jones for the rest of the analysis:
 
 ``` r
 
+# Pull the Sheather-Jones suggested cell widths out of the result object and
+# store them in `chosen_res`. This is the named numeric vector (one entry per
+# variable) we will feed into the thinning functions below as the
+# `grid_resolution` argument.
 chosen_res <- res_sj$suggested_resolution
 chosen_res
 ```
@@ -313,27 +362,34 @@ We will run both for comparison.
 
 ``` r
 
-# Stochastic thinning: one randomly chosen occurrence per pod.
+# Stochastic thinning: build an environmental grid over the env_vars axes
+# and *randomly retain one of the original occurrence points* in each
+# occupied grid cell ("pod"). Real coordinates and GBIF metadata are kept.
 thin_nd <- thin_env_nd(
-  data            = prepped,
-  env_vars        = c("bio1", "bio12", "bio15"),
-  grid_resolution = chosen_res          # per-variable cell widths from Sheather-Jones
+  data = prepped, # output of prepare_bean(): one row per occurrence
+  env_vars = c("bio1", "bio12", "bio15"), # which columns of `data` define the env grid axes
+  grid_resolution = chosen_res # named vector of per-variable cell widths (from Sheather-Jones)
 )
 
-# Deterministic thinning: one synthetic point at the centre of each pod.
-# We deliberately use a fixed, coarse resolution here (0.5 z-score units on
+# Deterministic thinning: build the same kind of grid, but instead of
+# keeping a random real point per pod, REPLACE every occupied pod with a
+# single synthetic point sitting at the centre of that pod. Output is
+# perfectly reproducible without a seed, at the cost of losing the link
+# back to the original GBIF records.
+# We deliberately use a fixed, coarse resolution (0.5 z-score units on
 # every axis). Because the data were scaled in prepare_bean(), 0.5 means
 # half a standard deviation per axis — a sensible "moderate smoothing"
-# choice that is easy to interpret and visualise.
+# choice that is easy to interpret and visualise alongside the stochastic
+# result above.
 thin_center <- thin_env_center(
-  data            = prepped,
-  env_vars        = c("bio1", "bio12", "bio15"),
-  grid_resolution = c(0.5, 0.5, 0.5)
+  data = prepped, # same prepare_bean() output as above
+  env_vars = c("bio1", "bio12", "bio15"), # same three axes
+  grid_resolution = c(0.5, 0.5, 0.5) # fixed 0.5-SD-wide cells on every axis
 )
 
-# Each `thin_*` object reports the number of input occurrences, the number
-# of occupied pods, the retained sample size, and stores the thinned table
-# in `$thinned_data`.
+# Printing a `thin_*` object shows a one-line summary: the number of input
+# occurrences, the number of occupied pods, and the retained sample size.
+# The actual thinned table of points lives in `thin_*$thinned_data`.
 thin_nd
 ```
 
@@ -358,12 +414,19 @@ thin_center
 
 ``` r
 
-# `plot_bean()` overlays the original data (grey, faded) and the retained
-# thinned points (highlighted) on the same E-space scatter.
+# plot_bean() draws an E-space scatter that overlays the *original* cloud
+# of points (in faded grey) with the points retained by a thinning call
+# (highlighted), so the visual reduction in density is obvious at a glance.
+#
+# Arguments used by both calls below:
+#   - original_data:  the prepare_bean() data frame (the full, un-thinned set)
+#   - thinned_object: the object returned by a thin_env_*() call
+#   - env_vars:       which columns of the data frame to use as plot axes;
+#                     here our three bioclim variables
 plot_bean(
-  original_data  = prepped,
-  thinned_object = thin_nd,
-  env_vars       = c("bio1", "bio12", "bio15")
+  original_data = prepped, # full, un-thinned table
+  thinned_object = thin_nd, # stochastic thinning result
+  env_vars = c("bio1", "bio12", "bio15") # axes of the scatter
 )
 ```
 
@@ -372,9 +435,9 @@ plot_bean(
 ``` r
 
 plot_bean(
-  original_data  = prepped,
-  thinned_object = thin_center,
-  env_vars       = c("bio1", "bio12", "bio15")
+  original_data = prepped, # same full table
+  thinned_object = thin_center, # deterministic thinning result
+  env_vars = c("bio1", "bio12", "bio15")
 )
 ```
 
@@ -398,20 +461,37 @@ thinned ones, to see how thinning shifts the niche estimate.
 
 ``` r
 
-# Raw ellipsoid (no thinning): biased toward the densest sampled environments.
+# fit_ellipsoid() draws a multivariate ellipsoid around the supplied points
+# in environmental space. The shape (size, orientation, elongation) is the
+# package's mathematical representation of the niche.
+#
+# Arguments shared by both calls:
+#   - First positional argument: the data frame of points to fit on.
+#   - env_vars: which columns of that data frame become the ellipsoid axes.
+#   - method = "covmat": estimate the ellipsoid from the *covariance matrix*
+#                        of the points (standard, robust choice).
+#   - level   = 0.95:    enclose 95% of the multivariate distribution within
+#                        the ellipsoid boundary (the conventional confidence
+#                        level for niche modelling).
+
+# Raw ellipsoid: fit on the full, un-thinned set of occurrences. This fit
+# is biased toward the densest sampled environments because clustered
+# points carry more weight than isolated ones in the covariance estimate.
 ell_raw <- fit_ellipsoid(
-  prepped,
+  prepped, # un-thinned data
   env_vars = c("bio1", "bio12", "bio15"),
-  method   = "covmat",
-  level    = 0.95
+  method = "covmat",
+  level = 0.95
 )
 
-# Thinned ellipsoid: each pod contributes at most one record.
+# Thinned ellipsoid: fit on the table inside thin_nd$thinned_data — i.e.
+# the stochastically thinned points (one per pod). Because each pod
+# contributes at most one record, no environmental region is over-weighted.
 ell_thinned <- fit_ellipsoid(
-  thin_nd$thinned_data,
+  thin_nd$thinned_data, # thinned data (one point per pod)
   env_vars = c("bio1", "bio12", "bio15"),
-  method   = "covmat",
-  level    = 0.95
+  method = "covmat",
+  level = 0.95
 )
 ```
 
@@ -420,6 +500,10 @@ onto BIO1 × BIO12) and in 3-D (a rotatable WebGL widget):
 
 ``` r
 
+# Static 2-D view of the raw ellipsoid.
+# `dims = c(1, 2)` tells the plot method to draw the projection onto the
+# first two environmental axes (here BIO1 on x, BIO12 on y) and to ignore
+# BIO15 — useful as a quick, printable cross-section of the niche.
 plot(ell_raw, dims = c(1, 2))
 ```
 
@@ -427,6 +511,11 @@ plot(ell_raw, dims = c(1, 2))
 
 ``` r
 
+# Interactive 3-D view of the same raw ellipsoid.
+# `dims = c(1, 2, 3)` asks for all three axes (BIO1, BIO12, BIO15) so the
+# full ellipsoidal surface is drawn. Because the chunk option `webgl = TRUE`
+# is set in the chunk header, this renders as a rotatable WebGL widget you
+# can spin with the mouse to inspect the niche from any angle.
 plot(ell_raw, dims = c(1, 2, 3))
 ```
 
@@ -441,6 +530,9 @@ Now compare with the **thinned** ellipsoid:
 
 ``` r
 
+# Same two views, but for the *thinned* ellipsoid. Comparing this 2-D
+# projection with the raw one above shows how the niche shape changes once
+# the dense E-space cluster has been broken up by bean.
 plot(ell_thinned, dims = c(1, 2))
 ```
 
@@ -448,6 +540,9 @@ plot(ell_thinned, dims = c(1, 2))
 
 ``` r
 
+# 3-D WebGL widget of the thinned ellipsoid. Rotate alongside the raw 3-D
+# plot from the previous chunk to see how thinning typically *widens* the
+# fit — the dense cluster no longer drags the ellipsoid in toward itself.
 plot(ell_thinned, dims = c(1, 2, 3))
 ```
 
@@ -466,19 +561,39 @@ on the scaled bioclim raster.
 
 ``` r
 
-# nicheR provides the ellipsoid -> raster projection used here.
+# Make sure nicheR is available — it provides the ellipsoid -> raster
+# projection used here. requireNamespace() returns TRUE if the package is
+# already installed and FALSE if not; the `!` flips that, so we only run
+# install_github() when nicheR is missing.
 if (!requireNamespace("nicheR", quietly = TRUE)) {
   remotes::install_github("castanedaM/nicheR", upgrade = "never")
 }
 library(nicheR)
 
-# Both ellipsoids were fit on z-scored variables (transform = "scale" in
-# prepare_bean()), so we must project onto a z-scored raster too.
-pred_raw     <- predict(ell_raw,     scale(env))
+# Project each ellipsoid back onto the geographic landscape.
+# Arguments to predict():
+#   - First positional argument: the fitted ellipsoid object (ell_raw or
+#     ell_thinned). nicheR's predict() method dispatches on its class.
+#   - Second positional argument: the environmental raster to project onto.
+#     We wrap it in scale() because both ellipsoids were fit on z-scored
+#     points (we passed `transform = "scale"` to prepare_bean()), and the
+#     raster and the points MUST share the same transformation for the
+#     projection to be meaningful.
+# The return value contains a `$suitability` SpatRaster layer that we plot
+# in the next step.
+pred_raw <- predict(ell_raw, scale(env))
 pred_thinned <- predict(ell_thinned, scale(env))
 
+# Two side-by-side suitability maps so the raw vs. thinned comparison is
+# visually direct.
 par(mfrow = c(1, 2))
-plot(pred_raw$suitability,     main = "Suitability — raw data")
+
+# LEFT panel: suitability projected from the *raw* ellipsoid.
+# `pred_raw$suitability` is a 0-1 SpatRaster; plot() draws it with terra's
+# default viridis-like palette; `main` sets the panel title.
+plot(pred_raw$suitability, main = "Suitability — raw data")
+
+# RIGHT panel: same projection, but from the *thinned* ellipsoid.
 plot(pred_thinned$suitability, main = "Suitability — thinned niche")
 ```
 
@@ -486,6 +601,7 @@ plot(pred_thinned$suitability, main = "Suitability — thinned niche")
 
 ``` r
 
+# Reset the plotting region back to a single panel for whatever comes next.
 par(mfrow = c(1, 1))
 ```
 
@@ -498,7 +614,16 @@ correction `bean` is designed to deliver.
 
 ``` r
 
-# Persist the thinned occurrence table so Step 3 can re-use it directly.
+# Write the thinned occurrence table to disk so Step 3 can re-use it.
+# Arguments to write.csv():
+#   - First positional argument: the data frame to save. ell_thinned
+#     carries a slot called `$all_points_used` which is the table of
+#     occurrences that actually fed into the thinned ellipsoid fit.
+#   - Second positional argument: the output file path. Saving under
+#     data/processed/gbif/ keeps it next to the other GBIF outputs.
+#   - row.names = FALSE: suppress the default row-number column R would
+#     otherwise prepend to the CSV. Without this you get an extra unnamed
+#     index column that downstream readers (Step 3) would mistake for data.
 write.csv(ell_thinned$all_points_used,
           "data/processed/gbif/sambar_thailand_thinned.csv",
           row.names = FALSE)
