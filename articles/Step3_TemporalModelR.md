@@ -166,7 +166,7 @@ plot(thailand[2])
 dpky <- st_read("data/processed/DPKY/DPKY.shp", quiet = TRUE) |>
   st_transform(4326)
 
-plot(dpky[11])
+plot(dpky)
 ```
 
 ![](Step3_TemporalModelR_files/figure-html/load-base-2.png)
@@ -873,110 +873,6 @@ hv_res <- build_temporal_hv(
   create_plot = FALSE, # skip the per-fold pairplots
   verbose = FALSE # silence per-fold KDE-construction progress
 )
-```
-
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## Retaining 25140/25140 hypervolume random points for comparison with 78 test points.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## Retaining 21828/21828 hypervolume random points for comparison with 78 test points.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## Retaining 21943/21943 hypervolume random points for comparison with 76 test points.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-    ## Retaining 21533/21533 hypervolume random points for comparison with 78 test points.
-    ## 
-    ## Building tree... 
-    ## done.
-    ## Ball query... 
-    ## 
-    ## done.
-
-``` r
 
 # Presence-only E-space metrics: sensitivity, envelope volume, per-fold overlap.
 hv_res$fold_test_metrics
@@ -1604,12 +1500,6 @@ Phayayen–Khao Yai Forest Complex (DPKY)** and break it down by its
 what happened inside each park or sanctuary individually rather than
 averaging across the whole complex.
 
-The DPKY shapefile we loaded earlier ships with six polygon features,
-but only five distinct protected areas — two of the features both belong
-to *Dong Yai Wildlife Sanctuary* (`ดงใหญ่`). We dissolve those two
-features into a single multi-polygon so the regional aggregation returns
-exactly **five rows**, one per protected area:
-
 1.  **ทับลาน** — Thap Lan National Park.
 2.  **เขาใหญ่** — Khao Yai National Park (the first Thai national park
     established 1962, and the namesake of the complex).
@@ -1633,32 +1523,6 @@ Key arguments to
 - **`binary_stack` / `pattern_raster` / `time_decrease_raster` /
   `time_increase_raster`** — outputs from the consensus and pattern
   steps for the model in question.
-
-``` r
-
-# Two small clean-up steps make the DPKY polygon ready for the regional
-# aggregation that follows:
-#
-# 1. sf::st_zm() drops the Z (elevation) dimension from every geometry.
-#    The DPKY shapefile is XYZ on disk, but analyze_trends_by_spatial_unit()
-#    and the underlying terra calls expect plain 2-D polygons; stripping
-#    Z here prevents confusing errors later. `st_zm()` takes the sf object
-#    as its only argument and returns an sf object whose CRS, attribute
-#    columns, and polygon shapes are otherwise unchanged.
-#
-# 2. dplyr::group_by(Name_th) followed by dplyr::summarise() with
-#    sf::st_union() dissolves any features that share the same Name_th
-#    label into a single (multi-)polygon. The DPKY shapefile carries six
-#    rows but only five distinct protected-area names, so this collapses
-#    the two Dong Yai (ดงใหญ่) features into one row and leaves the
-#    other four parks untouched. The argument `.groups = "drop"` removes
-#    the leftover grouping metadata so the result is a plain ungrouped
-#    sf object the next chunk can use directly.
-dpky <- sf::st_zm(dpky) |>
-  dplyr::group_by(Name_th) |>
-  dplyr::summarise(geometry = sf::st_union(geometry),
-                   .groups  = "drop")
-```
 
 ``` r
 
@@ -1700,7 +1564,7 @@ glm_regional <- analyze_trends_by_spatial_unit(
 )
 ```
 
-![](Step3_TemporalModelR_files/figure-html/regional-glm-1.png)![](Step3_TemporalModelR_files/figure-html/regional-glm-2.png)![](Step3_TemporalModelR_files/figure-html/regional-glm-3.png)![](Step3_TemporalModelR_files/figure-html/regional-glm-4.png)
+![](Step3_TemporalModelR_files/figure-html/regional-glm-1.png)![](Step3_TemporalModelR_files/figure-html/regional-glm-2.png)![](Step3_TemporalModelR_files/figure-html/regional-glm-3.png)![](Step3_TemporalModelR_files/figure-html/regional-glm-4.png)![](Step3_TemporalModelR_files/figure-html/regional-glm-5.png)
 
 ``` r
 
@@ -1710,28 +1574,28 @@ glm_regional$overall_summary
 ```
 
     ##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing
-    ## 1      ตาพระยา             6              4          8          0          0
-    ## 2        ทับลาน            10             22          7          2          0
-    ## 3       ปางสีดา             2             10          7          1          0
-    ## 4       เขาใหญ่             8             18         16          2          0
-    ## 5            0             0              7          5          0          0
+    ## 1        ทับลาน            10             22          7          2          0
+    ## 2       เขาใหญ่             8             18         16          2          0
+    ## 3      ตาพระยา             6              4          8          0          0
+    ## 4       ปางสีดา             2             10          7          1          0
+    ## 5        ดงใหญ่             0              7          5          0          0
     ##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present
-    ## 1           0      0           18             33.33              22.22
-    ## 2           0      0           41             24.39              53.66
-    ## 3           0      0           20             10.00              50.00
-    ## 4           0      0           44             18.18              40.91
+    ## 1           0      0           41             24.39              53.66
+    ## 2           0      0           44             18.18              40.91
+    ## 3           0      0           18             33.33              22.22
+    ## 4           0      0           20             10.00              50.00
     ## 5           0      0           12              0.00              58.33
     ##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing
-    ## 1          44.44           0.00              0               0            0.00
-    ## 2          17.07           4.88              0               0            6.45
-    ## 3          35.00           5.00              0               0            5.56
-    ## 4          36.36           4.55              0               0            5.56
+    ## 1          17.07           4.88              0               0            6.45
+    ## 2          36.36           4.55              0               0            5.56
+    ## 3          44.44           0.00              0               0            0.00
+    ## 4          35.00           5.00              0               0            5.56
     ## 5          41.67           0.00              0               0            0.00
     ##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable
-    ## 1                33.33               0                  42.86
-    ## 2                70.97               0                  52.63
-    ## 3                55.56               0                  20.00
-    ## 4                50.00               0                  30.77
+    ## 1                70.97               0                  52.63
+    ## 2                50.00               0                  30.77
+    ## 3                33.33               0                  42.86
+    ## 4                55.56               0                  20.00
     ## 5                58.33               0                   0.00
 
 ``` r
@@ -1754,7 +1618,7 @@ gam_regional <- analyze_trends_by_spatial_unit(
 )
 ```
 
-![](Step3_TemporalModelR_files/figure-html/regional-gam-1.png)![](Step3_TemporalModelR_files/figure-html/regional-gam-2.png)![](Step3_TemporalModelR_files/figure-html/regional-gam-3.png)![](Step3_TemporalModelR_files/figure-html/regional-gam-4.png)
+![](Step3_TemporalModelR_files/figure-html/regional-gam-1.png)![](Step3_TemporalModelR_files/figure-html/regional-gam-2.png)![](Step3_TemporalModelR_files/figure-html/regional-gam-3.png)![](Step3_TemporalModelR_files/figure-html/regional-gam-4.png)![](Step3_TemporalModelR_files/figure-html/regional-gam-5.png)
 
 ``` r
 
@@ -1763,28 +1627,28 @@ gam_regional$overall_summary
 ```
 
     ##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing
-    ## 1      ตาพระยา             6              5          7          0          0
-    ## 2        ทับลาน            10             22          7          2          0
-    ## 3       ปางสีดา             3             10          6          1          0
-    ## 4       เขาใหญ่             7             20         15          2          0
-    ## 5            0             0              8          4          0          0
+    ## 1        ทับลาน            10             22          7          2          0
+    ## 2       เขาใหญ่             7             20         15          2          0
+    ## 3      ตาพระยา             6              5          7          0          0
+    ## 4       ปางสีดา             3             10          6          1          0
+    ## 5        ดงใหญ่             0              8          4          0          0
     ##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present
-    ## 1           0      0           18             33.33              27.78
-    ## 2           0      0           41             24.39              53.66
-    ## 3           0      0           20             15.00              50.00
-    ## 4           0      0           44             15.91              45.45
+    ## 1           0      0           41             24.39              53.66
+    ## 2           0      0           44             15.91              45.45
+    ## 3           0      0           18             33.33              27.78
+    ## 4           0      0           20             15.00              50.00
     ## 5           0      0           12              0.00              66.67
     ##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing
-    ## 1          38.89           0.00              0               0            0.00
-    ## 2          17.07           4.88              0               0            6.45
-    ## 3          30.00           5.00              0               0            5.88
-    ## 4          34.09           4.55              0               0            5.41
+    ## 1          17.07           4.88              0               0            6.45
+    ## 2          34.09           4.55              0               0            5.41
+    ## 3          38.89           0.00              0               0            0.00
+    ## 4          30.00           5.00              0               0            5.88
     ## 5          33.33           0.00              0               0            0.00
     ##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable
-    ## 1                41.67               0                  46.15
-    ## 2                70.97               0                  52.63
-    ## 3                58.82               0                  30.00
-    ## 4                54.05               0                  29.17
+    ## 1                70.97               0                  52.63
+    ## 2                54.05               0                  29.17
+    ## 3                41.67               0                  46.15
+    ## 4                58.82               0                  30.00
     ## 5                66.67               0                   0.00
 
 ``` r
@@ -1805,7 +1669,7 @@ rf_regional <- analyze_trends_by_spatial_unit(
 )
 ```
 
-![](Step3_TemporalModelR_files/figure-html/regional-rf-1.png)![](Step3_TemporalModelR_files/figure-html/regional-rf-2.png)![](Step3_TemporalModelR_files/figure-html/regional-rf-3.png)![](Step3_TemporalModelR_files/figure-html/regional-rf-4.png)
+![](Step3_TemporalModelR_files/figure-html/regional-rf-1.png)![](Step3_TemporalModelR_files/figure-html/regional-rf-2.png)![](Step3_TemporalModelR_files/figure-html/regional-rf-3.png)![](Step3_TemporalModelR_files/figure-html/regional-rf-4.png)![](Step3_TemporalModelR_files/figure-html/regional-rf-5.png)
 
 ``` r
 
@@ -1814,28 +1678,28 @@ rf_regional$overall_summary
 ```
 
     ##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing
-    ## 1      ตาพระยา             5              0         11          1          1
-    ## 2        ทับลาน             8              4         26          3          0
-    ## 3       ปางสีดา             1              1         16          2          0
-    ## 4       เขาใหญ่             2              4         33          3          1
-    ## 5            0             0              1         10          1          0
+    ## 1        ทับลาน             8              4         26          3          0
+    ## 2       เขาใหญ่             2              4         33          3          1
+    ## 3      ตาพระยา             5              0         11          1          1
+    ## 4       ปางสีดา             1              1         16          2          0
+    ## 5        ดงใหญ่             0              1         10          1          0
     ##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present
-    ## 1           0      0           18             27.78               0.00
-    ## 2           0      0           41             19.51               9.76
-    ## 3           0      0           20              5.00               5.00
-    ## 4           1      0           44              4.55               9.09
+    ## 1           0      0           41             19.51               9.76
+    ## 2           1      0           44              4.55               9.09
+    ## 3           0      0           18             27.78               0.00
+    ## 4           0      0           20              5.00               5.00
     ## 5           0      0           12              0.00               8.33
     ##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing
-    ## 1          61.11           5.56           5.56            0.00            7.69
-    ## 2          63.41           7.32           0.00            0.00            9.09
-    ## 3          80.00          10.00           0.00            0.00           10.53
-    ## 4          75.00           6.82           2.27            2.27            7.14
+    ## 1          63.41           7.32           0.00            0.00            9.09
+    ## 2          75.00           6.82           2.27            2.27            7.14
+    ## 3          61.11           5.56           5.56            0.00            7.69
+    ## 4          80.00          10.00           0.00            0.00           10.53
     ## 5          83.33           8.33           0.00            0.00            8.33
     ##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable
-    ## 1                 0.00            5.56                  27.78
-    ## 2                12.12            0.00                  21.62
-    ## 3                 5.26            0.00                   5.26
-    ## 4                 9.52            2.50                   5.00
+    ## 1                12.12            0.00                  21.62
+    ## 2                 9.52            2.50                   5.00
+    ## 3                 0.00            5.56                  27.78
+    ## 4                 5.26            0.00                   5.26
     ## 5                 8.33            0.00                   0.00
 
 ``` r
@@ -1856,7 +1720,7 @@ hv_regional <- analyze_trends_by_spatial_unit(
 )
 ```
 
-![](Step3_TemporalModelR_files/figure-html/regional-hv-1.png)![](Step3_TemporalModelR_files/figure-html/regional-hv-2.png)![](Step3_TemporalModelR_files/figure-html/regional-hv-3.png)![](Step3_TemporalModelR_files/figure-html/regional-hv-4.png)
+![](Step3_TemporalModelR_files/figure-html/regional-hv-1.png)![](Step3_TemporalModelR_files/figure-html/regional-hv-2.png)![](Step3_TemporalModelR_files/figure-html/regional-hv-3.png)![](Step3_TemporalModelR_files/figure-html/regional-hv-4.png)![](Step3_TemporalModelR_files/figure-html/regional-hv-5.png)
 
 ``` r
 
@@ -1865,28 +1729,28 @@ hv_regional$overall_summary
 ```
 
     ##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing
-    ## 1      ตาพระยา             0             12          6          0          0
-    ## 2        ทับลาน             2             30          9          0          0
-    ## 3       ปางสีดา             0             14          3          3          0
-    ## 4       เขาใหญ่             1             34          9          0          0
-    ## 5            0             0             12          0          0          0
+    ## 1        ทับลาน             2             30          9          0          0
+    ## 2       เขาใหญ่             1             34          9          0          0
+    ## 3      ตาพระยา             0             12          6          0          0
+    ## 4       ปางสีดา             0             14          3          3          0
+    ## 5        ดงใหญ่             0             12          0          0          0
     ##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present
-    ## 1           0      0           18              0.00              66.67
-    ## 2           0      0           41              4.88              73.17
-    ## 3           0      0           20              0.00              70.00
-    ## 4           0      0           44              2.27              77.27
+    ## 1           0      0           41              4.88              73.17
+    ## 2           0      0           44              2.27              77.27
+    ## 3           0      0           18              0.00              66.67
+    ## 4           0      0           20              0.00              70.00
     ## 5           0      0           12              0.00             100.00
     ##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing
-    ## 1          33.33              0              0               0               0
-    ## 2          21.95              0              0               0               0
-    ## 3          15.00             15              0               0              15
-    ## 4          20.45              0              0               0               0
+    ## 1          21.95              0              0               0               0
+    ## 2          20.45              0              0               0               0
+    ## 3          33.33              0              0               0               0
+    ## 4          15.00             15              0               0              15
     ## 5           0.00              0              0               0               0
     ##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable
-    ## 1                66.67               0                   0.00
-    ## 2                76.92               0                  18.18
-    ## 3                70.00               0                   0.00
-    ## 4                79.07               0                  10.00
+    ## 1                76.92               0                  18.18
+    ## 2                79.07               0                  10.00
+    ## 3                66.67               0                   0.00
+    ## 4                70.00               0                   0.00
     ## 5               100.00              NA                     NA
 
 Putting the four `overall_summary` tables side by side tells you, *for

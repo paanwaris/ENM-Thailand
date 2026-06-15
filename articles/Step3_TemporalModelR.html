@@ -235,7 +235,7 @@ shapefile.</p>
 <span><span class="va">dpky</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_read.html" class="external-link">st_read</a></span><span class="op">(</span><span class="st">"data/processed/DPKY/DPKY.shp"</span>, quiet <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_transform.html" class="external-link">st_transform</a></span><span class="op">(</span><span class="fl">4326</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dpky</span><span class="op">[</span><span class="fl">11</span><span class="op">]</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">dpky</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/load-base-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Clean GBIF Sambar deer table from the Pre-workshop. We:</span></span>
@@ -891,116 +891,16 @@ below.</p>
 <span>  output_dir <span class="op">=</span> <span class="st">"outputs/HV_Models"</span>,</span>
 <span>  create_plot <span class="op">=</span> <span class="cn">FALSE</span>, <span class="co"># skip the per-fold pairplots</span></span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-fold KDE-construction progress</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Retaining 25140/25140 hypervolume random points for comparison with 78 test points.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Retaining 21828/21828 hypervolume random points for comparison with 78 test points.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Retaining 21943/21943 hypervolume random points for comparison with 76 test points.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Retaining 21533/21533 hypervolume random points for comparison with 78 test points.</span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## Building tree... </span></span>
-<span><span class="co">## done.</span></span>
-<span><span class="co">## Ball query... </span></span>
-<span><span class="co">## </span></span>
-<span><span class="co">## done.</span></span></code></pre>
-<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Presence-only E-space metrics: sensitivity, envelope volume, per-fold overlap.</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Presence-only E-space metrics: sensitivity, envelope volume, per-fold overlap.</span></span>
 <span><span class="va">hv_res</span><span class="op">$</span><span class="va">fold_test_metrics</span></span></code></pre></div>
 <pre><code><span><span class="co">##   Fold N_Test E_Volume Testing_TP Testing_FN Sensitivity</span></span>
 <span><span class="co">## 1    1     78  41.3336         54         24      0.6923</span></span>
 <span><span class="co">## 2    2     78  78.8560         78          0      1.0000</span></span>
 <span><span class="co">## 3    3     76  80.8515         76          0      1.0000</span></span>
 <span><span class="co">## 4    4     78  76.2519         77          1      0.9872</span></span></code></pre>
-<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">hv_res</span><span class="op">$</span><span class="va">volumes</span></span></code></pre></div>
 <pre><code><span><span class="co">##    fold1    fold2    fold3    fold4 </span></span>
 <span><span class="co">## 41.33356 78.85604 80.85154 76.25195</span></span></code></pre>
@@ -1047,7 +947,7 @@ per-time-step prediction rasters get written. Each model writes to its
 own folder so the post-processing later can address them
 separately.</li>
 </ul>
-<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb42"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">time_steps</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>year <span class="op">=</span> <span class="fl">2010</span><span class="op">:</span><span class="fl">2025</span><span class="op">)</span> <span class="co"># 16 years -&gt; fits a 4 x 4 plot grid</span></span>
 <span></span>
 <span><span class="co"># A single named vector used by every projection call.</span></span>
@@ -1127,7 +1027,7 @@ how many folds agreed the pixel was suitable in that year. With 16
 modelled years (2010–2025), each stack lays out as a 4 × 4 grid; the
 spatial extent is Thailand-wide, so every panel shows the country
 outline filled with per-pixel vote counts.</p>
-<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load all per-year GLM prediction rasters into a single multi-layer</span></span>
 <span><span class="co"># SpatRaster. `terra::rast()` accepts a character vector of file paths</span></span>
 <span><span class="co"># and stacks them in the order given.</span></span>
@@ -1151,7 +1051,7 @@ outline filled with per-pixel vote counts.</p>
 <span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/plot-glm-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb44"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same three-step pattern as the GLM chunk above: build a multi-layer</span></span>
 <span><span class="co"># SpatRaster from the GAM prediction files, label each layer, and draw a</span></span>
 <span><span class="co"># 4 x 4 grid of yearly fold-vote maps.</span></span>
@@ -1161,7 +1061,7 @@ outline filled with per-pixel vote counts.</p>
 <span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/plot-gam-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same pattern, but for the random forest prediction files.</span></span>
 <span><span class="va">rf_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">rf_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">rf_pred_stack</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"\\.tif$"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">rf_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span><span class="op">)</span></span>
@@ -1169,7 +1069,7 @@ outline filled with per-pixel vote counts.</p>
 <span>            mar    <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/plot-rf-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb46"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same pattern, but for the hypervolume prediction files.</span></span>
 <span><span class="va">hv_pred_stack</span> <span class="op">&lt;-</span> <span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/rast.html" class="external-link">rast</a></span><span class="op">(</span><span class="va">hv_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">hv_pred_stack</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"\\.tif$"</span>, <span class="st">""</span>, <span class="fu"><a href="https://rdrr.io/r/base/basename.html" class="external-link">basename</a></span><span class="op">(</span><span class="va">hv_preds</span><span class="op">$</span><span class="va">prediction_files</span><span class="op">)</span><span class="op">)</span></span>
@@ -1211,7 +1111,7 @@ object; supplying it overlays the E-space
 <code>$fold_test_metrics</code> as reference lines on the per-time-step
 series.</li>
 </ul>
-<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb47"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Draw the GLM's per-fold diagnostic time series.</span></span>
 <span><span class="co"># - predictions:  the object returned by generate_spatiotemporal_predictions()</span></span>
 <span><span class="co">#                 for this model; contains the per-time-step G-space metrics.</span></span>
@@ -1224,7 +1124,7 @@ series.</li>
 <span>  model_result <span class="op">=</span> <span class="va">glm_res</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/assess-glm-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-glm-6.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb48"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same diagnostic for the GAM. Arguments behave identically to the GLM</span></span>
 <span><span class="co"># call above, only the `predictions` and `model_result` objects differ.</span></span>
 <span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
@@ -1233,7 +1133,7 @@ series.</li>
 <span>  model_result <span class="op">=</span> <span class="va">gam_res</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/assess-gam-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-gam-6.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb49"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same diagnostic for the random forest.</span></span>
 <span><span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/plot_model_assessment.html" class="external-link">plot_model_assessment</a></span><span class="op">(</span></span>
 <span>  predictions <span class="op">=</span> <span class="va">rf_preds</span>,</span>
@@ -1241,7 +1141,7 @@ series.</li>
 <span>  model_result <span class="op">=</span> <span class="va">rf_res</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/assess-rf-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/assess-rf-6.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb50"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same diagnostic for the hypervolume. The function detects that the</span></span>
 <span><span class="co"># model is presence-only and automatically drops the specificity panel</span></span>
 <span><span class="co"># (no negative training data =&gt; no specificity).</span></span>
@@ -1297,7 +1197,7 @@ stack and frequency raster.</li>
 that must agree before a pixel is called suitable; here, <code>2</code>
 of <code>4</code>.</li>
 </ul>
-<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb51"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Collapse the GLM's per-fold per-year prediction rasters into two</span></span>
 <span><span class="co"># products: a binary `consensus_stack` (one layer per year) and a single</span></span>
 <span><span class="co"># 0-1 `frequency_raster` (proportion of years suitable).</span></span>
@@ -1308,7 +1208,7 @@ of <code>4</code>.</li>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>, <span class="co"># replace any outputs from a previous run</span></span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence progress messages</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb52"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same consensus rule for the GAM. Only the source / target folders change.</span></span>
 <span><span class="va">gam_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
 <span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/gam_predictions"</span>, <span class="co"># source folder of per-fold rasters</span></span>
@@ -1317,7 +1217,7 @@ of <code>4</code>.</li>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb53"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same consensus rule for the random forest.</span></span>
 <span><span class="va">rf_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
 <span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/rf_predictions"</span>, <span class="co"># source folder of per-fold rasters</span></span>
@@ -1326,7 +1226,7 @@ of <code>4</code>.</li>
 <span>  overwrite <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb54"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same consensus rule for the hypervolume.</span></span>
 <span><span class="va">hv_consensus</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/summarize_raster_outputs.html" class="external-link">summarize_raster_outputs</a></span><span class="op">(</span></span>
 <span>  predictions_dir <span class="op">=</span> <span class="st">"outputs/hv_predictions"</span>, <span class="co"># source folder of per-fold rasters</span></span>
@@ -1343,7 +1243,7 @@ of <code>4</code>.</li>
 year</strong> (yellow = suitable, purple = unsuitable). Plot it the same
 way we plotted the prediction stacks earlier — a 4 × 4 grid of the 16
 modelled years for the model in question.</p>
-<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb55"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Draw the GLM's per-year binary suitability surfaces as a 4 x 4 grid.</span></span>
 <span><span class="co"># Arguments mirror the prediction-stack plot above:</span></span>
 <span><span class="co">#   - First positional argument: the binary multi-layer SpatRaster.</span></span>
@@ -1356,19 +1256,19 @@ modelled years for the model in question.</p>
 <span>            mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/consensus-stack-glm-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb56"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same plotting recipe applied to the GAM's binary consensus stack.</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">gam_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">4</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>            mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/consensus-stack-gam-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb57"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same plotting recipe applied to the random forest's binary consensus stack.</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">rf_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">4</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>            mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
 <span>            legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/consensus-stack-rf-1.png" class="r-plt" alt="" width="900" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb58"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same plotting recipe applied to the hypervolume's binary consensus stack.</span></span>
 <span><span class="fu">terra</span><span class="fu">::</span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hv_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>, nr <span class="op">=</span> <span class="fl">4</span>, nc <span class="op">=</span> <span class="fl">4</span>,</span>
 <span>            mar <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1.0</span>, <span class="fl">1.0</span>, <span class="fl">1.5</span>, <span class="fl">3.0</span><span class="op">)</span>,</span>
@@ -1388,7 +1288,7 @@ applied.</p>
 a single 0–1 surface — the proportion of years a pixel was called
 suitable. Drawn per model as a 2 × 2 panel for easy side-by-side
 comparison.</p>
-<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set up a 2 x 2 plot grid so each model's frequency raster occupies one</span></span>
 <span><span class="co"># panel, making side-by-side comparison straightforward.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
@@ -1408,7 +1308,7 @@ comparison.</p>
 <span><span class="fu"><a href="https://rspatial.github.io/terra/reference/plot.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">hv_consensus</span><span class="op">$</span><span class="va">frequency_raster</span>,</span>
 <span>     main <span class="op">=</span> <span class="st">"Hypervolume — proportion of years suitable"</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/consensus-plot-1.png" class="r-plt" alt="" width="1000" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb60"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Reset the plot region back to a single panel for anything that follows.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Reading the panels: pixels close to 1 (bright) were predicted
@@ -1445,7 +1345,7 @@ suitable.</li>
 <code>estimate_time</code></strong> — both <code>FALSE</code> here to
 keep the workshop fast; enable on real analyses if you need them.</li>
 </ul>
-<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb61"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Run changepoint detection on the GLM's binary consensus stack to</span></span>
 <span><span class="co"># classify each pixel's trajectory across years (never-, always-,</span></span>
 <span><span class="co"># increasing, decreasing, fluctuating, no-pattern).</span></span>
@@ -1460,7 +1360,7 @@ keep the workshop fast; enable on real analyses if you need them.</li>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span> <span class="co"># silence per-pixel progress messages</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-glm-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/changepoints-glm-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/changepoints-glm-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb62"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same call, applied to the GAM's consensus stack. Only the input rasters</span></span>
 <span><span class="co"># and the output folder change.</span></span>
 <span><span class="va">gam_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
@@ -1474,7 +1374,7 @@ keep the workshop fast; enable on real analyses if you need them.</li>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-gam-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/changepoints-gam-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/changepoints-gam-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb63"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same call, applied to the random forest's consensus stack.</span></span>
 <span><span class="va">rf_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
 <span>  binary_stack <span class="op">=</span> <span class="va">rf_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
@@ -1487,7 +1387,7 @@ keep the workshop fast; enable on real analyses if you need them.</li>
 <span>  verbose <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-rf-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/changepoints-rf-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/changepoints-rf-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb64"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same call, applied to the hypervolume's consensus stack.</span></span>
 <span><span class="va">hv_patterns</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_temporal_patterns.html" class="external-link">analyze_temporal_patterns</a></span><span class="op">(</span></span>
 <span>  binary_stack <span class="op">=</span> <span class="va">hv_consensus</span><span class="op">$</span><span class="va">consensus_stack</span>,</span>
@@ -1501,7 +1401,7 @@ keep the workshop fast; enable on real analyses if you need them.</li>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-hv-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/changepoints-hv-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/changepoints-hv-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
 <p>The four trajectory-class maps, side-by-side:</p>
-<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb65"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Set up a 2 x 2 plot region so the four models' trajectory maps appear</span></span>
 <span><span class="co"># side by side.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
@@ -1527,7 +1427,7 @@ keep the workshop fast; enable on real analyses if you need them.</li>
 <span>     main <span class="op">=</span> <span class="st">"Hypervolume — temporal trajectory class"</span>,</span>
 <span>     legend <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Step3_TemporalModelR_files/figure-html/changepoints-plot-1.png" class="r-plt" alt="" width="1000" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb66"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Reset the plot region back to a single panel for anything that follows.</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>Reading the panels: each colour is a categorical trajectory class.
@@ -1549,12 +1449,6 @@ Phayayen–Khao Yai Forest Complex (DPKY)</strong> and break it down by
 its <strong>five constituent protected areas</strong>, so the per-unit
 numbers describe what happened inside each park or sanctuary
 individually rather than averaging across the whole complex.</p>
-<p>The DPKY shapefile we loaded earlier ships with six polygon features,
-but only five distinct protected areas — two of the features both belong
-to <em>Dong Yai Wildlife Sanctuary</em> (<code>ดงใหญ่</code>). We
-dissolve those two features into a single multi-polygon so the regional
-aggregation returns exactly <strong>five rows</strong>, one per
-protected area:</p>
 <ol style="list-style-type: decimal">
 <li>
 <strong>ทับลาน</strong> — Thap Lan National Park.</li>
@@ -1589,30 +1483,7 @@ name of each constituent protected area.</li>
 <code>time_increase_raster</code></strong> — outputs from the consensus
 and pattern steps for the model in question.</li>
 </ul>
-<div class="sourceCode" id="cb69"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Two small clean-up steps make the DPKY polygon ready for the regional</span></span>
-<span><span class="co"># aggregation that follows:</span></span>
-<span><span class="co">#</span></span>
-<span><span class="co"># 1. sf::st_zm() drops the Z (elevation) dimension from every geometry.</span></span>
-<span><span class="co">#    The DPKY shapefile is XYZ on disk, but analyze_trends_by_spatial_unit()</span></span>
-<span><span class="co">#    and the underlying terra calls expect plain 2-D polygons; stripping</span></span>
-<span><span class="co">#    Z here prevents confusing errors later. `st_zm()` takes the sf object</span></span>
-<span><span class="co">#    as its only argument and returns an sf object whose CRS, attribute</span></span>
-<span><span class="co">#    columns, and polygon shapes are otherwise unchanged.</span></span>
-<span><span class="co">#</span></span>
-<span><span class="co"># 2. dplyr::group_by(Name_th) followed by dplyr::summarise() with</span></span>
-<span><span class="co">#    sf::st_union() dissolves any features that share the same Name_th</span></span>
-<span><span class="co">#    label into a single (multi-)polygon. The DPKY shapefile carries six</span></span>
-<span><span class="co">#    rows but only five distinct protected-area names, so this collapses</span></span>
-<span><span class="co">#    the two Dong Yai (ดงใหญ่) features into one row and leaves the</span></span>
-<span><span class="co">#    other four parks untouched. The argument `.groups = "drop"` removes</span></span>
-<span><span class="co">#    the leftover grouping metadata so the result is a plain ungrouped</span></span>
-<span><span class="co">#    sf object the next chunk can use directly.</span></span>
-<span><span class="va">dpky</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/st_zm.html" class="external-link">st_zm</a></span><span class="op">(</span><span class="va">dpky</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/group_by.html" class="external-link">group_by</a></span><span class="op">(</span><span class="va">Name_th</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html" class="external-link">summarise</a></span><span class="op">(</span>geometry <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/geos_combine.html" class="external-link">st_union</a></span><span class="op">(</span><span class="va">geometry</span><span class="op">)</span>,</span>
-<span>                   .groups  <span class="op">=</span> <span class="st">"drop"</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb67"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Aggregate the GLM's pixel-level trajectories to the DPKY polygon.</span></span>
 <span><span class="co"># The function overlays the polygon on the trajectory rasters, counts</span></span>
 <span><span class="co"># the pixels falling in each of the seven trajectory classes, and writes</span></span>
@@ -1649,36 +1520,36 @@ and pattern steps for the model in question.</li>
 <span>  create_plot          <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="Step3_TemporalModelR_files/figure-html/regional-glm-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-glm-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-glm-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-glm-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
+<p><img src="Step3_TemporalModelR_files/figure-html/regional-glm-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-glm-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-glm-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-glm-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-glm-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb68"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Pattern composition summary: counts and percentages of pixels in each</span></span>
 <span><span class="co"># of the seven trajectory classes inside DPKY.</span></span>
 <span><span class="va">glm_regional</span><span class="op">$</span><span class="va">overall_summary</span></span></code></pre></div>
 <pre><code><span><span class="co">##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing</span></span>
-<span><span class="co">## 1      ตาพระยา             6              4          8          0          0</span></span>
-<span><span class="co">## 2        ทับลาน            10             22          7          2          0</span></span>
-<span><span class="co">## 3       ปางสีดา             2             10          7          1          0</span></span>
-<span><span class="co">## 4       เขาใหญ่             8             18         16          2          0</span></span>
-<span><span class="co">## 5            0             0              7          5          0          0</span></span>
+<span><span class="co">## 1        ทับลาน            10             22          7          2          0</span></span>
+<span><span class="co">## 2       เขาใหญ่             8             18         16          2          0</span></span>
+<span><span class="co">## 3      ตาพระยา             6              4          8          0          0</span></span>
+<span><span class="co">## 4       ปางสีดา             2             10          7          1          0</span></span>
+<span><span class="co">## 5        ดงใหญ่             0              7          5          0          0</span></span>
 <span><span class="co">##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present</span></span>
-<span><span class="co">## 1           0      0           18             33.33              22.22</span></span>
-<span><span class="co">## 2           0      0           41             24.39              53.66</span></span>
-<span><span class="co">## 3           0      0           20             10.00              50.00</span></span>
-<span><span class="co">## 4           0      0           44             18.18              40.91</span></span>
+<span><span class="co">## 1           0      0           41             24.39              53.66</span></span>
+<span><span class="co">## 2           0      0           44             18.18              40.91</span></span>
+<span><span class="co">## 3           0      0           18             33.33              22.22</span></span>
+<span><span class="co">## 4           0      0           20             10.00              50.00</span></span>
 <span><span class="co">## 5           0      0           12              0.00              58.33</span></span>
 <span><span class="co">##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing</span></span>
-<span><span class="co">## 1          44.44           0.00              0               0            0.00</span></span>
-<span><span class="co">## 2          17.07           4.88              0               0            6.45</span></span>
-<span><span class="co">## 3          35.00           5.00              0               0            5.56</span></span>
-<span><span class="co">## 4          36.36           4.55              0               0            5.56</span></span>
+<span><span class="co">## 1          17.07           4.88              0               0            6.45</span></span>
+<span><span class="co">## 2          36.36           4.55              0               0            5.56</span></span>
+<span><span class="co">## 3          44.44           0.00              0               0            0.00</span></span>
+<span><span class="co">## 4          35.00           5.00              0               0            5.56</span></span>
 <span><span class="co">## 5          41.67           0.00              0               0            0.00</span></span>
 <span><span class="co">##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable</span></span>
-<span><span class="co">## 1                33.33               0                  42.86</span></span>
-<span><span class="co">## 2                70.97               0                  52.63</span></span>
-<span><span class="co">## 3                55.56               0                  20.00</span></span>
-<span><span class="co">## 4                50.00               0                  30.77</span></span>
+<span><span class="co">## 1                70.97               0                  52.63</span></span>
+<span><span class="co">## 2                50.00               0                  30.77</span></span>
+<span><span class="co">## 3                33.33               0                  42.86</span></span>
+<span><span class="co">## 4                55.56               0                  20.00</span></span>
 <span><span class="co">## 5                58.33               0                   0.00</span></span></code></pre>
-<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb70"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same aggregation applied to the GAM outputs. Only the input rasters and</span></span>
 <span><span class="co"># the output folder change from the GLM call above; all other arguments</span></span>
 <span><span class="co"># are identical.</span></span>
@@ -1695,35 +1566,35 @@ and pattern steps for the model in question.</li>
 <span>  create_plot          <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="Step3_TemporalModelR_files/figure-html/regional-gam-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-gam-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-gam-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-gam-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
+<p><img src="Step3_TemporalModelR_files/figure-html/regional-gam-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-gam-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-gam-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-gam-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-gam-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb71"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Diagnostic DPKY-level pattern composition summary for the GAM.</span></span>
 <span><span class="va">gam_regional</span><span class="op">$</span><span class="va">overall_summary</span></span></code></pre></div>
 <pre><code><span><span class="co">##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing</span></span>
-<span><span class="co">## 1      ตาพระยา             6              5          7          0          0</span></span>
-<span><span class="co">## 2        ทับลาน            10             22          7          2          0</span></span>
-<span><span class="co">## 3       ปางสีดา             3             10          6          1          0</span></span>
-<span><span class="co">## 4       เขาใหญ่             7             20         15          2          0</span></span>
-<span><span class="co">## 5            0             0              8          4          0          0</span></span>
+<span><span class="co">## 1        ทับลาน            10             22          7          2          0</span></span>
+<span><span class="co">## 2       เขาใหญ่             7             20         15          2          0</span></span>
+<span><span class="co">## 3      ตาพระยา             6              5          7          0          0</span></span>
+<span><span class="co">## 4       ปางสีดา             3             10          6          1          0</span></span>
+<span><span class="co">## 5        ดงใหญ่             0              8          4          0          0</span></span>
 <span><span class="co">##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present</span></span>
-<span><span class="co">## 1           0      0           18             33.33              27.78</span></span>
-<span><span class="co">## 2           0      0           41             24.39              53.66</span></span>
-<span><span class="co">## 3           0      0           20             15.00              50.00</span></span>
-<span><span class="co">## 4           0      0           44             15.91              45.45</span></span>
+<span><span class="co">## 1           0      0           41             24.39              53.66</span></span>
+<span><span class="co">## 2           0      0           44             15.91              45.45</span></span>
+<span><span class="co">## 3           0      0           18             33.33              27.78</span></span>
+<span><span class="co">## 4           0      0           20             15.00              50.00</span></span>
 <span><span class="co">## 5           0      0           12              0.00              66.67</span></span>
 <span><span class="co">##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing</span></span>
-<span><span class="co">## 1          38.89           0.00              0               0            0.00</span></span>
-<span><span class="co">## 2          17.07           4.88              0               0            6.45</span></span>
-<span><span class="co">## 3          30.00           5.00              0               0            5.88</span></span>
-<span><span class="co">## 4          34.09           4.55              0               0            5.41</span></span>
+<span><span class="co">## 1          17.07           4.88              0               0            6.45</span></span>
+<span><span class="co">## 2          34.09           4.55              0               0            5.41</span></span>
+<span><span class="co">## 3          38.89           0.00              0               0            0.00</span></span>
+<span><span class="co">## 4          30.00           5.00              0               0            5.88</span></span>
 <span><span class="co">## 5          33.33           0.00              0               0            0.00</span></span>
 <span><span class="co">##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable</span></span>
-<span><span class="co">## 1                41.67               0                  46.15</span></span>
-<span><span class="co">## 2                70.97               0                  52.63</span></span>
-<span><span class="co">## 3                58.82               0                  30.00</span></span>
-<span><span class="co">## 4                54.05               0                  29.17</span></span>
+<span><span class="co">## 1                70.97               0                  52.63</span></span>
+<span><span class="co">## 2                54.05               0                  29.17</span></span>
+<span><span class="co">## 3                41.67               0                  46.15</span></span>
+<span><span class="co">## 4                58.82               0                  30.00</span></span>
 <span><span class="co">## 5                66.67               0                   0.00</span></span></code></pre>
-<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb73"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same aggregation applied to the random forest outputs.</span></span>
 <span><span class="va">rf_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
 <span>  shapefile_path       <span class="op">=</span> <span class="va">dpky</span>,</span>
@@ -1738,35 +1609,35 @@ and pattern steps for the model in question.</li>
 <span>  create_plot          <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="Step3_TemporalModelR_files/figure-html/regional-rf-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-rf-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-rf-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-rf-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
+<p><img src="Step3_TemporalModelR_files/figure-html/regional-rf-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-rf-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-rf-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-rf-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-rf-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb74"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Diagnostic DPKY-level pattern composition summary for the RF.</span></span>
 <span><span class="va">rf_regional</span><span class="op">$</span><span class="va">overall_summary</span></span></code></pre></div>
 <pre><code><span><span class="co">##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing</span></span>
-<span><span class="co">## 1      ตาพระยา             5              0         11          1          1</span></span>
-<span><span class="co">## 2        ทับลาน             8              4         26          3          0</span></span>
-<span><span class="co">## 3       ปางสีดา             1              1         16          2          0</span></span>
-<span><span class="co">## 4       เขาใหญ่             2              4         33          3          1</span></span>
-<span><span class="co">## 5            0             0              1         10          1          0</span></span>
+<span><span class="co">## 1        ทับลาน             8              4         26          3          0</span></span>
+<span><span class="co">## 2       เขาใหญ่             2              4         33          3          1</span></span>
+<span><span class="co">## 3      ตาพระยา             5              0         11          1          1</span></span>
+<span><span class="co">## 4       ปางสีดา             1              1         16          2          0</span></span>
+<span><span class="co">## 5        ดงใหญ่             0              1         10          1          0</span></span>
 <span><span class="co">##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present</span></span>
-<span><span class="co">## 1           0      0           18             27.78               0.00</span></span>
-<span><span class="co">## 2           0      0           41             19.51               9.76</span></span>
-<span><span class="co">## 3           0      0           20              5.00               5.00</span></span>
-<span><span class="co">## 4           1      0           44              4.55               9.09</span></span>
+<span><span class="co">## 1           0      0           41             19.51               9.76</span></span>
+<span><span class="co">## 2           1      0           44              4.55               9.09</span></span>
+<span><span class="co">## 3           0      0           18             27.78               0.00</span></span>
+<span><span class="co">## 4           0      0           20              5.00               5.00</span></span>
 <span><span class="co">## 5           0      0           12              0.00               8.33</span></span>
 <span><span class="co">##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing</span></span>
-<span><span class="co">## 1          61.11           5.56           5.56            0.00            7.69</span></span>
-<span><span class="co">## 2          63.41           7.32           0.00            0.00            9.09</span></span>
-<span><span class="co">## 3          80.00          10.00           0.00            0.00           10.53</span></span>
-<span><span class="co">## 4          75.00           6.82           2.27            2.27            7.14</span></span>
+<span><span class="co">## 1          63.41           7.32           0.00            0.00            9.09</span></span>
+<span><span class="co">## 2          75.00           6.82           2.27            2.27            7.14</span></span>
+<span><span class="co">## 3          61.11           5.56           5.56            0.00            7.69</span></span>
+<span><span class="co">## 4          80.00          10.00           0.00            0.00           10.53</span></span>
 <span><span class="co">## 5          83.33           8.33           0.00            0.00            8.33</span></span>
 <span><span class="co">##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable</span></span>
-<span><span class="co">## 1                 0.00            5.56                  27.78</span></span>
-<span><span class="co">## 2                12.12            0.00                  21.62</span></span>
-<span><span class="co">## 3                 5.26            0.00                   5.26</span></span>
-<span><span class="co">## 4                 9.52            2.50                   5.00</span></span>
+<span><span class="co">## 1                12.12            0.00                  21.62</span></span>
+<span><span class="co">## 2                 9.52            2.50                   5.00</span></span>
+<span><span class="co">## 3                 0.00            5.56                  27.78</span></span>
+<span><span class="co">## 4                 5.26            0.00                   5.26</span></span>
 <span><span class="co">## 5                 8.33            0.00                   0.00</span></span></code></pre>
-<div class="sourceCode" id="cb79"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb76"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Same aggregation applied to the hypervolume outputs.</span></span>
 <span><span class="va">hv_regional</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html" class="external-link">analyze_trends_by_spatial_unit</a></span><span class="op">(</span></span>
 <span>  shapefile_path       <span class="op">=</span> <span class="va">dpky</span>,</span>
@@ -1781,33 +1652,33 @@ and pattern steps for the model in question.</li>
 <span>  create_plot          <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  verbose              <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="Step3_TemporalModelR_files/figure-html/regional-hv-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-hv-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-hv-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-hv-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
-<div class="sourceCode" id="cb80"><pre class="downlit sourceCode r">
+<p><img src="Step3_TemporalModelR_files/figure-html/regional-hv-1.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-hv-2.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-hv-3.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-hv-4.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"><img src="Step3_TemporalModelR_files/figure-html/regional-hv-5.png" class="r-plt" alt="" width="700" style="display: block; margin: auto;"></p>
+<div class="sourceCode" id="cb77"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Diagnostic DPKY-level pattern composition summary for the hypervolume.</span></span>
 <span><span class="va">hv_regional</span><span class="op">$</span><span class="va">overall_summary</span></span></code></pre></div>
 <pre><code><span><span class="co">##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing</span></span>
-<span><span class="co">## 1      ตาพระยา             0             12          6          0          0</span></span>
-<span><span class="co">## 2        ทับลาน             2             30          9          0          0</span></span>
-<span><span class="co">## 3       ปางสีดา             0             14          3          3          0</span></span>
-<span><span class="co">## 4       เขาใหญ่             1             34          9          0          0</span></span>
-<span><span class="co">## 5            0             0             12          0          0          0</span></span>
+<span><span class="co">## 1        ทับลาน             2             30          9          0          0</span></span>
+<span><span class="co">## 2       เขาใหญ่             1             34          9          0          0</span></span>
+<span><span class="co">## 3      ตาพระยา             0             12          6          0          0</span></span>
+<span><span class="co">## 4       ปางสีดา             0             14          3          3          0</span></span>
+<span><span class="co">## 5        ดงใหญ่             0             12          0          0          0</span></span>
 <span><span class="co">##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present</span></span>
-<span><span class="co">## 1           0      0           18              0.00              66.67</span></span>
-<span><span class="co">## 2           0      0           41              4.88              73.17</span></span>
-<span><span class="co">## 3           0      0           20              0.00              70.00</span></span>
-<span><span class="co">## 4           0      0           44              2.27              77.27</span></span>
+<span><span class="co">## 1           0      0           41              4.88              73.17</span></span>
+<span><span class="co">## 2           0      0           44              2.27              77.27</span></span>
+<span><span class="co">## 3           0      0           18              0.00              66.67</span></span>
+<span><span class="co">## 4           0      0           20              0.00              70.00</span></span>
 <span><span class="co">## 5           0      0           12              0.00             100.00</span></span>
 <span><span class="co">##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing</span></span>
-<span><span class="co">## 1          33.33              0              0               0               0</span></span>
-<span><span class="co">## 2          21.95              0              0               0               0</span></span>
-<span><span class="co">## 3          15.00             15              0               0              15</span></span>
-<span><span class="co">## 4          20.45              0              0               0               0</span></span>
+<span><span class="co">## 1          21.95              0              0               0               0</span></span>
+<span><span class="co">## 2          20.45              0              0               0               0</span></span>
+<span><span class="co">## 3          33.33              0              0               0               0</span></span>
+<span><span class="co">## 4          15.00             15              0               0              15</span></span>
 <span><span class="co">## 5           0.00              0              0               0               0</span></span>
 <span><span class="co">##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable</span></span>
-<span><span class="co">## 1                66.67               0                   0.00</span></span>
-<span><span class="co">## 2                76.92               0                  18.18</span></span>
-<span><span class="co">## 3                70.00               0                   0.00</span></span>
-<span><span class="co">## 4                79.07               0                  10.00</span></span>
+<span><span class="co">## 1                76.92               0                  18.18</span></span>
+<span><span class="co">## 2                79.07               0                  10.00</span></span>
+<span><span class="co">## 3                66.67               0                   0.00</span></span>
+<span><span class="co">## 4                70.00               0                   0.00</span></span>
 <span><span class="co">## 5               100.00              NA                     NA</span></span></code></pre>
 <p>Putting the four <code>overall_summary</code> tables side by side
 tells you, <em>for each of the five protected areas</em>, what fraction
