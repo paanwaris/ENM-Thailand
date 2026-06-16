@@ -15,10 +15,9 @@ Supported by:
 
 A hands-on workshop on **ecological niche modeling (ENM)** in R, using
 Sambar deer (*Rusa unicolor*) data as a case study. The workshop walks
-participants through three modern R packages that cover the fundamental
-theory and an applied predictive workflow. The material is organized as
-four self-contained **Steps**, so instructors can pace the workshop
-flexibly — from a single intensive day to a longer multi-session course.
+participants through three R packages that cover the fundamental theory
+and an applied predictive workflow. The material is organized as four
+self-contained **Steps**.
 
 The full content is available at
 <https://paanwaris.github.io/ENM-Thailand/>.
