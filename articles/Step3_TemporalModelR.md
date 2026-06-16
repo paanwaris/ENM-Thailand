@@ -122,7 +122,7 @@ worlds: the model has enough data to estimate a credible niche, and the
 conservation-relevant interpretation focuses on the protected complex
 where management decisions are actually made.
 
-We therefore load **two** polygons in this chunk: the country boundary
+We therefore load **two** polygons in this code: the country boundary
 `thailand` (used as the study-area reference for cross-validation folds
 and pseudoabsences below), and the DPKY polygon (held in reserve for the
 *Aggregate by spatial unit* step at the end of the document). The DPKY
@@ -243,29 +243,36 @@ raster_align(
 )
 ```
 
-### Build a temporal-mean E-space for thinning
+### Visualise the period-mean environment
 
-Before any thinning, we build a single **temporal-mean** reference
-E-space that summarises the environment Sambar deer experienced across
-the entire 16-year **2010–2025** window. We compute the per-pixel mean
-across years for each of the three aligned, DPKY-masked variables, then
-stack the three mean surfaces into one 3-layer `SpatRaster`.
+Before we hit the thinning step, it helps to see what the study-area
+environment looks like *on average* across the 16-year modelled window.
+We compute the per-pixel mean across years for each of the three aligned
+variables and plot the three resulting surfaces side by side.
 
-This temporal-mean stack will be the **reference environmental space**
-that `bean` uses to thin every year. Using a single, period-wide E-space
-(rather than the year-specific raster of each occurrence) keeps the
-thinning grid *consistent across years*: a 2014 record and a 2020 record
-that fall in the same temporal-mean pod are treated as environmentally
-redundant, even though their individual years’ rasters may differ
-slightly.
+> **Important:** these mean rasters are **only a diagnostic snapshot of
+> the study area** — `bean` does **not** use them as its reference
+> E-space below. Each year’s records are thinned against *that year’s
+> own* per-year rasters, so a 2010 record is compared against 2010
+> precipitation/temperature/NDVI and a 2024 record against 2024’s. The
+> plots in this code are a study-area summary, not an input to the
+> modelling pipeline.
 
 ``` r
 
-# List every aligned per-year raster, then split by variable name.
+# List every aligned per-year raster file in `aligned_dir`.
+# `pattern = "\\.tif$"` keeps only TIFFs (the `\\.` escapes the dot so it
+# matches a literal period, not "any character"); `full.names = TRUE`
+# returns the complete file path for each match rather than just the
+# bare file name.
 aligned_files <- list.files(aligned_dir, pattern = "\\.tif$", full.names = TRUE)
 
-# Group the file list by variable name (prec_ / temp_ / NDVI_) so each
-# group becomes a multi-layer SpatRaster spanning every year.
+# Split the file list by variable name (prec_ / temp_ / NDVI_) so each
+# group becomes a multi-layer SpatRaster spanning every modelled year.
+# grep() returns the file names that contain the given prefix and
+# `value = TRUE` makes it return the matched strings rather than their
+# integer positions. We then prepend the directory path back on with
+# file.path() so terra has full paths to read.
 prec_files <- file.path(aligned_dir,
                         grep("prec_", basename(aligned_files), value = TRUE))
 temp_files <- file.path(aligned_dir,
@@ -273,17 +280,15 @@ temp_files <- file.path(aligned_dir,
 NDVI_files <- file.path(aligned_dir,
                         grep("NDVI_", basename(aligned_files), value = TRUE))
 
-# Per-pixel mean across years for each variable — terra::mean() over a
-# multi-layer SpatRaster collapses the time dimension into a single layer.
+# Per-pixel mean across years for each variable. `rast(<vector of paths>)`
+# stacks the per-year TIFFs into a 16-layer SpatRaster; terra::mean()
+# then collapses the time dimension to a single layer. `na.rm = TRUE`
+# ignores any NA pixels (e.g. ocean) so they do not contaminate the mean.
 mean_prec <- terra::mean(rast(prec_files), na.rm = TRUE)
 mean_temp <- terra::mean(rast(temp_files), na.rm = TRUE)
 mean_NDVI <- terra::mean(rast(NDVI_files), na.rm = TRUE)
 
-# Stack the three mean surfaces into one 3-layer reference E-space, and
-# rename the layers to the variable names bean will look up.
-env_ref <- c(mean_prec, mean_temp, mean_NDVI)
-names(env_ref) <- c("mean_prec", "mean_temp", "mean_NDVI")
-
+# Display the three diagnostic mean surfaces side by side.
 par(mfrow = c(1, 3))
 plot(mean_prec, main = "Mean precipitation (2010–2025)")
 plot(mean_temp, main = "Mean temperature (2010–2025)")
@@ -302,28 +307,30 @@ corresponding variable across the 16 modelled years, in the variable’s
 natural units (mm for precipitation, °C-equivalent units for
 land-surface-temperature-derived `temp`, and a unitless 0–1 index for
 NDVI). Bright patches stand for places that were *consistently* wet,
-warm, or vegetated; dark patches stand for places that were
-*consistently* dry, cool, or sparse. This is the environmental landscape
-`bean` will use to define the thinning grid.
+warm, or vegetated during 2010–2025; dark patches stand for places that
+were *consistently* dry, cool, or sparse. Treat this strictly as a
+study-area summary — the bean thinning that follows uses the
+**year-specific** rasters, not these means.
 
 ### Environmental thinning with `bean`
 
 We reduce **environmental sampling bias** in the Sambar deer occurrences
-using `bean`, with the temporal-mean stack `env_ref` from the previous
-section as the reference E-space.
+using `bean`. Each year is thinned against **its own three rasters** of
+precipitation, temperature, and NDVI, so a 2010 record is judged only
+against the 2010 climate that actually surrounded it, a 2024 record is
+judged only against the 2024 climate, and so on.
 
 Because Step 3 treats every year as an independent observation along the
-time axis, we run `bean` **once per year** rather than once over the
-pooled occurrence table. Each year is thinned against only its own
-subset of records, so a heavily-sampled year cannot drag the thinning
-grid away from sparsely-sampled ones. The reference E-space `env_ref`
-stays *constant* across iterations: it is the period-wide environmental
-landscape every record is judged against, so the same env value means
-the same thing in 2018 as in 2024. Two records from *different* years
-that happen to fall in the same `env_ref` pod are both kept, because
-they carry independent information about the niche at two different
-points in time; only records that cluster *within the same year* are
-treated as environmentally redundant and thinned away.
+time axis, we run `bean` **once per year**, and each iteration uses
+**two year-specific inputs**: that year’s subset of GBIF records *and*
+that year’s aligned per-year rasters. The thinning grid is therefore
+rebuilt from scratch every iteration, and its cell widths come from the
+actual climate values that prevailed in that particular year. Two
+records collected in the same year that fall into the same year-specific
+pod are treated as environmentally redundant and thinned away; two
+records collected in different years live in separate iterations of the
+loop and are never directly compared, so the `year` column always
+survives intact for the temporal modelling that follows.
 
 We use the **`"sheather-jones"`** bandwidth selector inside
 [`find_env_resolution()`](https://paanwaris.github.io/bean/reference/find_env_resolution.html).
@@ -335,23 +342,29 @@ workshop uses everywhere `bean` appears. We pair it with the stochastic
 so each pod retains one of the original GBIF coordinates rather than a
 synthetic centroid, preserving the link back to the source record.
 
-The loop below follows the same five steps inside every iteration:
+The loop below follows the same six steps inside every iteration:
 
 1.  **Pull the year’s rows** out of `sambar`.
-2.  **Slim them to (longitude, latitude)** for bean — bean’s pipeline
-    only needs the coordinate pair.
-3.  **Run the bean pipeline** —
+2.  **Load that year’s three aligned rasters** — any file whose name
+    starts with `prec_YYYY`, `temp_YYYY`, or `NDVI_YYYY` (so both
+    `prec_2010.tif` and `prec_2010_Masked_Updated.tif` style filenames
+    are accepted) — and stack them as that iteration’s reference
+    E-space.
+3.  **Slim the year’s rows to (longitude, latitude)** for bean — bean’s
+    pipeline only needs the coordinate pair.
+4.  **Run the bean pipeline** —
     [`prepare_bean()`](https://paanwaris.github.io/bean/reference/prepare_bean.html)
-    extracts the env values at each occurrence and z-scores them,
+    extracts the env values at each occurrence from this year’s rasters
+    and z-scores them,
     [`find_env_resolution()`](https://paanwaris.github.io/bean/reference/find_env_resolution.html)
     picks per-variable Sheather–Jones bandwidths as the grid cell
     widths, and
     [`thin_env_nd()`](https://paanwaris.github.io/bean/reference/thin_env_nd.html)
     randomly retains one occurrence per occupied pod.
-4.  **Recover every original column** of the year’s subset (`year`,
+5.  **Recover every original column** of the year’s subset (`year`,
     `presence`, `gbifID`, `basisOfRecord`, …) by matching the thinned
     (longitude, latitude) pair back onto the year’s rows.
-5.  **Stash the result** in a pre-allocated, year-keyed list slot so the
+6.  **Stash the result** in a pre-allocated, year-keyed list slot so the
     per-year tables can be row-bound into a single data frame at the
     end.
 
@@ -380,7 +393,45 @@ for (yr in years) {
   # ---- 1. Pull this year's rows out of the full sambar table -------------
   yr_df <- sambar[sambar$year == yr, ]
 
-  # ---- 2. Coordinate-only slice for bean ---------------------------------
+  # ---- 2. Load this year's three aligned rasters as the env reference ----
+  # The aligned files carry the variable name + year plus an optional suffix
+  # (some shipped versions of the dataset are saved as e.g.
+  # "prec_2010_Masked_Updated.tif", others as just "prec_2010.tif"), so we
+  # find each year's three files with a regex rather than hard-coding a
+  # filename.
+  #
+  # `list.files()` arguments:
+  #   - path:       the folder to search (our aligned-rasters directory).
+  #   - pattern:    a regex describing which filenames to match. We use
+  #                 sprintf() to inject the current year into the pattern;
+  #                 the resulting string for yr = 2010 is
+  #                 "^prec_2010.*\\.tif$" — i.e. starts with "prec_2010",
+  #                 then any characters, then ends in ".tif".
+  #   - full.names: TRUE returns full file paths so terra can read them
+  #                 directly without needing file.path() reassembly.
+  # The trailing `[1]` keeps just the first matching file in case more
+  # than one matches (e.g. an old non-suffixed copy left next to the
+  # current one).
+  #
+  # terra::rast() then reads the three single-band TIFFs and stacks them
+  # into one 3-layer SpatRaster. We rename the layers to plain "prec" /
+  # "temp" / "NDVI" so bean's `env_vars` argument stays the same string
+  # vector in every iteration of the loop, regardless of which year is
+  # being processed.
+  prec_path <- list.files(aligned_dir,
+                          pattern    = sprintf("^prec_%d.*\\.tif$", yr),
+                          full.names = TRUE)[1]
+  temp_path <- list.files(aligned_dir,
+                          pattern    = sprintf("^temp_%d.*\\.tif$", yr),
+                          full.names = TRUE)[1]
+  NDVI_path <- list.files(aligned_dir,
+                          pattern    = sprintf("^NDVI_%d.*\\.tif$", yr),
+                          full.names = TRUE)[1]
+
+  env_yr <- terra::rast(c(prec_path, temp_path, NDVI_path))
+  names(env_yr) <- c("prec", "temp", "NDVI")
+
+  # ---- 3. Coordinate-only slice for bean ---------------------------------
   yr_xy <- yr_df[, c("longitude", "latitude")]
 
   # ---- Safety guard: skip thinning when there is nothing to thin ---------
@@ -391,37 +442,43 @@ for (yr in years) {
     next
   }
 
-  # ---- 3a. prepare_bean(): extract env values + z-score them -------------
+  # ---- 4a. prepare_bean(): extract env values + z-score them -------------
+  # The key change from a single-pass workflow: env_rasters is set to
+  # `env_yr`, the year-specific 3-layer stack built in step 2 above.
+  # Every other argument behaves exactly as in the Step 2 walkthrough.
   prepped <- prepare_bean(
-    data        = yr_xy,                        # this year's coord-only table
-    env_rasters = env_ref,                      # the constant period-wide E-space
-    longitude   = "longitude",                  # name of the x coordinate column
-    latitude    = "latitude",                   # name of the y coordinate column
-    transform   = "scale"                       # z-score every env variable
+    data = yr_xy, # this year's coord-only table
+    env_rasters = env_yr, # THIS year's 3-layer raster stack
+    longitude = "longitude", # name of the x coordinate column
+    latitude = "latitude", # name of the y coordinate column
+    transform = "scale" # z-score every env variable
   )
 
-  # ---- 3b. find_env_resolution(): pick a per-variable cell width ---------
+  # ---- 4b. find_env_resolution(): pick a per-variable cell width ---------
+  # The env_vars vector uses plain "prec" / "temp" / "NDVI" because we
+  # renamed the layers in step 2; these strings stay identical across
+  # iterations even though the underlying numeric values are year-specific.
   res <- find_env_resolution(
-    data     = prepped,                                          # the prepped, scaled table
-    env_vars = c("mean_prec", "mean_temp", "mean_NDVI"),         # columns that define the grid axes
-    method   = "sheather-jones"                                  # Sheather-Jones plug-in bandwidth
+    data = prepped, # the prepped, scaled table
+    env_vars = c("prec", "temp", "NDVI"), # columns that define the grid axes
+    method = "sheather-jones" # Sheather-Jones plug-in bandwidth
   )
 
-  # ---- 3c. thin_env_nd(): keep one occurrence per occupied pod -----------
+  # ---- 4c. thin_env_nd(): keep one occurrence per occupied pod -----------
   thin_out <- thin_env_nd(
-    data            = prepped,                                   # same prepped table
-    env_vars        = c("mean_prec", "mean_temp", "mean_NDVI"),  # same three axes
-    grid_resolution = res$suggested_resolution                   # per-variable cell widths from 3b
+    data = prepped, # same prepped table
+    env_vars = c("prec", "temp", "NDVI"), # same three axes
+    grid_resolution = res$suggested_resolution # per-variable cell widths from 4b
   )
 
-  # ---- 4. Recover the original columns by matching on (lon, lat) ---------
+  # ---- 5. Recover the original columns by matching on (lon, lat) ---------
   # paste() joins each row's two coordinates into a single string so we can
   # check membership in one step with %in%.
   keep_key <- paste(thin_out$thinned_data$longitude,
                     thin_out$thinned_data$latitude)
   yr_thinned <- yr_df[paste(yr_df$longitude, yr_df$latitude) %in% keep_key, ]
 
-  # ---- 5. Stash this year's thinned table into the year-keyed slot ------
+  # ---- 6. Stash this year's thinned table into the year-keyed slot ------
   thinned_list[[as.character(yr)]] <- yr_thinned
 }
 
@@ -434,10 +491,10 @@ rownames(sambar_thinned) <- NULL
 # factor(..., levels = ...) on `after` forces table() to include a zero
 # for any year where every record was thinned away.
 data.frame(
-  year   = sort(unique(sambar$year)),
+  year = sort(unique(sambar$year)),
   before = as.integer(table(sambar$year)),
-  after  = as.integer(table(factor(sambar_thinned$year,
-                                   levels = sort(unique(sambar$year)))))
+  after = as.integer(table(factor(sambar_thinned$year,
+                                  levels = sort(unique(sambar$year)))))
 )
 ```
 
@@ -448,11 +505,11 @@ data.frame(
     ## 4  2013     27    14
     ## 5  2014     29    13
     ## 6  2015     31    20
-    ## 7  2016     30    15
+    ## 7  2016     30    14
     ## 8  2017     31    22
     ## 9  2018     40    18
     ## 10 2019     55    14
-    ## 11 2020     19    14
+    ## 11 2020     19    12
     ## 12 2021     17    12
     ## 13 2022     68    21
     ## 14 2023    106    44
@@ -466,12 +523,12 @@ sambar <- sambar_thinned
 ```
 
 The before/after table reports, for each modelled year, how many records
-went into the thinning step and how many survived its own pod-by-pod
-sampling. Years where `after` is much smaller than `before` are the
-years that carried the most environmental redundancy; years where the
-two columns are equal are either too small to thin (the safety guard
-skipped them) or already environmentally well-spread within that single
-year.
+went into the thinning step and how many survived their year-specific
+pod-by-pod sampling. Years where `after` is much smaller than `before`
+are years where Sambar surveys clustered tightly around a narrow range
+of *that year’s* climates; years where the two columns are equal are
+either too small to thin (the safety guard skipped them) or already
+environmentally well-spread within that single year’s reference E-space.
 
 ### Spatio-temporal rarefaction
 
@@ -514,7 +571,7 @@ rare_out <- spatiotemporal_rarefaction(
 rare_out$input_points # n records that entered rarefaction
 ```
 
-    ## [1] 315
+    ## [1] 312
 
 ``` r
 
@@ -574,8 +631,8 @@ head(ext_out$raw_values)
     ## 2 2022     1785 1563.137 28.29210 0.7183695  98.82302 18.68756
     ## 3 2021     3210 1561.478 25.62316 0.7308000 101.57942 17.36530
     ## 4 2025     3574 1649.073 27.18566 0.6480218 100.87285 16.99498
-    ## 5 2023     3676 1159.333 28.01327 0.6358696 101.63737 16.96117
-    ## 6 2021     3676 1500.452 27.31196 0.6299087 101.62724 16.96162
+    ## 5 2021     3676 1500.452 27.31196 0.6299087 101.62724 16.96162
+    ## 6 2023     3676 1159.333 28.01327 0.6358696 101.63737 16.96117
 
 ``` r
 
@@ -718,7 +775,7 @@ absences$summary
 
 `TemporalModelR` ships four model families, all with the same
 `partition_result` + (optionally) `pseudoabsence_result` interface so
-swapping algorithms is a one-chunk change:
+swapping algorithms is a one-code change:
 
 - **GLM** — generalised linear model (`build_temporal_glm`). Linear /
   polynomial responses, easiest to interpret.
@@ -753,26 +810,31 @@ glm_res <- build_temporal_glm(
   link = "logit", # binary GLM with logit link
   threshold_method = "tss", # pick threshold maximising True Skill Statistic
   output_dir = "outputs/GLM_Models",
-  create_plot = FALSE,
+  create_plot = TRUE, # create the smooth-response curves to keep output compact
   overwrite = TRUE,
   time_cols = "year",
-  verbose = FALSE
+  verbose = FALSE # silence per-fold smoothing progress
 )
+```
+
+![](Step3_TemporalModelR_files/figure-html/glm-1.png)![](Step3_TemporalModelR_files/figure-html/glm-2.png)![](Step3_TemporalModelR_files/figure-html/glm-3.png)![](Step3_TemporalModelR_files/figure-html/glm-4.png)![](Step3_TemporalModelR_files/figure-html/glm-5.png)![](Step3_TemporalModelR_files/figure-html/glm-6.png)
+
+``` r
 
 # Out-of-fold E-space test metrics — one row per fold.
 glm_res$fold_test_metrics
 ```
 
     ##   Fold Threshold Testing_TP Testing_FN Testing_TN Testing_FP Sensitivity
-    ## 1    1      0.36         55         23         82         71      0.7051
-    ## 2    2      0.43         67         11        122         33      0.8590
-    ## 3    3      0.37         44         32        106         46      0.5789
-    ## 4    4      0.41         51         27         93         63      0.6538
+    ## 1    1      0.44         49         29         91         62      0.6282
+    ## 2    2      0.26         78          0         94         61      1.0000
+    ## 3    3      0.37         45         31        108         44      0.5921
+    ## 4    4      0.35         61         17         88         67      0.7821
     ##   Specificity    TSS  Kappa    AUC
-    ## 1      0.5359 0.2411 0.2095 0.5831
-    ## 2      0.7871 0.6461 0.6038 0.8816
-    ## 3      0.6974 0.2763 0.2642 0.7568
-    ## 4      0.5962 0.2500 0.2241 0.6822
+    ## 1      0.5948 0.2230 0.2020 0.6067
+    ## 2      0.6065 0.6065 0.5078 0.8629
+    ## 3      0.7105 0.3026 0.2902 0.7716
+    ## 4      0.5677 0.3498 0.3017 0.7058
 
 ### GAM (smooth nonlinear responses)
 
@@ -792,26 +854,31 @@ gam_res <- build_temporal_gam(
   gam_params = list(method = "REML"), # smoothing-parameter selection rule (mgcv default REML)
   threshold_method = "tss", # pick threshold maximising True Skill Statistic
   output_dir = "outputs/GAM_Models",
-  create_plot = FALSE, # skip the smooth-response curves to keep output compact
+  create_plot = TRUE, # create the smooth-response curves to keep output compact
   overwrite = TRUE,
   time_cols = "year",
   verbose = FALSE # silence per-fold smoothing progress
 )
+```
+
+![](Step3_TemporalModelR_files/figure-html/gam-1.png)![](Step3_TemporalModelR_files/figure-html/gam-2.png)![](Step3_TemporalModelR_files/figure-html/gam-3.png)![](Step3_TemporalModelR_files/figure-html/gam-4.png)![](Step3_TemporalModelR_files/figure-html/gam-5.png)![](Step3_TemporalModelR_files/figure-html/gam-6.png)
+
+``` r
 
 # Out-of-fold E-space test metrics — one row per fold.
 gam_res$fold_test_metrics
 ```
 
     ##   Fold Threshold Testing_TP Testing_FN Testing_TN Testing_FP Sensitivity
-    ## 1    1      0.36         33         45        125         28      0.4231
-    ## 2    2      0.45         70          8        125         30      0.8974
-    ## 3    3      0.32         51         25        107         45      0.6711
-    ## 4    4      0.35         54         24         88         68      0.6923
+    ## 1    1      0.40         37         41        107         46      0.4744
+    ## 2    2      0.46         71          7        119         36      0.9103
+    ## 3    3      0.36         47         29        114         38      0.6184
+    ## 4    4      0.39         53         25        100         55      0.6795
     ##   Specificity    TSS  Kappa    AUC
-    ## 1      0.8170 0.2401 0.2536 0.6502
-    ## 2      0.8065 0.7039 0.6578 0.8914
-    ## 3      0.7039 0.3750 0.3519 0.7682
-    ## 4      0.5641 0.2564 0.2247 0.7004
+    ## 1      0.6993 0.1737 0.1710 0.6343
+    ## 2      0.7677 0.6780 0.6207 0.8630
+    ## 3      0.7500 0.3684 0.3578 0.7829
+    ## 4      0.6452 0.3246 0.2963 0.7142
 
 ### Random forest (flexible ensemble)
 
@@ -828,26 +895,31 @@ rf_res <- build_temporal_rf(
   rf_params = list(ntree = 500), # number of decision trees grown per fold
   threshold_method = "tss", # pick threshold maximising True Skill Statistic
   output_dir = "outputs/RF_Models",
-  create_plot = FALSE, # skip variable-importance plot
+  create_plot = TRUE, # create the smooth-response curves to keep output compact
   overwrite = TRUE,
   time_cols = "year",
   verbose = FALSE # silence per-fold tree-growth progress
 )
+```
+
+![](Step3_TemporalModelR_files/figure-html/rf-1.png)![](Step3_TemporalModelR_files/figure-html/rf-2.png)![](Step3_TemporalModelR_files/figure-html/rf-3.png)![](Step3_TemporalModelR_files/figure-html/rf-4.png)![](Step3_TemporalModelR_files/figure-html/rf-5.png)![](Step3_TemporalModelR_files/figure-html/rf-6.png)
+
+``` r
 
 # Out-of-fold E-space test metrics — one row per fold.
 rf_res$fold_test_metrics
 ```
 
     ##   Fold Threshold Testing_TP Testing_FN Testing_TN Testing_FP Sensitivity
-    ## 1    1      0.39         42         36        103         50      0.5385
-    ## 2    2      0.36         71          7        104         51      0.9103
-    ## 3    3      0.38         41         35        117         35      0.5395
-    ## 4    4      0.40         38         40        113         43      0.4872
+    ## 1    1      0.39         46         32         83         70      0.5897
+    ## 2    2      0.37         72          6        103         52      0.9231
+    ## 3    3      0.40         42         34        116         36      0.5526
+    ## 4    4      0.37         53         25        102         53      0.6795
     ##   Specificity    TSS  Kappa    AUC
-    ## 1      0.6732 0.2117 0.2027 0.6552
-    ## 2      0.6710 0.5812 0.5098 0.8737
-    ## 3      0.7697 0.3092 0.3092 0.7381
-    ## 4      0.7244 0.2115 0.2095 0.6854
+    ## 1      0.5425 0.1322 0.1181 0.6163
+    ## 2      0.6645 0.5876 0.5125 0.8545
+    ## 3      0.7632 0.3158 0.3137 0.7548
+    ## 4      0.6581 0.3376 0.3099 0.7141
 
 ### Hypervolume (presence-only kernel density)
 
@@ -857,11 +929,6 @@ produce a probability scale, so there is no `pseudoabsence_result` or
 `threshold_method` argument. Only sensitivity-based metrics are reported
 (specificity / AUC / TSS require negative training data).
 
-> **Heads-up.** Hypervolume fitting can be slow (several minutes per
-> fold on real data) because it samples millions of random points per
-> envelope. If you are running the workshop on a laptop, you can comment
-> this chunk out and skip the HV columns in the plots below.
-
 ``` r
 
 hv_res <- build_temporal_hv(
@@ -870,7 +937,7 @@ hv_res <- build_temporal_hv(
   method = "gaussian", # Gaussian KDE envelope (alternative: "svm" = one-class SVM)
   hypervolume_params = list(), # accept hypervolume::hypervolume_gaussian() defaults
   output_dir = "outputs/HV_Models",
-  create_plot = FALSE, # skip the per-fold pairplots
+  create_plot = TRUE, # create the smooth-response curves to keep output compact
   verbose = FALSE # silence per-fold KDE-construction progress
 )
 
@@ -1039,7 +1106,7 @@ terra::plot(glm_pred_stack, nr = 4, nc = 4,
 
 ``` r
 
-# Same three-step pattern as the GLM chunk above: build a multi-layer
+# Same three-step pattern as the GLM code above: build a multi-layer
 # SpatRaster from the GAM prediction files, label each layer, and draw a
 # 4 x 4 grid of yearly fold-vote maps.
 gam_pred_stack <- terra::rast(gam_preds$prediction_files)
@@ -1509,7 +1576,7 @@ averaging across the whole complex.
 
 We also drop the Z (elevation) dimension from the geometry, because the
 shapefile ships as XYZ but the spatial-aggregation function expects
-plain 2-D geometry. Both clean-ups happen in a single short chunk below.
+plain 2-D geometry. Both clean-ups happen in a single short code below.
 
 Key arguments to
 [`analyze_trends_by_spatial_unit()`](https://cjhughes926.github.io/TemporalModelR/reference/analyze_trends_by_spatial_unit.html):
@@ -1574,29 +1641,29 @@ glm_regional$overall_summary
 ```
 
     ##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing
-    ## 1        ทับลาน            10             22          7          2          0
-    ## 2       เขาใหญ่             8             18         16          2          0
-    ## 3      ตาพระยา             6              4          8          0          0
-    ## 4       ปางสีดา             2             10          7          1          0
-    ## 5        ดงใหญ่             0              7          5          0          0
+    ## 1        ทับลาน             9             23          7          2          0
+    ## 2       เขาใหญ่             7             23         13          1          0
+    ## 3      ตาพระยา             6              5          7          0          0
+    ## 4       ปางสีดา             0             10          9          1          0
+    ## 5        ดงใหญ่             0              8          3          1          0
     ##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present
-    ## 1           0      0           41             24.39              53.66
-    ## 2           0      0           44             18.18              40.91
-    ## 3           0      0           18             33.33              22.22
-    ## 4           0      0           20             10.00              50.00
-    ## 5           0      0           12              0.00              58.33
+    ## 1           0      0           41             21.95              56.10
+    ## 2           0      0           44             15.91              52.27
+    ## 3           0      0           18             33.33              27.78
+    ## 4           0      0           20              0.00              50.00
+    ## 5           0      0           12              0.00              66.67
     ##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing
-    ## 1          17.07           4.88              0               0            6.45
-    ## 2          36.36           4.55              0               0            5.56
-    ## 3          44.44           0.00              0               0            0.00
-    ## 4          35.00           5.00              0               0            5.56
-    ## 5          41.67           0.00              0               0            0.00
+    ## 1          17.07           4.88              0               0            6.25
+    ## 2          29.55           2.27              0               0            2.70
+    ## 3          38.89           0.00              0               0            0.00
+    ## 4          45.00           5.00              0               0            5.00
+    ## 5          25.00           8.33              0               0            8.33
     ##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable
-    ## 1                70.97               0                  52.63
-    ## 2                50.00               0                  30.77
-    ## 3                33.33               0                  42.86
-    ## 4                55.56               0                  20.00
-    ## 5                58.33               0                   0.00
+    ## 1                71.88               0                  50.00
+    ## 2                62.16               0                  33.33
+    ## 3                41.67               0                  46.15
+    ## 4                50.00               0                   0.00
+    ## 5                66.67               0                   0.00
 
 ``` r
 
@@ -1627,28 +1694,28 @@ gam_regional$overall_summary
 ```
 
     ##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing
-    ## 1        ทับลาน            10             22          7          2          0
+    ## 1        ทับลาน            10             21          8          2          0
     ## 2       เขาใหญ่             7             20         15          2          0
     ## 3      ตาพระยา             6              5          7          0          0
-    ## 4       ปางสีดา             3             10          6          1          0
+    ## 4       ปางสีดา             2              9          8          1          0
     ## 5        ดงใหญ่             0              8          4          0          0
     ##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present
-    ## 1           0      0           41             24.39              53.66
+    ## 1           0      0           41             24.39              51.22
     ## 2           0      0           44             15.91              45.45
     ## 3           0      0           18             33.33              27.78
-    ## 4           0      0           20             15.00              50.00
+    ## 4           0      0           20             10.00              45.00
     ## 5           0      0           12              0.00              66.67
     ##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing
-    ## 1          17.07           4.88              0               0            6.45
+    ## 1          19.51           4.88              0               0            6.45
     ## 2          34.09           4.55              0               0            5.41
     ## 3          38.89           0.00              0               0            0.00
-    ## 4          30.00           5.00              0               0            5.88
+    ## 4          40.00           5.00              0               0            5.56
     ## 5          33.33           0.00              0               0            0.00
     ##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable
-    ## 1                70.97               0                  52.63
+    ## 1                67.74               0                  50.00
     ## 2                54.05               0                  29.17
     ## 3                41.67               0                  46.15
-    ## 4                58.82               0                  30.00
+    ## 4                50.00               0                  18.18
     ## 5                66.67               0                   0.00
 
 ``` r
@@ -1678,29 +1745,29 @@ rf_regional$overall_summary
 ```
 
     ##   Spatial_Unit Always_Absent Always_Present No_Pattern Increasing Decreasing
-    ## 1        ทับลาน             8              4         26          3          0
-    ## 2       เขาใหญ่             2              4         33          3          1
-    ## 3      ตาพระยา             5              0         11          1          1
-    ## 4       ปางสีดา             1              1         16          2          0
-    ## 5        ดงใหญ่             0              1         10          1          0
+    ## 1        ทับลาน             8              7         23          3          0
+    ## 2       เขาใหญ่             5              4         23          9          1
+    ## 3      ตาพระยา             4              1         11          1          1
+    ## 4       ปางสีดา             0              2         15          3          0
+    ## 5        ดงใหญ่             0              4          7          1          0
     ##   Fluctuating Failed Total_Pixels Pct_Always_Absent Pct_Always_Present
-    ## 1           0      0           41             19.51               9.76
-    ## 2           1      0           44              4.55               9.09
-    ## 3           0      0           18             27.78               0.00
-    ## 4           0      0           20              5.00               5.00
-    ## 5           0      0           12              0.00               8.33
+    ## 1           0      0           41             19.51              17.07
+    ## 2           2      0           44             11.36               9.09
+    ## 3           0      0           18             22.22               5.56
+    ## 4           0      0           20              0.00              10.00
+    ## 5           0      0           12              0.00              33.33
     ##   Pct_No_Pattern Pct_Increasing Pct_Decreasing Pct_Fluctuating Prop_Increasing
-    ## 1          63.41           7.32           0.00            0.00            9.09
-    ## 2          75.00           6.82           2.27            2.27            7.14
-    ## 3          61.11           5.56           5.56            0.00            7.69
-    ## 4          80.00          10.00           0.00            0.00           10.53
-    ## 5          83.33           8.33           0.00            0.00            8.33
+    ## 1          56.10           7.32           0.00            0.00            9.09
+    ## 2          52.27          20.45           2.27            4.55           23.08
+    ## 3          61.11           5.56           5.56            0.00            7.14
+    ## 4          75.00          15.00           0.00            0.00           15.00
+    ## 5          58.33           8.33           0.00            0.00            8.33
     ##   Prop_Stable_Suitable Prop_Decreasing Prop_Stable_Unsuitable
-    ## 1                12.12            0.00                  21.62
-    ## 2                 9.52            2.50                   5.00
-    ## 3                 0.00            5.56                  27.78
-    ## 4                 5.26            0.00                   5.26
-    ## 5                 8.33            0.00                   0.00
+    ## 1                21.21            0.00                  23.53
+    ## 2                10.26            2.50                  12.50
+    ## 3                 7.14            5.88                  23.53
+    ## 4                10.00            0.00                   0.00
+    ## 5                33.33            0.00                   0.00
 
 ``` r
 
@@ -1770,13 +1837,15 @@ What we covered:
 
 - Read the pre-prepared annual precipitation, temperature, and NDVI
   rasters directly from `data/processed/temporal_split/`.
-- Summarised the per-year aligned rasters as a single **temporal-mean**
-  3-layer stack (`mean_prec`, `mean_temp`, `mean_NDVI`) and used it as
-  the reference E-space for thinning.
-- Applied **`bean`** once against that temporal-mean E-space
-  (Sheather–Jones bandwidth, stochastic per-pod thinning) to reduce
-  environmental sampling bias across the full Sambar deer occurrence
-  table before any temporal modelling.
+- Visualised the per-year aligned rasters as a diagnostic temporal-mean
+  3-layer panel (`mean_prec`, `mean_temp`, `mean_NDVI`) so participants
+  could see at a glance which parts of the country were consistently
+  wet, warm, or vegetated across 2010–2025.
+- Applied **`bean`** **per year**, with each iteration of the loop using
+  *that year’s own* aligned prec/temp/NDVI rasters as the reference
+  E-space (Sheather–Jones bandwidth, stochastic per-pod thinning). A
+  2010 occurrence is therefore judged only against 2010 conditions, a
+  2024 occurrence only against 2024 conditions, and so on.
 - Built a fully temporally-explicit pipeline: time-stamped occurrences ↔︎
   time-stamped rasters via
   [`temporally_explicit_extraction()`](https://cjhughes926.github.io/TemporalModelR/reference/temporally_explicit_extraction.html).
