@@ -84,7 +84,7 @@ Open **`Pre-workshop.Rmd`** in RStudio, then choose **one** of these two approac
 
 ### 6. Verify everything is in place
 
-Then, the `data/processed/` folder should contain four sub-folders: **`bioclim/`**, **`boundary/`**, **`gbif/`**, and **`bias/`**. If you can see all four, you are ready for the workshop!
+Then, the `data/processed/` folder should contain four sub-folders: **`DPKY/`, `point`, `temporal_split`, `bioclim/`**, **`boundary/`**, **`gbif/`**, and **`bias/`**. If you can see all four, you are ready for the workshop!
 
 ------------------------------------------------------------------------
 
